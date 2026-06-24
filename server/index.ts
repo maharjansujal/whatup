@@ -4,6 +4,8 @@ import http from "http";
 import { Server } from "socket.io";
 
 import userRouter from "./src/routes/user.routes";
+import messageRoutes from "./src/routes/message.routes";
+import { initSocket } from "./src/socket/socket";
 
 const app = express();
 
@@ -11,17 +13,20 @@ app.use(express.json());
 app.use(cors());
 
 app.use("/users", userRouter);
+app.use("/messages", messageRoutes);
 
 const server = http.createServer(app);
 
-const io = new Server(server, {
+export const io = new Server(server, {
   cors: {
     origin: "*",
   },
 });
-io.on("connection", (socket) => {
-  console.log("Client connected:", socket.id);
-});
+// io.on("connection", (socket) => {
+//   console.log("Client connected:", socket.id);
+// });
+
+initSocket(io);
 const PORT = 5000;
 
 server.listen(PORT, () => {

@@ -22,3 +22,11 @@ export const getConversationMessagesService = async (
   );
   return result.rows;
 };
+
+export const getAllMessagesService = async (receiverId: number) => {
+  const result = await pool.query(
+    "SELECT * FROM messages WHERE receiver_id = $1",
+    [receiverId],
+  );
+  return result.rows;
+};

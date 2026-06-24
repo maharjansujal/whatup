@@ -34,7 +34,7 @@ export const getUserById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     if (Array.isArray(id) || isNaN(Number(id))) {
-      return res.status(429).json({ message: "invalid user id received" });
+      return res.status(400).json({ message: "invalid user id received" });
     }
     const result = await getUserByIdService(Number(id));
     return res
