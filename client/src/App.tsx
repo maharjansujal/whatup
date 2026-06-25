@@ -5,6 +5,7 @@ import {
   useConversation,
   useSendMessage,
   type Message,
+  type User,
 } from "./hooks/useChatQueries";
 import { useQueryClient } from "@tanstack/react-query";
 import { ChatWindow } from "./components/chat/ChatWindow";
@@ -51,7 +52,7 @@ function ChatApp({
       ) {
         queryClient.setQueryData(
           ["messages", currentUser.id, selectedUser?.id],
-          (oldMessages: any) => [...(oldMessages || []), newMessage],
+          (oldMessages: Message[]) => [...(oldMessages || []), newMessage],
         );
       }
       if (newMessage.sender_id === selectedUser?.id) {
@@ -104,7 +105,7 @@ function ChatApp({
         // Manually update cache for instant feedback on sender side
         queryClient.setQueryData(
           ["messages", currentUser.id, selectedUser.id],
-          (oldMessages: any) => [...(oldMessages || []), savedMessage],
+          (oldMessages: Message[]) => [...(oldMessages || []), savedMessage],
         );
         setMessageText("");
       },
@@ -143,7 +144,7 @@ function ChatApp({
 // Global Shell Component executing the local session selector
 export default function App() {
   const { data: users = [], isLoading } = useUsers();
-  const [activeUser, setActiveUser] = useState<any | null>(null);
+  const [activeUser, setActiveUser] = useState<User | null>(null);
 
   if (isLoading) {
     return (
