@@ -148,7 +148,7 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <div className="h-screen bg-slate-900 text-white flex items-center justify-center">
+      <div className="h-screen flex items-center justify-center bg-(--color-background) text-(--color-text-primary)">
         Loading Data...
       </div>
     );
@@ -157,23 +157,36 @@ export default function App() {
   // Pseudo-login layout if no user session is picked in this tab
   if (!activeUser) {
     return (
-      <div className="h-screen bg-slate-900 text-white flex items-center justify-center p-4">
-        <div className="bg-slate-950 p-6 rounded-xl border border-slate-800 max-w-sm w-full shadow-xl">
-          <h2 className="text-xl font-bold mb-1 text-center text-indigo-400">
+      <div className="h-screen flex items-center justify-center p-4 bg-(--color-background) text-(--color-text-primary)">
+        <div className="p-6 rounded-xl border shadow-xl max-w-sm w-full bg-(--color-surface) border-(--color-border)">
+          <h2 className="text-xl font-bold mb-1 text-center text-(--color-brand-primary)">
             Select Test Profile
           </h2>
-          <p className="text-xs text-slate-400 text-center mb-6">
+
+          <p className="text-xs text-center mb-6 text-(--color-text-secondary)">
             Choose who you are browsing as in this window.
           </p>
+
           <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
             {users.map((user) => (
               <button
                 key={user.id}
                 onClick={() => setActiveUser(user)}
-                className="w-full text-left p-3 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 transition-colors block"
+                className="
+                w-full text-left p-3 rounded-lg block
+                bg-(--color-background)
+                border border-(--color-border)
+                transition-colors
+                hover:bg-(--color-surface)
+              "
               >
-                <div className="font-semibold text-sm">{user.name}</div>
-                <div className="text-xs text-slate-500">@{user.username}</div>
+                <div className="font-semibold text-sm text-(--color-text-primary)">
+                  {user.name}
+                </div>
+
+                <div className="text-xs text-(--color-text-secondary)">
+                  @{user.username}
+                </div>
               </button>
             ))}
           </div>
@@ -181,7 +194,6 @@ export default function App() {
       </div>
     );
   }
-
   return (
     <SocketProvider authUserId={activeUser.id}>
       <ChatApp currentUser={activeUser} onLogout={() => setActiveUser(null)} />

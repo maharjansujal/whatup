@@ -1,5 +1,7 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 
+const API_URL = import.meta.env.API_URL;
+
 export interface User {
   id: number;
   username: string;
@@ -14,8 +16,6 @@ export interface Message {
   content: string;
   created_at: string;
 }
-
-const API_URL = "http://localhost:5000";
 
 export const useUsers = () => {
   return useQuery<User[]>({

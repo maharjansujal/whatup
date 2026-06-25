@@ -33,11 +33,12 @@ export const MessageList = ({
       {typingUser === selectedUser?.id && (
         <div className="flex justify-start items-center animate-fade-in gap-2">
           <Avatar image={selectedUser.image} size={25} />
-          <div className="bg-slate-800 text-slate-200 p-3 rounded-xl rounded-bl-none shadow-md flex items-center justify-center min-w-12.5 h-9.5">
+
+          <div className="flex items-center justify-center min-w-12.5 h-9.5 bg-(--color-surface) text-(--color-text-primary)">
             <div className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.3s]" />
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.15s]" />
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" />
+              <span className="w-1.5 h-1.5 rounded-full bg-(--color-text-secondary) animate-bounce [animation-delay:-0.3s]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-(--color-text-secondary) animate-bounce [animation-delay:-0.15s]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-(--color-text-secondary) animate-bounce" />
             </div>
           </div>
         </div>

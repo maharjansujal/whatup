@@ -1,27 +1,41 @@
 @import "tailwindcss";
 
 :root {
+  --color-background: #ffffff;
+  --color-surface: #f8fafc;
+
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #64748b;
+
+  --color-border: #e2e8f0;
+
   --color-brand-primary: #4f46e5;
   --color-brand-primary-hover: #4338ca;
-  --color-brand-danger: #ef4444;
-  --color-brand-danger-hover: #dc2626;
+
+  --color-danger: #ef4444;
+  --color-danger-hover: #dc2626;
 }
 
 @theme {
+  /* Button: Primary */
   --color-btn-primary-bg: var(--color-brand-primary);
   --color-btn-primary-hover: var(--color-brand-primary-hover);
   --color-btn-primary-text: #ffffff;
 
-  --color-btn-secondary-bg: var(--color-slate-800);
-  --color-btn-secondary-hover: var(--color-slate-700);
-  --color-btn-secondary-text: var(--color-slate-200);
+  /* Button: Secondary */
+  --color-btn-secondary-bg: var(--color-surface);
+  --color-btn-secondary-hover: #f1f5f9;
+  --color-btn-secondary-text: var(--color-text-primary);
+  --color-btn-secondary-border: var(--color-border);
 
+  /* Button: Danger */
   --color-btn-danger-bg: var(--color-brand-danger);
   --color-btn-danger-hover: var(--color-brand-danger-hover);
   --color-btn-danger-text: #ffffff;
 
+  /* Button: Outline */
   --color-btn-outline-bg: transparent;
-  --color-btn-outline-hover: var(--color-slate-800);
-  --color-btn-outline-border: var(--color-slate-700);
-  --color-btn-outline-text: var(--color-slate-300);
+  --color-btn-outline-hover: var(--color-surface);
+  --color-btn-outline-border: var(--color-border);
+  --color-btn-outline-text: var(--color-text-primary);
 }

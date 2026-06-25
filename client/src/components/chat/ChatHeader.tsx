@@ -6,8 +6,8 @@ export const ChatHeader = ({ image, name }: User) => {
     <div className="flex gap-x-4 p-4">
       <Avatar image={image} />
       <div className="flex flex-col">
-        <h3 className="font-semibold text-slate-200">{name}</h3>
-        <p className="text-xs text-slate-400">Active Session</p>
+        <h3 className="font-semibold text-(--color-text-primary)">{name}</h3>
+        <p className="text-xs text-(--color-text-secondary)">Active Session</p>
       </div>
     </div>
   );

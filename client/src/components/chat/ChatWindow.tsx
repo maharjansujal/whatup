@@ -103,7 +103,7 @@ export const ChatWindow = ({
           />
         </>
       ) : (
-        <div className="flex-1 flex items-center justify-center text-slate-500 text-sm">
+        <div className="flex-1 flex items-center justify-center text-sm text-(--color-text-secondary)">
           Select a user from the sidebar to start a real-time conversation.
         </div>
       )}
