@@ -1,1 +1,27 @@
 @import "tailwindcss";
+
+:root {
+  --color-brand-primary: #4f46e5;
+  --color-brand-primary-hover: #4338ca;
+  --color-brand-danger: #ef4444;
+  --color-brand-danger-hover: #dc2626;
+}
+
+@theme {
+  --color-btn-primary-bg: var(--color-brand-primary);
+  --color-btn-primary-hover: var(--color-brand-primary-hover);
+  --color-btn-primary-text: #ffffff;
+
+  --color-btn-secondary-bg: var(--color-slate-800);
+  --color-btn-secondary-hover: var(--color-slate-700);
+  --color-btn-secondary-text: var(--color-slate-200);
+
+  --color-btn-danger-bg: var(--color-brand-danger);
+  --color-btn-danger-hover: var(--color-brand-danger-hover);
+  --color-btn-danger-text: #ffffff;
+
+  --color-btn-outline-bg: transparent;
+  --color-btn-outline-hover: var(--color-slate-800);
+  --color-btn-outline-border: var(--color-slate-700);
+  --color-btn-outline-text: var(--color-slate-300);
+}

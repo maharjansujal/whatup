@@ -1,4 +1,5 @@
-import type { User } from "../hooks/useChatQueries";
+import type { User } from "../../hooks/useChatQueries";
+import { Button } from "../ui/Button";
 
 export const Sidebar = ({
   selectedUser,
@@ -20,12 +21,12 @@ export const Sidebar = ({
           <h2 className="font-bold text-lg">{currentUser.name}</h2>
           <p className="text-xs text-slate-400">@{currentUser.username}</p>
         </div>
-        <button
+        <Button
+          variant="danger"
+          text="Exit"
+          size="sm"
           onClick={onLogout}
-          className="text-xs bg-red-600 hover:bg-red-700 px-2 py-1 rounded"
-        >
-          Exit
-        </button>
+        ></Button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-2 space-y-1">

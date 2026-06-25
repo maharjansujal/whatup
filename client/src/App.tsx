@@ -7,8 +7,8 @@ import {
   type Message,
 } from "./hooks/useChatQueries";
 import { useQueryClient } from "@tanstack/react-query";
-import { Sidebar } from "./components/Sidebar";
-import { ChatWindow } from "./components/ChatWindow";
+import { ChatWindow } from "./components/chat/ChatWindow";
+import { Sidebar } from "./components/layout/Sidebar";
 
 function ChatApp({
   currentUser,
