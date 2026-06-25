@@ -36,7 +36,7 @@ export const getConversationMessages = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       message: "Messages retrieved successfully",
-      ...result,
+      messages: result,
     });
   } catch (err) {
     return res.status(500).json({

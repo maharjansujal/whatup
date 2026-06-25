@@ -4,49 +4,41 @@ const userSocketMap = new Map<number, string>();
 
 export const initSocket = (io: Server) => {
   io.on("connection", (socket: Socket) => {
-    console.log(`Client connected: ${socket.id}`);
-
-    //Register user connection
-    const userIdStr = socket.handshake.query.userId;
-    if (userIdStr) {
-      const userId = Number(userIdStr);
-      if (!isNaN(userId)) {
-        userSocketMap.set(userId, socket.id);
-        console.log(`User ${userId} associated with socket ${socket.id}`);
-      }
+    const user = socket.data.user;
+    if (!user || !user.id) {
+      console.error("Socket connected without a valid user ID payload");
+      return socket.disconnect();
     }
+    const userId = Number(user.id);
+
+    userSocketMap.set(userId, socket.id);
+    console.log(`Client connected: ${socket.id}`);
 
     // handle disconnects
     socket.on("disconnect", () => {
-      console.log(`Client disconnected: ${socket.id}`);
-      // Find and remove the user from map
+      userSocketMap.delete(userId);
 
-      for (const [userId, socketId] of userSocketMap.entries()) {
-        if (socketId === socket.id) {
-          userSocketMap.delete(userId);
-          console.log(`User ${userId} removed from active connections`);
-          break;
-        }
-      }
+      console.log(`User ${userId} removed from active connections`);
     });
 
     // Listen for typing events from sender and relay to receiver
-    socket.on("typing", ({ senderId, receiverId }) => {
+    socket.on("typing", ({ receiverId }) => {
+      const senderId = socket.data.user.id;
       const receiverSocketId = getReceiverSocketId(Number(receiverId));
+
       if (receiverSocketId) {
         io.to(receiverSocketId).emit("userTyping", {
-          senderId: Number(senderId),
+          senderId,
         });
       }
     });
 
     // Listen for stopTyping events from sender and relay to receiver
-    socket.on("stopTyping", ({ senderId, receiverId }) => {
+    socket.on("stopTyping", ({ receiverId }) => {
+      const senderId = socket.data.user.id;
       const receiverSocketId = getReceiverSocketId(Number(receiverId));
       if (receiverSocketId) {
-        io.to(receiverSocketId).emit("userStoppedTyping", {
-          senderId: Number(senderId),
-        });
+        io.to(receiverSocketId).emit("userStoppedTyping", { senderId });
       }
     });
   });

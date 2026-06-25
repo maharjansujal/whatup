@@ -6,6 +6,7 @@ import { Server } from "socket.io";
 import userRouter from "./src/routes/user.routes";
 import messageRoutes from "./src/routes/message.routes";
 import { initSocket } from "./src/socket/socket";
+import { registerSocketMiddleware } from "./src/middleware/socket.middleware";
 
 const app = express();
 
@@ -26,6 +27,7 @@ export const io = new Server(server, {
 //   console.log("Client connected:", socket.id);
 // });
 
+registerSocketMiddleware(io);
 initSocket(io);
 const PORT = 5000;
 

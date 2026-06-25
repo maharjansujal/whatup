@@ -35,10 +35,7 @@ export async function registerUserService({
   }
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
   const result = await pool.query(
-    `
-    INSERT INTO users (username, name, password_hash, image) VALUES ($1, $2, $3, $4) 
-    RETURNING id, name, username, image
-    `,
+    "INSERT INTO users (username, name, password_hash, image) VALUES ($1, $2, $3, $4) RETURNING id, name, username, image",
     [username, name, passwordHash, image],
   );
   return result.rows[0];
