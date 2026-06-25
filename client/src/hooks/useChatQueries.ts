@@ -1,13 +1,7 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "../instance/api";
 
-const API_URL = import.meta.env.API_URL;
-
-export interface User {
-  id: number;
-  username: string;
-  name: string;
-  image?: string;
-}
+const API_URL = import.meta.env.VITE_API_URL;
 
 export interface Message {
   id: number;
@@ -17,55 +11,76 @@ export interface Message {
   created_at: string;
 }
 
-export const useUsers = () => {
-  return useQuery<User[]>({
-    queryKey: ["users"],
-    queryFn: async () => {
-      const res = await fetch(`${API_URL}/users`);
-      const data = await res.json();
-      return data.result || [];
-    },
-  });
-};
+export interface SendMessagePayload {
+  senderId: number;
+  receiverId: number;
+  content: string;
+}
 
-export const useConversation = (
+export const useMessages = (
   senderId: number | null,
   receiverId: number | null,
 ) => {
-  return useQuery<Message[]>({
-    queryKey: ["messages", senderId, receiverId],
+  const queryClient = useQueryClient();
+  const queryKey = ["messages", senderId, receiverId];
+
+  // Fetch messages
+  const conversationQuery = useQuery<Message[]>({
+    queryKey,
     queryFn: async () => {
-      if (!senderId || !receiverId) return [];
-
-      const params = new URLSearchParams({
-        senderId: String(senderId),
-        receiverId: String(receiverId),
+      const res = await api.get(`${API_URL}/messages`, {
+        params: {
+          senderId,
+          receiverId,
+        },
       });
-
-      const res = await fetch(`${API_URL}/messages?${params}`);
-      const data = await res.json();
-      return Object.values(data).filter(
-        (item) =>
-          typeof item === "object" && item !== null && "content" in item,
-      ) as Message[];
+      // Fallback to empty array if messages is undefined
+      return (res.data?.messages || []) as Message[];
     },
     enabled: !!senderId && !!receiverId,
   });
-};
 
-export const useSendMessage = () => {
-  return useMutation({
-    mutationFn: async (payload: {
-      senderId: number;
-      receiverId: number;
-      content: string;
-    }) => {
-      const res = await fetch(`${API_URL}/messages`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+  // Send message
+  const sendMessageMutation = useMutation({
+    mutationFn: async (payload: SendMessagePayload) => {
+      const token = localStorage.getItem("token");
+      const res = await api.post(`${API_URL}/messages`, payload, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       });
-      return res.json();
+      return res.data;
+    },
+    onSuccess: (data) => {
+      // Structure incoming data to match the Message interface
+      const savedMessage: Message = {
+        id: data.id,
+        sender_id: data.sender_id,
+        receiver_id: data.receiver_id,
+        content: data.content,
+        created_at: data.created_at,
+      };
+
+      // Instantly update the current conversation cache for immediate local feedback
+      queryClient.setQueryData(
+        queryKey,
+        (oldMessages: Message[] | undefined) => [
+          ...(oldMessages || []),
+          savedMessage,
+        ],
+      );
     },
   });
+
+  return {
+    messages: conversationQuery.data || [],
+    isMessagesLoading: conversationQuery.isLoading,
+    messagesError: conversationQuery.error,
+
+    sendMessage: sendMessageMutation.mutate,
+    sendMessageAsync: sendMessageMutation.mutateAsync,
+    isSendingMessage: sendMessageMutation.isPending,
+    sendMessageError: sendMessageMutation.error,
+  };
 };
