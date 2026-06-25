@@ -29,6 +29,26 @@ export const initSocket = (io: Server) => {
         }
       }
     });
+
+    // Listen for typing events from sender and relay to receiver
+    socket.on("typing", ({ senderId, receiverId }) => {
+      const receiverSocketId = getReceiverSocketId(Number(receiverId));
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("userTyping", {
+          senderId: Number(senderId),
+        });
+      }
+    });
+
+    // Listen for stopTyping events from sender and relay to receiver
+    socket.on("stopTyping", ({ senderId, receiverId }) => {
+      const receiverSocketId = getReceiverSocketId(Number(receiverId));
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("userStoppedTyping", {
+          senderId: Number(senderId),
+        });
+      }
+    });
   });
 };
 
