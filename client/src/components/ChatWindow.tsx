@@ -111,7 +111,7 @@ export const ChatWindow = ({
 
             {typingUser === selectedUser?.id && (
               <div className="flex justify-start animate-fade-in">
-                <div className="bg-slate-800 text-slate-200 p-3 rounded-xl rounded-bl-none shadow-md flex items-center justify-center min-w-[50px] h-[38px]">
+                <div className="bg-slate-800 text-slate-200 p-3 rounded-xl rounded-bl-none shadow-md flex items-center justify-center min-w-12.5 h-9.5">
                   <div className="flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.3s]" />
                     <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.15s]" />

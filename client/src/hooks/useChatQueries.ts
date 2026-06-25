@@ -35,9 +35,13 @@ export const useConversation = (
     queryKey: ["messages", senderId, receiverId],
     queryFn: async () => {
       if (!senderId || !receiverId) return [];
-      const res = await fetch(
-        `${API_URL}/messages?senderId=${senderId}&receiverId=${receiverId}`,
-      );
+
+      const params = new URLSearchParams({
+        senderId: String(senderId),
+        receiverId: String(receiverId),
+      });
+
+      const res = await fetch(`${API_URL}/messages?${params}`);
       const data = await res.json();
       return Object.values(data).filter(
         (item) =>
