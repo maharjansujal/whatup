@@ -4,6 +4,7 @@ import {
   useUsers,
   useConversation,
   useSendMessage,
+  type Message,
 } from "./hooks/useChatQueries";
 import { useQueryClient } from "@tanstack/react-query";
 import { Sidebar } from "./components/Sidebar";
@@ -21,6 +22,7 @@ function ChatApp({
     null,
   );
   const [messageText, setMessageText] = useState("");
+  const [typingUser, setTypingUser] = useState<number | null>(null);
 
   const { data: messages = [] } = useConversation(
     currentUser.id,
@@ -40,7 +42,7 @@ function ChatApp({
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("newMessage", (newMessage) => {
+    socket.on("newMessage", (newMessage: Message) => {
       if (
         (newMessage.sender_id === selectedUser?.id &&
           newMessage.receiver_id === currentUser.id) ||
@@ -52,10 +54,28 @@ function ChatApp({
           (oldMessages: any) => [...(oldMessages || []), newMessage],
         );
       }
+      if (newMessage.sender_id === selectedUser?.id) {
+        setTypingUser(null);
+      }
+    });
+
+    // Listen for typing signals
+    socket.on("userTyping", ({ senderId }) => {
+      if (senderId === selectedUser?.id) {
+        setTypingUser(senderId);
+      }
+    });
+
+    socket.on("userStoppedTyping", ({ senderId }) => {
+      if (senderId === selectedUser?.id) {
+        setTypingUser(null);
+      }
     });
 
     return () => {
       socket.off("newMessage");
+      socket.off("userTyping");
+      socket.off("userStoppedTyping");
     };
   }, [socket, selectedUser, currentUser.id, queryClient]);
 
@@ -113,6 +133,8 @@ function ChatApp({
         messages={messages}
         onSendMessage={handleSend}
         selectedUser={selectedUser}
+        socket={socket}
+        typingUser={typingUser}
       />
     </div>
   );

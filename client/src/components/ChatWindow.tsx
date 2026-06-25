@@ -1,5 +1,6 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { Message, User } from "../hooks/useChatQueries";
+import type { Socket } from "socket.io-client";
 
 interface Props {
   selectedUser: User | null;
@@ -10,6 +11,8 @@ interface Props {
   onMessageTextChange: (
     e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>,
   ) => void;
+  socket: Socket | null;
+  typingUser: number | null;
 }
 
 export const ChatWindow = ({
@@ -19,8 +22,58 @@ export const ChatWindow = ({
   onSendMessage,
   messageText,
   onMessageTextChange,
+  socket,
+  typingUser,
 }: Props) => {
   const messageEndRef = useRef<HTMLDivElement>(null);
+  const lastTypingEventTime = useRef<number>(0);
+  const stopTypingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
+  useEffect(() => {
+    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onMessageTextChange(e);
+
+    if (!socket || !selectedUser) return;
+
+    const now = Date.now();
+    const THROTTLE_TIME = 3000; // 3 seconds
+
+    // 1. THROTTLE: Send "typing" status if 3 seconds have passed since the last notification
+    if (now - lastTypingEventTime.current > THROTTLE_TIME) {
+      socket.emit("typing", {
+        senderId: currentUser.id,
+        receiverId: selectedUser.id,
+      });
+      lastTypingEventTime.current = now;
+    }
+
+    // 2. STOP TYPING DETECTION: Clear the previous timeout and set a new one
+    if (stopTypingTimeoutRef.current) {
+      clearTimeout(stopTypingTimeoutRef.current);
+    }
+
+    stopTypingTimeoutRef.current = setTimeout(() => {
+      socket.emit("stopTyping", {
+        senderId: currentUser.id,
+        receiverId: selectedUser.id,
+      });
+      // Reset throttle baseline so next keystroke instantly fires again
+      lastTypingEventTime.current = 0;
+    }, 2000); // Declared "stopped" after 2 seconds of silence
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (stopTypingTimeoutRef.current)
+        clearTimeout(stopTypingTimeoutRef.current);
+    };
+  }, []);
 
   return (
     <div className="flex-1 flex flex-col bg-slate-900">
@@ -55,6 +108,18 @@ export const ChatWindow = ({
                 </div>
               );
             })}
+
+            {typingUser === selectedUser?.id && (
+              <div className="flex justify-start animate-fade-in">
+                <div className="bg-slate-800 text-slate-200 p-3 rounded-xl rounded-bl-none shadow-md flex items-center justify-center min-w-[50px] h-[38px]">
+                  <div className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.3s]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.15s]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" />
+                  </div>
+                </div>
+              </div>
+            )}
             <div ref={messageEndRef} />
           </div>
 
@@ -66,7 +131,7 @@ export const ChatWindow = ({
             <input
               type="text"
               value={messageText}
-              onChange={onMessageTextChange}
+              onChange={handleInputChange}
               placeholder={`Message ${selectedUser.name}...`}
               className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-500 text-white"
             />
