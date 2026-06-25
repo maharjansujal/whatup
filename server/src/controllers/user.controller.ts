@@ -1,18 +1,23 @@
 import { Request, Response } from "express";
-import {
-  getUserByIdService,
-  getUsersService,
-  registerUserService,
-} from "../services/user.service";
+import { getUserByIdService, getUsersService } from "../services/user.service";
+import { uploadImage } from "../services/upload.service";
 
-export const registerUser = async (req: Request, res: Response) => {
+export const uploadAvatar = async (req: Request, res: Response) => {
   try {
-    const { username, name } = req.body;
-    const result = await registerUserService(username, name);
-    return res.status(201).json({ message: "New user created", ...result });
-  } catch (err) {
-    return res.status(500).json({
-      message: err instanceof Error ? err.message : "Internal Server error",
+    if (!req.file) {
+      return res.status(400).json({
+        message: "No file uploaded",
+      });
+    }
+
+    const imageUrl = await uploadImage(req.file.buffer);
+
+    res.json({
+      imageUrl,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Upload failed",
     });
   }
 };

@@ -4,6 +4,7 @@ CREATE TABLE
         username VARCHAR(100) NOT NULL UNIQUE,
         name VARCHAR(100) NOT NULL,
         password_hash VARCHAR(100) NOT NULL,
+        image VARCHAR(100),
         created_at TIMESTAMP DEFAULT NOW ()
     );
 
