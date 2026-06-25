@@ -1,14 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../instance/api";
+import type { User } from "../types/user";
 
 const API_URL = import.meta.env.VITE_API_URL;
-
-export interface User {
-  id: number;
-  username: string;
-  name: string;
-  image?: string;
-}
 
 export const useUsers = () => {
   const getAllUsersQuery = useQuery<User[]>({

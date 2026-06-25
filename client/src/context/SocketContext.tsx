@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
 interface SocketContextType {
   socket: Socket | null;
-  onlineUsers: number[]; // Can be used later if you broadcast online status
+  onlineUsers: number[];
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
@@ -15,17 +15,12 @@ export const useSocket = () => {
   return context;
 };
 
-export const SocketProvider = ({
-  children,
-  authUserId,
-}: {
-  children: React.ReactNode;
-  authUserId: number | null;
-}) => {
+export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    if (!authUserId) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       if (socket) {
         socket.disconnect();
         setSocket(null);
@@ -33,9 +28,9 @@ export const SocketProvider = ({
       return;
     }
 
-    // Connect to the backend and pass the active userId in the query string
+    // Pass the token inside the auth object matching the backend middleware expectations
     const newSocket = io("http://localhost:5000", {
-      query: { userId: authUserId },
+      auth: { token },
     });
 
     setSocket(newSocket);
@@ -43,7 +38,7 @@ export const SocketProvider = ({
     return () => {
       newSocket.disconnect();
     };
-  }, [authUserId]);
+  }, []); // Re-evaluate on mount or logout cleanups
 
   return (
     <SocketContext.Provider value={{ socket, onlineUsers: [] }}>

@@ -1,15 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../instance/api";
+import type { Message } from "../types/message";
 
 const API_URL = import.meta.env.VITE_API_URL;
-
-export interface Message {
-  id: number;
-  sender_id: number;
-  receiver_id: number;
-  content: string;
-  created_at: string;
-}
 
 export interface SendMessagePayload {
   senderId: number;

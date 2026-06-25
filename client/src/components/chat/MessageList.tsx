@@ -1,4 +1,5 @@
-import type { Message, User } from "../../hooks/useChatQueries";
+import type { Message } from "../../types/message";
+import type { User } from "../../types/user";
 import Avatar from "../ui/Avatar";
 import { ChatBubble } from "./ChatBubble";
 

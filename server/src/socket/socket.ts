@@ -17,7 +17,6 @@ export const initSocket = (io: Server) => {
     // handle disconnects
     socket.on("disconnect", () => {
       userSocketMap.delete(userId);
-
       console.log(`User ${userId} removed from active connections`);
     });
 
@@ -25,7 +24,6 @@ export const initSocket = (io: Server) => {
     socket.on("typing", ({ receiverId }) => {
       const senderId = socket.data.user.id;
       const receiverSocketId = getReceiverSocketId(Number(receiverId));
-
       if (receiverSocketId) {
         io.to(receiverSocketId).emit("userTyping", {
           senderId,

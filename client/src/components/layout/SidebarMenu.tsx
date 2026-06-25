@@ -1,4 +1,4 @@
-import type { User } from "../../hooks/useChatQueries";
+import type { User } from "../../types/user";
 
 type SidebarUserItemProps = {
   user: User;

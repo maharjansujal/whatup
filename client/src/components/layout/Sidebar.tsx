@@ -1,4 +1,4 @@
-import type { User } from "../../hooks/useChatQueries";
+import type { User } from "../../types/user";
 import { Button } from "../ui/Button";
 import { SidebarUserItem } from "./SidebarMenu";
 
@@ -19,7 +19,7 @@ export const Sidebar = ({
     <div
       className="w-80 border-r flex flex-col"
       style={{
-        backgroundColor: "var(--color-background)",
+        backgroundColor: "var(--color-sidebar)",
         borderColor: "var(--color-border)",
       }}
     >

@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
 import type { Socket } from "socket.io-client";
-import type { Message, User } from "../../hooks/useChatQueries";
 import { ChatHeader } from "./ChatHeader";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
+import type { User } from "../../types/user";
+import type { Message } from "../../types/message";
 
 interface Props {
   selectedUser: User | null;
@@ -79,7 +80,7 @@ export const ChatWindow = ({
   }, []);
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-900">
+    <div className="flex-1 flex flex-col bg-(--color-background)">
       {selectedUser ? (
         <>
           {/* Chat Header */}

@@ -1,4 +1,5 @@
-import type { Message, User } from "../../hooks/useChatQueries";
+import type { Message } from "../../types/message";
+import type { User } from "../../types/user";
 import Avatar from "../ui/Avatar";
 
 interface ChatBubbleProps {
@@ -14,7 +15,7 @@ export const ChatBubble = ({
 }: ChatBubbleProps) => {
   const isMe = message.sender_id === currentUser.id;
   return (
-    <div className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+    <div className={`flex ${!isMe ? "justify-end" : "justify-start"}`}>
       <div className="flex items-center gap-2">
         {!isMe && <Avatar image={selectedUser.image} size={30} />}
         <div
