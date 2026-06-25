@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { Message, User } from "../hooks/useChatQueries";
 import type { Socket } from "socket.io-client";
+import Avatar from "./Avatar";
 
 interface Props {
   selectedUser: User | null;
@@ -80,11 +81,14 @@ export const ChatWindow = ({
       {selectedUser ? (
         <>
           {/* Chat Header */}
-          <div className="p-4 border-b border-slate-800 bg-slate-950">
-            <h3 className="font-semibold text-slate-200">
-              {selectedUser.name}
-            </h3>
-            <p className="text-xs text-slate-400">Active Session</p>
+          <div className="flex gap-x-4 p-4">
+            <Avatar image={selectedUser.image} />
+            <div className="flex flex-col">
+              <h3 className="font-semibold text-slate-200">
+                {selectedUser.name}
+              </h3>
+              <p className="text-xs text-slate-400">Active Session</p>
+            </div>
           </div>
 
           {/* Messages Area */}
@@ -96,21 +100,25 @@ export const ChatWindow = ({
                   key={msg.id}
                   className={`flex ${isMe ? "justify-end" : "justify-start"}`}
                 >
-                  <div
-                    className={`max-w-xs md:max-w-md p-3 rounded-xl shadow-md ${
-                      isMe
-                        ? "bg-indigo-600 text-white rounded-br-none"
-                        : "bg-slate-800 text-slate-200 rounded-bl-none"
-                    }`}
-                  >
-                    <p className="text-sm leading-relaxed">{msg.content}</p>
+                  <div className="flex items-center gap-2">
+                    {!isMe && <Avatar image={selectedUser.image} size={30} />}
+                    <div
+                      className={`max-w-xs md:max-w-md p-3 rounded-xl shadow-md ${
+                        isMe
+                          ? "bg-indigo-600 text-white rounded-br-none"
+                          : "bg-slate-800 text-slate-200 rounded-bl-none"
+                      }`}
+                    >
+                      <p className="text-sm leading-relaxed">{msg.content}</p>
+                    </div>
                   </div>
                 </div>
               );
             })}
 
             {typingUser === selectedUser?.id && (
-              <div className="flex justify-start animate-fade-in">
+              <div className="flex justify-start items-center animate-fade-in gap-2">
+                <Avatar image={selectedUser.image} size={25} />
                 <div className="bg-slate-800 text-slate-200 p-3 rounded-xl rounded-bl-none shadow-md flex items-center justify-center min-w-12.5 h-9.5">
                   <div className="flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.3s]" />
