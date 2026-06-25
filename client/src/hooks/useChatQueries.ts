@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-interface User {
+export interface User {
   id: number;
   username: string;
   name: string;
 }
 
-interface Message {
+export interface Message {
   id: number;
   sender_id: number;
   receiver_id: number;

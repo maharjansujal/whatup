@@ -6,6 +6,8 @@ import {
   useSendMessage,
 } from "./hooks/useChatQueries";
 import { useQueryClient } from "@tanstack/react-query";
+import { Sidebar } from "./components/Sidebar";
+import { ChatWindow } from "./components/ChatWindow";
 
 function ChatApp({
   currentUser,
@@ -95,103 +97,23 @@ function ChatApp({
   return (
     <div className="flex h-screen bg-slate-900 text-slate-100">
       {/* Sidebar */}
-      <div className="w-80 border-r border-slate-800 flex flex-col bg-slate-950">
-        <div className="p-4 border-b border-slate-800 flex justify-between items-center">
-          <div>
-            <h2 className="font-bold text-lg">{currentUser.name}</h2>
-            <p className="text-xs text-slate-400">@{currentUser.username}</p>
-          </div>
-          <button
-            onClick={onLogout}
-            className="text-xs bg-red-600 hover:bg-red-700 px-2 py-1 rounded"
-          >
-            Exit
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          <h3 className="text-xs font-semibold text-slate-500 uppercase px-2 my-2">
-            Active Users
-          </h3>
-          {chatList.map((user) => (
-            <button
-              key={user.id}
-              onClick={() => setSelectedUser(user)}
-              className={`w-full text-left p-3 rounded-lg transition-colors ${
-                selectedUser?.id === user.id
-                  ? "bg-indigo-600 text-white"
-                  : "hover:bg-slate-800 text-slate-300"
-              }`}
-            >
-              <div className="font-medium">{user.name}</div>
-              <div className="text-xs text-slate-400">@{user.username}</div>
-            </button>
-          ))}
-        </div>
-      </div>
+      <Sidebar
+        selectedUser={selectedUser}
+        onSelectUser={(user) => setSelectedUser(user)}
+        chatList={chatList}
+        currentUser={currentUser}
+        onLogout={onLogout}
+      />
 
       {/* Chat Window */}
-      <div className="flex-1 flex flex-col bg-slate-900">
-        {selectedUser ? (
-          <>
-            {/* Chat Header */}
-            <div className="p-4 border-b border-slate-800 bg-slate-950">
-              <h3 className="font-semibold text-slate-200">
-                {selectedUser.name}
-              </h3>
-              <p className="text-xs text-slate-400">Active Session</p>
-            </div>
-
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {messages.map((msg) => {
-                const isMe = msg.sender_id === currentUser.id;
-                return (
-                  <div
-                    key={msg.id}
-                    className={`flex ${isMe ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`max-w-xs md:max-w-md p-3 rounded-xl shadow-md ${
-                        isMe
-                          ? "bg-indigo-600 text-white rounded-br-none"
-                          : "bg-slate-800 text-slate-200 rounded-bl-none"
-                      }`}
-                    >
-                      <p className="text-sm leading-relaxed">{msg.content}</p>
-                    </div>
-                  </div>
-                );
-              })}
-              <div ref={messageEndRef} />
-            </div>
-
-            {/* Input Form */}
-            <form
-              onSubmit={handleSend}
-              className="p-4 border-t border-slate-800 bg-slate-950 flex gap-2"
-            >
-              <input
-                type="text"
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                placeholder={`Message ${selectedUser.name}...`}
-                className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-500 text-white"
-              />
-              <button
-                type="submit"
-                className="bg-indigo-600 hover:bg-indigo-700 px-5 py-2 rounded-lg text-sm font-medium transition-colors"
-              >
-                Send
-              </button>
-            </form>
-          </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-slate-500 text-sm">
-            Select a user from the sidebar to start a real-time conversation.
-          </div>
-        )}
-      </div>
+      <ChatWindow
+        currentUser={currentUser}
+        messageText={messageText}
+        onMessageTextChange={(e) => setMessageText(e.target.value)}
+        messages={messages}
+        onSendMessage={handleSend}
+        selectedUser={selectedUser}
+      />
     </div>
   );
 }
