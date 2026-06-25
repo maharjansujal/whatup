@@ -16,7 +16,6 @@ export const initSocket = (io: Server) => {
       }
     }
 
-    //handle disconnects
     // handle disconnects
     socket.on("disconnect", () => {
       console.log(`Client disconnected: ${socket.id}`);
