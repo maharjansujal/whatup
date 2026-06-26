@@ -67,13 +67,16 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    socket.on("newMessage", (message) => {
+    socket.on("newMessage", (message: Message) => {
       const chatId = activeUser?.id;
 
-      queryClient.setQueryData(["messages", chatId], (old: Message[] = []) => [
-        ...old,
-        message,
-      ]);
+      queryClient.setQueryData(["messages", chatId], (old: Message[] = []) => {
+        // Check if the message already exists in the cache to prevent duplicates
+        const messageExists = old.some((msg) => msg.id === message.id);
+        if (messageExists) return old;
+
+        return [...old, message];
+      });
     });
     socket.on("userTyping", handleUserTyping);
     socket.on("userStoppedTyping", handleUserStoppedTyping);
