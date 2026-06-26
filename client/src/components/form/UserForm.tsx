@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { MessageSquare, Upload, User } from "lucide-react";
 import { useAuth } from "../../hooks/post/useAuth";

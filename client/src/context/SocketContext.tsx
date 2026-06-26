@@ -1,5 +1,4 @@
-// src/context/SocketContext.tsx (Updated to match your server)
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { type UserItem } from "../hooks/get/useFetchUsers";
 import { useQueryClient } from "@tanstack/react-query";
