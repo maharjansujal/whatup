@@ -8,8 +8,8 @@ export type UpdateUserPayload = {
   image?: string | null;
 };
 
-const updateUser = async (payload: UpdateUserPayload) => {
-  const { data } = await api.patch("/me", payload);
+const updateUser = async (formData: FormData) => {
+  const { data } = await api.patch("/users/me", formData);
   return data.result;
 };
 
@@ -18,7 +18,6 @@ export const useUpdateUser = () => {
 
   return useMutation({
     mutationFn: updateUser,
-
     onSuccess: (updatedUser) => {
       queryClient.setQueryData(["me"], updatedUser);
 
@@ -33,7 +32,9 @@ export const useUpdateUser = () => {
         );
       }
 
-      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({
+        queryKey: ["users"],
+      });
     },
   });
 };

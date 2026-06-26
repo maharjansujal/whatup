@@ -5,6 +5,8 @@ import { useAuth } from "../../hooks/post/useAuth";
 import { Input } from "./Input";
 import { Button } from "../shared/Button";
 import { Link } from "react-router-dom";
+import { normalizeError } from "../../utils/normalizeError";
+import { useUpdateUser } from "../../hooks/update/useUpdateUser";
 
 type Mode = "create" | "edit";
 
@@ -21,14 +23,21 @@ type Props = {
     username: string;
     image?: string | null;
   };
+  onFormSubmit?: () => void;
 };
 
-export function UserForm({ mode = "create", initialValues }: Props) {
+export function UserForm({
+  mode = "create",
+  initialValues,
+  onFormSubmit,
+}: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isEdit = mode === "edit";
 
-  const { registerUser, isRegisteringUser, registerError } = useAuth();
+  const { registerUser, isRegisteringUser, registerError, isRegisterError } =
+    useAuth();
+  const { mutateAsync: updateUser, isPending: isUpdating } = useUpdateUser();
 
   const [imageFile, setImageFile] = useState<File | undefined>();
   const [imagePreview, setImagePreview] = useState<string | null>(
@@ -62,9 +71,7 @@ export function UserForm({ mode = "create", initialValues }: Props) {
     }
   }, [initialValues, reset]);
 
-  const errorMessage = registerError
-    ? (registerError as any)?.response?.data?.message || "Something went wrong"
-    : "";
+  const errorMessage = normalizeError(registerError);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -79,22 +86,18 @@ export function UserForm({ mode = "create", initialValues }: Props) {
 
     formData.append("name", data.name);
     formData.append("username", data.username);
-
-    // password only used in create OR if user wants to change it later
-    if (data.password) {
-      formData.append("password", data.password);
-    }
+    formData.append("password", data.password);
 
     if (imageFile) {
       formData.append("image", imageFile);
     }
 
     if (isEdit) {
-      // NOTE: you will wire updateUser later
-      await registerUser(formData); // temporary fallback if backend uses same endpoint
+      await updateUser(formData);
     } else {
       await registerUser(formData);
     }
+    if (onFormSubmit) onFormSubmit();
   };
 
   const isLoading = isRegisteringUser;
@@ -120,7 +123,7 @@ export function UserForm({ mode = "create", initialValues }: Props) {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Error */}
-        {errorMessage && (
+        {isRegisterError && errorMessage && (
           <div className="p-3 bg-error/10 border border-error/20 rounded-lg text-sm text-error font-medium">
             {errorMessage}
           </div>
@@ -208,8 +211,19 @@ export function UserForm({ mode = "create", initialValues }: Props) {
         />
 
         {/* Submit */}
-        <Button type="submit" className="w-full" isLoading={isLoading}>
-          {isEdit ? "Update Profile" : "Sign Up"}
+        <Button
+          type="submit"
+          disabled={isUpdating || isRegisteringUser}
+          className="w-full disabled:opacity-50"
+          isLoading={isLoading}
+        >
+          {isEdit
+            ? isUpdating
+              ? "Updating..."
+              : "Update Profile"
+            : isRegisteringUser
+              ? "Signing Up"
+              : "Sign Up"}
         </Button>
 
         {mode === "create" && (

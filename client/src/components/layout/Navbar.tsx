@@ -7,7 +7,7 @@ import { UserForm } from "../form/UserForm";
 
 export function Navbar() {
   const { logout } = useAuth();
-  const { openModal } = useModal();
+  const { openModal, closeModal } = useModal();
 
   const userString = localStorage.getItem("user");
   const currentUser = userString ? JSON.parse(userString) : null;
@@ -17,7 +17,13 @@ export function Navbar() {
   };
 
   const handleUpdateProfile = () => {
-    openModal(<UserForm mode="edit" />);
+    openModal(
+      <UserForm
+        mode="edit"
+        initialValues={currentUser}
+        onFormSubmit={closeModal}
+      />,
+    );
   };
 
   return (

@@ -1,12 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../instance/api";
-
-type RegisterPayload = {
-  name: string;
-  username: string;
-  password: string;
-  image?: File;
-};
+import { useNavigate } from "react-router-dom";
 
 type LoginPayload = {
   username: string;
@@ -15,6 +9,7 @@ type LoginPayload = {
 
 export function useAuth() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const registerUserMutation = useMutation({
     mutationFn: async (formData: FormData) => {
@@ -29,12 +24,12 @@ export function useAuth() {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      navigate("/login");
     },
   });
 
   const loginUserMutation = useMutation({
     mutationFn: async ({ username, password }: LoginPayload) => {
-      // FIXED: Removed API_URL prefix
       const res = await api.post("/users/login", {
         username,
         password,
@@ -66,6 +61,7 @@ export function useAuth() {
     registerUserMutation,
     isRegisteringUser: registerUserMutation.isPending,
     registerError: registerUserMutation.error,
+    isRegisterError: registerUserMutation.isError,
 
     loginUser: loginUserMutation.mutateAsync,
     loginUserMutation,
