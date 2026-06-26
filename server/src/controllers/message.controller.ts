@@ -6,6 +6,7 @@ import {
 } from "../services/message.service";
 import { getReceiverSocketId } from "../socket/socket";
 import { io } from "../../index";
+import { AuthenticatedRequest } from "../middleware/auth.middleware";
 
 export const getAllMessages = async (req: Request, res: Response) => {
   try {
@@ -44,9 +45,16 @@ export const getConversationMessages = async (req: Request, res: Response) => {
     });
   }
 };
-export const createMessage = async (req: Request, res: Response) => {
+export const createMessage = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
   try {
-    const { receiverId, senderId, content } = req.body;
+    const { receiverId, content } = req.body;
+    const senderId = req.user?.id;
+    if (!senderId) {
+      return res.status(401).json({ message: "User not logged in" });
+    }
     const result = await createMessageService(receiverId, senderId, content);
 
     const receiverSocketId = getReceiverSocketId(Number(receiverId));
