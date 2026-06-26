@@ -15,5 +15,5 @@ CREATE TABLE
         receiver_id INTEGER NOT NULL REFERENCES users (id),
         content TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT NOW (),
-        updated_at TIMESTAMP DEFAULT NOW ()
+        updated_at TIMESTAMP
     );

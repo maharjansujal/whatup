@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import {
   createMessageService,
+  deleteMessageService,
   getAllMessagesService,
   getConversationMessagesService,
+  updateMessageService,
 } from "../services/message.service";
 import { getReceiverSocketId } from "../socket/socket";
 import { io } from "../../index";
@@ -76,6 +78,63 @@ export const createMessage = async (
     }
 
     return res.status(201).json({ message: "Message sent!", ...result });
+  } catch (err) {
+    return res.status(500).json({
+      message: err instanceof Error ? err.message : "Internal Server error",
+    });
+  }
+};
+
+export const updateMessage = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
+  try {
+    const messageId = Number(req.params.messageId);
+    const { content } = req.body;
+    if (isNaN(messageId)) {
+      return res.status(400).json({
+        message: "Invalid message id",
+      });
+    }
+    const result = await updateMessageService(messageId, content);
+
+    if (!result) {
+      return res.status(404).json({
+        message: "Message not found",
+      });
+    }
+    return res.status(200).json({
+      message: "Message updated successfully",
+      messageData: result,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: err instanceof Error ? err.message : "Internal Server error",
+    });
+  }
+};
+
+export const deleteMessage = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
+  try {
+    const messageId = Number(req.params.messageId);
+    if (isNaN(messageId)) {
+      return res.status(400).json({
+        message: "Invalid message id",
+      });
+    }
+    const deleted = await deleteMessageService(messageId);
+    if (!deleted) {
+      return res.status(404).json({
+        message: "Message not found",
+      });
+    }
+    return res.status(200).json({
+      message: "Message deleted successfully",
+    });
   } catch (err) {
     return res.status(500).json({
       message: err instanceof Error ? err.message : "Internal Server error",
