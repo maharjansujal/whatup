@@ -88,11 +88,13 @@ export function ChatWindow() {
                 <div
                   className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm shadow-2xs ${
                     isMe
-                      ? "bg-brand text-white rounded-br-none"
+                      ? "bg-sidebar text-white rounded-br-none"
                       : "bg-white text-sidebar border border-border-light rounded-bl-none"
                   }`}
                 >
-                  <p className="leading-relaxed break-words">{msg.content}</p>
+                  <p className="leading-relaxed wrap-break-word">
+                    {msg.content}
+                  </p>
                   <span
                     className={`text-[10px] block mt-1 text-right ${isMe ? "text-white/70" : "text-muted"}`}
                   >
@@ -130,7 +132,7 @@ export function ChatWindow() {
         <button
           type="submit"
           disabled={!text.trim()}
-          className="w-10 h-10 bg-brand text-white rounded-xl flex items-center justify-center hover:bg-brand-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0 cursor-pointer"
+          className="w-10 h-10 bg-sidebar text-white rounded-xl flex items-center justify-center hover:bg-brand-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0 cursor-pointer"
         >
           <Send size={16} />
         </button>

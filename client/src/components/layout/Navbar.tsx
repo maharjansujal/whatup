@@ -22,7 +22,7 @@ export function Navbar() {
         <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center text-white">
           <MessageSquare size={18} />
         </div>
-        <span className="font-bold text-lg tracking-wide">ChatApp</span>
+        <span className="font-bold text-lg tracking-wide">Whatup</span>
       </div>
 
       {/* Right side: Interactive Avatar Action Element */}
