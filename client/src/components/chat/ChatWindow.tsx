@@ -11,21 +11,17 @@ export function ChatWindow() {
   const userString = localStorage.getItem("user");
   const currentUser = userString ? JSON.parse(userString) : null;
 
-  // Auto-scroll anchor timeline tracking
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // Handle typing triggers mapping to your server's socket.ts file
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
 
     if (!socket || !activeUser) return;
 
-    // Emit backend event string "typing"
     socket.emit("typing", { receiverId: activeUser.id });
 
-    // Simple debounce to clear typing notification state
     const timeoutId = setTimeout(() => {
       socket.emit("stopTyping", { receiverId: activeUser.id });
     }, 1500);
@@ -99,7 +95,6 @@ export function ChatWindow() {
           );
         })}
 
-        {/* Real-time Dynamic Typing indicator notice box */}
         {isTyping && (
           <div className="flex w-full justify-start animate-pulse">
             <div className="bg-white text-muted border border-border-light rounded-2xl rounded-bl-none px-4 py-2 text-xs italic">
@@ -110,7 +105,6 @@ export function ChatWindow() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 3. Message Input Action Panel */}
       <form
         onSubmit={handleSend}
         className="p-4 bg-white border-t border-border-light flex items-center gap-3 shrink-0"
