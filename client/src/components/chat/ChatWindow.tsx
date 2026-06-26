@@ -26,6 +26,10 @@ export function ChatWindow() {
   const [editedText, setEditedText] = useState("");
 
   useEffect(() => {
+    console.log(messages);
+  }, [messages]);
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
@@ -120,7 +124,7 @@ export function ChatWindow() {
                 className={`flex w-full ${isMe ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`group relative max-w-[70%] rounded-2xl px-4 py-2.5 text-sm shadow-2xs ${
+                  className={`group relative max-w-[70%] rounded-2xl px-4 py-2.5 text-sm shadow-xs ${
                     isMe
                       ? "bg-sidebar text-white rounded-br-none"
                       : "bg-white text-sidebar border border-border-light rounded-bl-none"
@@ -131,7 +135,7 @@ export function ChatWindow() {
                       <input
                         value={editedText}
                         onChange={(e) => setEditedText(e.target.value)}
-                        className="px-2 py-1"
+                        className="w-full rounded border px-2 py-1"
                       />
 
                       <div className="flex gap-2">
@@ -145,12 +149,12 @@ export function ChatWindow() {
                     </div>
                   ) : (
                     <>
-                      <p className="leading-relaxed wrap-break-word">
+                      <p className="leading-relaxed break-words">
                         {msg.content}
                       </p>
 
                       {isMe && (
-                        <div className="absolute -top-2 -right-2 hidden group-hover:flex gap-1 bg-brand rounded shadow p-1">
+                        <div className="absolute -top-2 -right-2 hidden group-hover:flex gap-1 rounded bg-brand p-1 shadow">
                           <button
                             onClick={() => {
                               setEditingId(msg.id);
@@ -166,16 +170,28 @@ export function ChatWindow() {
                         </div>
                       )}
 
-                      <span
-                        className={`text-[10px] block mt-1 text-right ${
+                      <div
+                        className={`mt-2 flex items-center justify-end gap-2 text-[10px] ${
                           isMe ? "text-white/70" : "text-muted"
                         }`}
                       >
-                        {new Date(msg.created_at).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
+                        {msg.updated_at && (
+                          <span className="italic">
+                            Edited{" "}
+                            {new Date(msg.updated_at).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        )}
+
+                        <span>
+                          {new Date(msg.created_at).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
                     </>
                   )}
                 </div>

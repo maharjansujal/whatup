@@ -36,9 +36,9 @@ export const updateMessageService = async (
   content: string | null,
 ) => {
   const result = await pool.query(
-    `UPDATE messages SET content = $2
+    `UPDATE messages SET content = $2, updated_at = NOW()
      WHERE id = $1
-     RETURNING content`,
+     RETURNING content, updated_at`,
     [messageId, content],
   );
 

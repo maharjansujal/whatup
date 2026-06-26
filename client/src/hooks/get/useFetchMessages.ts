@@ -9,6 +9,7 @@ export interface MessageItem {
   receiver_id: number;
   content: string;
   created_at: string;
+  updated_at?: string;
 }
 
 export function useFetchMessages(receiverId: number | undefined) {
@@ -25,7 +26,6 @@ export function useFetchMessages(receiverId: number | undefined) {
     enabled: !!receiverId, // Only execute if a target contact is selected
   });
 
-  // Keep our real-time socket message state in sync with loaded history
   useEffect(() => {
     if (query.data) {
       setMessages(query.data);
