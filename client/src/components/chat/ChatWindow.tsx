@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useChatSocket } from "../../context/SocketContext";
-import { Pencil, Send, Trash2, User } from "lucide-react";
+import { Check, Pencil, Send, Trash2, User, X } from "lucide-react";
 import { useSendMessage } from "../../hooks/post/useSendMessage";
 import { useFetchMessages } from "../../hooks/get/useFetchMessages";
 import { useUpdateMessage } from "../../hooks/update/useUpdateMessage";
@@ -131,15 +131,15 @@ export function ChatWindow() {
                       <input
                         value={editedText}
                         onChange={(e) => setEditedText(e.target.value)}
-                        className="w-full rounded px-2 py-1 text-"
+                        className="px-2 py-1"
                       />
 
                       <div className="flex gap-2">
                         <button onClick={() => handleUpdate(msg.id)}>
-                          Save
+                          <Check size={14} />
                         </button>
                         <button onClick={() => setEditingId(null)}>
-                          Cancel
+                          <X size={14} className="text-error" />
                         </button>
                       </div>
                     </div>
@@ -150,7 +150,7 @@ export function ChatWindow() {
                       </p>
 
                       {isMe && (
-                        <div className="absolute -top-2 -right-2 hidden group-hover:flex gap-1 bg-white rounded shadow p-1">
+                        <div className="absolute -top-2 -right-2 hidden group-hover:flex gap-1 bg-brand rounded shadow p-1">
                           <button
                             onClick={() => {
                               setEditingId(msg.id);
@@ -161,7 +161,7 @@ export function ChatWindow() {
                           </button>
 
                           <button onClick={() => handleDelete(msg.id)}>
-                            <Trash2 size={14} className="text-red-500" />
+                            <Trash2 size={14} className="text-error" />
                           </button>
                         </div>
                       )}
