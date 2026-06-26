@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "../instance/api";
+import { api } from "../../instance/api";
 
 type RegisterPayload = {
   name: string;
@@ -46,6 +46,7 @@ export function useAuth() {
 
   const loginUserMutation = useMutation({
     mutationFn: async ({ username, password }: LoginPayload) => {
+      // FIXED: Removed API_URL prefix
       const res = await api.post("/users/login", {
         username,
         password,
@@ -59,6 +60,7 @@ export function useAuth() {
       if (data?.user) {
         localStorage.setItem("user", JSON.stringify(data.user));
       }
+      // Seeds/updates TanStack cache for immediate global access
       queryClient.setQueryData(["auth-user"], data?.user);
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },

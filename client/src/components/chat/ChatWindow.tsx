@@ -1,113 +1,135 @@
-import { useEffect, useRef } from "react";
-import type { Socket } from "socket.io-client";
-import { ChatHeader } from "./ChatHeader";
-import { MessageList } from "./MessageList";
-import { MessageInput } from "./MessageInput";
-import type { User } from "../../types/user";
-import type { Message } from "../../types/message";
+import React, { useState, useEffect, useRef } from "react";
+import { useChatSocket } from "../../context/SocketContext";
+import { Send, User } from "lucide-react";
 
-interface Props {
-  selectedUser: User | null;
-  messages: Message[];
-  currentUser: User;
-  onSendMessage: (e: React.SubmitEvent<Element>) => void;
-  messageText: string;
-  onMessageTextChange: (
-    e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>,
-  ) => void;
-  socket: Socket | null;
-  typingUser: number | null;
-}
+export function ChatWindow() {
+  const { activeUser, messages, sendMessage, socket, isTyping } =
+    useChatSocket();
+  const [text, setText] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-export const ChatWindow = ({
-  selectedUser,
-  messages,
-  currentUser,
-  onSendMessage,
-  messageText,
-  onMessageTextChange,
-  socket,
-  typingUser,
-}: Props) => {
-  const messageEndRef = useRef<HTMLDivElement>(null);
-  const lastTypingEventTime = useRef<number>(0);
-  const stopTypingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
+  const userString = localStorage.getItem("user");
+  const currentUser = userString ? JSON.parse(userString) : null;
 
+  // Auto-scroll anchor timeline tracking
   useEffect(() => {
-    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isTyping]);
 
+  // Handle typing triggers mapping to your server's socket.ts file
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onMessageTextChange(e);
+    setText(e.target.value);
 
-    if (!socket || !selectedUser) return;
+    if (!socket || !activeUser) return;
 
-    const now = Date.now();
-    const THROTTLE_TIME = 3000; // 3 seconds
+    // Emit backend event string "typing"
+    socket.emit("typing", { receiverId: activeUser.id });
 
-    // THROTTLE: Send "typing" status if 3 seconds have passed since the last notification
-    if (now - lastTypingEventTime.current > THROTTLE_TIME) {
-      socket.emit("typing", {
-        senderId: currentUser.id,
-        receiverId: selectedUser.id,
-      });
-      lastTypingEventTime.current = now;
-    }
+    // Simple debounce to clear typing notification state
+    const timeoutId = setTimeout(() => {
+      socket.emit("stopTyping", { receiverId: activeUser.id });
+    }, 1500);
 
-    // STOP TYPING DETECTION: Clear the previous timeout and set a new one
-    if (stopTypingTimeoutRef.current) {
-      clearTimeout(stopTypingTimeoutRef.current);
-    }
-
-    stopTypingTimeoutRef.current = setTimeout(() => {
-      socket.emit("stopTyping", {
-        senderId: currentUser.id,
-        receiverId: selectedUser.id,
-      });
-      // Reset throttle baseline so next keystroke instantly fires again
-      lastTypingEventTime.current = 0;
-    }, 2000); // Declared "stopped" after 2 seconds of silence
+    return () => clearTimeout(timeoutId);
   };
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (stopTypingTimeoutRef.current)
-        clearTimeout(stopTypingTimeoutRef.current);
-    };
-  }, []);
+  const handleSend = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!text.trim()) return;
+
+    sendMessage(text.trim());
+
+    // Explicitly notify server typing has ended on click send
+    socket?.emit("stopTyping", { receiverId: activeUser?.id });
+    setText("");
+  };
 
   return (
-    <div className="flex-1 flex flex-col bg-(--color-background)">
-      {selectedUser ? (
-        <>
-          {/* Chat Header */}
-          <ChatHeader {...selectedUser} />
-
-          {/* Messages Area */}
-          <MessageList
-            currentUser={currentUser}
-            messageEndRef={messageEndRef}
-            messages={messages}
-            selectedUser={selectedUser}
-            typingUser={typingUser}
-          />
-
-          {/* Input Form */}
-          <MessageInput
-            handleInputChange={handleInputChange}
-            messageText={messageText}
-            name={selectedUser.name}
-            onSendMessage={onSendMessage}
-          />
-        </>
-      ) : (
-        <div className="flex-1 flex items-center justify-center text-sm text-(--color-text-secondary)">
-          Select a user from the sidebar to start a real-time conversation.
+    <div className="flex-1 flex flex-col h-full overflow-hidden">
+      {/* 1. Window Header Banner */}
+      <div className="h-16 w-full bg-white border-b border-border-light px-6 flex items-center justify-between shadow-xs shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-chat border border-border-light flex items-center justify-center overflow-hidden">
+            {activeUser?.image ? (
+              <img
+                src={activeUser.image}
+                alt={activeUser.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <User size={18} className="text-muted" />
+            )}
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-sidebar">
+              {activeUser?.name}
+            </h4>
+            <p className="text-xs text-muted">@{activeUser?.username}</p>
+          </div>
         </div>
-      )}
+      </div>
+
+      {/* 2. Messages Bubble History Stream */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        {messages.map((msg) => {
+          const isMe = msg.sender_id === currentUser?.id;
+          return (
+            <div
+              key={msg.id}
+              className={`flex w-full ${isMe ? "justify-end" : "justify-start"}`}
+            >
+              <div
+                className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm shadow-2xs ${
+                  isMe
+                    ? "bg-brand text-white rounded-br-none"
+                    : "bg-white text-sidebar border border-border-light rounded-bl-none"
+                }`}
+              >
+                <p className="leading-relaxed break-words">{msg.content}</p>
+                <span
+                  className={`text-[10px] block mt-1 text-right ${isMe ? "text-white/70" : "text-muted"}`}
+                >
+                  {new Date(msg.created_at).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Real-time Dynamic Typing indicator notice box */}
+        {isTyping && (
+          <div className="flex w-full justify-start animate-pulse">
+            <div className="bg-white text-muted border border-border-light rounded-2xl rounded-bl-none px-4 py-2 text-xs italic">
+              {activeUser?.name} is typing...
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* 3. Message Input Action Panel */}
+      <form
+        onSubmit={handleSend}
+        className="p-4 bg-white border-t border-border-light flex items-center gap-3 shrink-0"
+      >
+        <input
+          type="text"
+          placeholder={`Message @${activeUser?.username}...`}
+          value={text}
+          onChange={handleInputChange}
+          className="flex-1 bg-chat border border-border-light rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand/60 focus:ring-1 focus:ring-brand/40 transition-all text-sidebar placeholder:text-muted/50"
+        />
+        <button
+          type="submit"
+          disabled={!text.trim()}
+          className="w-10 h-10 bg-brand text-white rounded-xl flex items-center justify-center hover:bg-brand-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0 cursor-pointer"
+        >
+          <Send size={16} />
+        </button>
+      </form>
     </div>
   );
-};
+}

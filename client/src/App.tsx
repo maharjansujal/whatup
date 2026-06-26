@@ -1,56 +1,53 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import { ChatApp } from "./components/chat/ChatApp";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
+import { Navbar } from "./components/layout/Navbar";
 import { SocketProvider } from "./context/SocketContext";
+import { ChatMainWorkspace } from "./components/chat/ChatMainWorkspace";
 
-const queryClient = new QueryClient();
+// Protected Layout wrapper injecting real-time socket listeners
+function ProtectedLayout() {
+  const token = localStorage.getItem("token");
 
-function getUser() {
-  const user = localStorage.getItem("user");
-  return user ? JSON.parse(user) : null;
-}
-
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const user = getUser();
-
-  if (!user) {
+  if (!token) {
     return <Navigate to="/login" replace />;
   }
 
-  return <>{children}</>;
+  return (
+    <SocketProvider>
+      <div className="flex flex-col h-screen w-screen overflow-hidden">
+        {/* Top Navbar */}
+        <Navbar />
+
+        {/* Main interactive chat panels */}
+        <div className="flex-1 flex overflow-hidden">
+          <Outlet />
+        </div>
+      </div>
+    </SocketProvider>
+  );
 }
 
 export default function App() {
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    window.location.href = "/login";
-  };
+  const token = localStorage.getItem("token");
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <SocketProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* Auth routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+    <Routes>
+      <Route
+        path="/login"
+        element={token ? <Navigate to="/" replace /> : <LoginPage />}
+      />
+      <Route
+        path="/register"
+        element={token ? <Navigate to="/" replace /> : <RegisterPage />}
+      />
 
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <ChatApp onLogout={handleLogout} />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        </BrowserRouter>
-      </SocketProvider>
-    </QueryClientProvider>
+      {/* Main Real-time authenticated interface entrypoint */}
+      <Route element={<ProtectedLayout />}>
+        <Route path="/" element={<ChatMainWorkspace />} />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
