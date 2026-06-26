@@ -37,7 +37,7 @@ export const updateMessageService = async (
 ) => {
   const result = await pool.query(
     `UPDATE messages SET content = $2
-     WHERE message_id = $1
+     WHERE id = $1
      RETURNING content`,
     [messageId, content],
   );
@@ -46,9 +46,8 @@ export const updateMessageService = async (
 };
 
 export const deleteMessageService = async (messageId: number) => {
-  const result = await pool.query(
-    "DELETE FROM messages WHERE message_id = $1",
-    [messageId],
-  );
+  const result = await pool.query("DELETE FROM messages WHERE id = $1", [
+    messageId,
+  ]);
   return result.rowCount === 1;
 };
