@@ -5,7 +5,8 @@ CREATE TABLE
         name VARCHAR(100) NOT NULL,
         password_hash VARCHAR(100) NOT NULL,
         image VARCHAR(100),
-        created_at TIMESTAMP DEFAULT NOW ()
+        created_at TIMESTAMP DEFAULT NOW (),
+        updated_at TIMESTAMP
     );
 
 CREATE TABLE
