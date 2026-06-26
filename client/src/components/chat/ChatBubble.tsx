@@ -35,6 +35,16 @@ export const ChatBubble = ({
             <input
               value={editedText}
               onChange={(e) => setEditedText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  onUpdate(msg.id);
+                }
+
+                if (e.key === "Escape") {
+                  setEditingId(null);
+                }
+              }}
               className="w-full rounded border px-2 py-1 text-sm"
             />
 
