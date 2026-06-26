@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { type UserItem } from "../hooks/get/useFetchUsers";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Message {
   id: number;
@@ -23,8 +24,8 @@ interface SocketContextType {
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
 const VITE_API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
 export function SocketProvider({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isOnline, setIsOnline] = useState(false);
   const [activeUser, setActiveUser] = useState<UserItem | null>(null);
@@ -54,18 +55,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!socket) return;
 
-    // MATCHES SERVER: Listening for "newMessage"
-    const handleIncomingMessage = (message: Message) => {
-      if (
-        activeUser &&
-        (message.sender_id === activeUser.id ||
-          message.receiver_id === activeUser.id)
-      ) {
-        setMessages((prev) => [...prev, message]);
-      }
-    };
-
-    // MATCHES SERVER: Listeners for typing indicators
     const handleUserTyping = ({ senderId }: { senderId: number }) => {
       if (activeUser && senderId === activeUser.id) {
         setIsTyping(true);
@@ -78,27 +67,22 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    socket.on("newMessage", handleIncomingMessage);
+    socket.on("newMessage", (message) => {
+      const chatId = activeUser?.id;
+
+      queryClient.setQueryData(["messages", chatId], (old: Message[] = []) => [
+        ...old,
+        message,
+      ]);
+    });
     socket.on("userTyping", handleUserTyping);
     socket.on("userStoppedTyping", handleUserStoppedTyping);
 
     return () => {
-      socket.off("newMessage", handleIncomingMessage);
       socket.off("userTyping", handleUserTyping);
       socket.off("userStoppedTyping", handleUserStoppedTyping);
     };
   }, [socket, activeUser]);
-
-  // Emitting payloads to your server
-  // const sendMessage = (content: string) => {
-  //   if (!socket || !activeUser) return;
-
-  //   // MATCHES SERVER: Emitting "newMessage" with camelCase receiverId
-  //   socket.emit("newMessage", {
-  //     receiverId: activeUser.id,
-  //     content,
-  //   });
-  // };
 
   return (
     <SocketContext.Provider

@@ -17,8 +17,11 @@ export function useFetchMessages(receiverId: number | undefined) {
   const query = useQuery<MessageItem[]>({
     queryKey: ["messages", receiverId],
     queryFn: async () => {
-      const res = await api.get(`/messages/${receiverId}`);
-      return res.data;
+      const res = await api.get("/messages", {
+        params: { receiverId },
+      });
+      console.log("Response", res);
+      return res.data.messages;
     },
     enabled: !!receiverId, // Only execute if a target contact is selected
   });

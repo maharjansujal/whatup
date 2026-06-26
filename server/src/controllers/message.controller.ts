@@ -22,10 +22,17 @@ export const getAllMessages = async (req: Request, res: Response) => {
   }
 };
 
-export const getConversationMessages = async (req: Request, res: Response) => {
+export const getConversationMessages = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
   try {
-    const senderId = Number(req.query.senderId);
+    const senderId = req.user?.id;
     const receiverId = Number(req.query.receiverId);
+
+    if (!senderId) {
+      return res.status(401).json({ message: "User not logged in" });
+    }
 
     if (isNaN(senderId) || isNaN(receiverId)) {
       return res.status(400).json({
@@ -58,9 +65,14 @@ export const createMessage = async (
     const result = await createMessageService(receiverId, senderId, content);
 
     const receiverSocketId = getReceiverSocketId(Number(receiverId));
+    const senderSocketId = getReceiverSocketId(Number(senderId));
 
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newMessage", result);
+    }
+
+    if (senderSocketId) {
+      io.to(senderSocketId).emit("newMessage", result);
     }
 
     return res.status(201).json({ message: "Message sent!", ...result });

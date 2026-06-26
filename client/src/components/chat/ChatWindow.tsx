@@ -2,11 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import { useChatSocket } from "../../context/SocketContext";
 import { Send, User } from "lucide-react";
 import { useSendMessage } from "../../hooks/post/useSendMessage";
+import { useFetchMessages } from "../../hooks/get/useFetchMessages";
 
 export function ChatWindow() {
-  const { activeUser, messages, socket, isTyping } = useChatSocket();
+  const { activeUser, socket, isTyping } = useChatSocket();
 
   const { mutateAsync: sendMessageApi } = useSendMessage();
+
+  const { data: messages } = useFetchMessages(activeUser?.id);
 
   const [text, setText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -51,7 +54,6 @@ export function ChatWindow() {
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
-      {/* 1. Window Header Banner */}
       <div className="h-16 w-full bg-white border-b border-border-light px-6 flex items-center justify-between shadow-xs shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-chat border border-border-light flex items-center justify-center overflow-hidden">
@@ -74,35 +76,35 @@ export function ChatWindow() {
         </div>
       </div>
 
-      {/* 2. Messages Bubble History Stream */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        {messages.map((msg) => {
-          const isMe = msg.sender_id === currentUser?.id;
-          return (
-            <div
-              key={msg.id}
-              className={`flex w-full ${isMe ? "justify-end" : "justify-start"}`}
-            >
+        {messages &&
+          messages.map((msg) => {
+            const isMe = msg.sender_id === currentUser?.id;
+            return (
               <div
-                className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm shadow-2xs ${
-                  isMe
-                    ? "bg-brand text-white rounded-br-none"
-                    : "bg-white text-sidebar border border-border-light rounded-bl-none"
-                }`}
+                key={msg.id}
+                className={`flex w-full ${isMe ? "justify-end" : "justify-start"}`}
               >
-                <p className="leading-relaxed break-words">{msg.content}</p>
-                <span
-                  className={`text-[10px] block mt-1 text-right ${isMe ? "text-white/70" : "text-muted"}`}
+                <div
+                  className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm shadow-2xs ${
+                    isMe
+                      ? "bg-brand text-white rounded-br-none"
+                      : "bg-white text-sidebar border border-border-light rounded-bl-none"
+                  }`}
                 >
-                  {new Date(msg.created_at).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
+                  <p className="leading-relaxed break-words">{msg.content}</p>
+                  <span
+                    className={`text-[10px] block mt-1 text-right ${isMe ? "text-white/70" : "text-muted"}`}
+                  >
+                    {new Date(msg.created_at).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
 
         {isTyping && (
           <div className="flex w-full justify-start animate-pulse">
