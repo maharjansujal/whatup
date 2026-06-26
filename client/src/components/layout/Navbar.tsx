@@ -1,6 +1,5 @@
 // src/components/layout/Navbar.tsx
-import { useState } from "react";
-import { LogOut, MessageSquare, Settings, User } from "lucide-react";
+import { LogOut, MessageSquare, Settings } from "lucide-react";
 import { useAuth } from "../../hooks/post/useAuth";
 import { Button } from "../shared/Button";
 import { useModal } from "../../context/ModalContext";
@@ -8,7 +7,6 @@ import { UserForm } from "../form/UserForm";
 
 export function Navbar() {
   const { logout } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
   const { openModal } = useModal();
 
   const userString = localStorage.getItem("user");
@@ -60,13 +58,17 @@ export function Navbar() {
               onClick={handleUpdateProfile}
               variant="secondary"
               className="text-sm"
+              icon={<Settings />}
             >
-              <Settings size={16} />
               Update Profile
             </Button>
 
-            <Button onClick={handleLogout} variant="danger" className="text-sm">
-              <LogOut size={16} />
+            <Button
+              onClick={handleLogout}
+              variant="danger"
+              className="text-sm"
+              icon={<LogOut />}
+            >
               Log out
             </Button>
           </div>
