@@ -19,12 +19,12 @@ export function Sidebar({ onSelectUser, selectedUser }: SidebarProps) {
   );
 
   return (
-    <aside className="w-80 md:w-80 h-full bg-sidebar border-r border-border-dark flex flex-col text-slate-200">
+    <aside className="h-full bg-sidebar border-r border-border-dark flex flex-col text-slate-200">
       <div className="p-4 border-b border-border-dark flex items-center justify-center">
         <img
           src="https://lh3.googleusercontent.com/a-/ALV-UjUkcJVB86BFYmFar54_RAYBipQE_MXi1TswFZSz23GmNiLzfl4=s300-p-k-rw-no"
           alt="Company Logo"
-          className="h-50 w-auto object-contain rounded-full"
+          className="h-30 w-auto object-contain rounded-full"
         />
       </div>
       <div className="p-4 border-b border-border-dark">

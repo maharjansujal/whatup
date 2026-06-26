@@ -1,33 +1,37 @@
-import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Input } from "../components/form/Input";
 import { Button } from "../components/shared/Button";
 import { MessageSquare } from "lucide-react";
 import { useAuth } from "../hooks/post/useAuth";
+import { normalizeError } from "../utils/normalizeError";
+import { useForm } from "react-hook-form";
+import { useState } from "react";
+
+type LoginFormInputs = {
+  username: string;
+  password: string;
+};
 
 export function LoginPage() {
   const navigate = useNavigate();
   const { loginUser, isLoggingIn, loginError } = useAuth();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [showError, setShowError] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormInputs>();
 
   // Extract human-readable error messages from Axios / Server responses
-  const errorMessage = loginError
-    ? (loginError as any).response?.data?.message || "Invalid credentials"
-    : "";
+  const errorMessage = normalizeError(loginError);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!username || !password) return;
-
+  const onSubmit = async (data: LoginFormInputs) => {
+    setShowError(true);
     try {
-      await loginUser({ username, password });
-      navigate("/"); // Redirect to dashboard layout on success
-    } catch (err) {
-      // Handled by react-query mutation error state
-    }
+      await loginUser(data);
+      navigate("/");
+    } catch {}
   };
-
   return (
     <div className="min-h-screen w-screen flex items-center justify-center bg-chat p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-md border border-border-light p-8">
@@ -43,8 +47,8 @@ export function LoginPage() {
         </div>
 
         {/* Form Container */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {errorMessage && (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          {showError && errorMessage && (
             <div className="p-3 bg-error/10 border border-error/20 rounded-lg text-sm text-error font-medium">
               {errorMessage}
             </div>
@@ -54,21 +58,25 @@ export function LoginPage() {
             label="Username"
             type="text"
             placeholder="enter your username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
             disabled={isLoggingIn}
-            required
+            {...register("username", { required: "Username is required" })}
           />
+
+          {showError && errors.username && (
+            <p className="text-xs text-error mt-1">{errors.username.message}</p>
+          )}
 
           <Input
             label="Password"
             type="password"
             placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
             disabled={isLoggingIn}
-            required
+            {...register("password", { required: "Password is required" })}
           />
+
+          {showError && errors.password && (
+            <p className="text-xs text-error mt-1">{errors.password.message}</p>
+          )}
 
           <Button type="submit" className="w-full mt-2" isLoading={isLoggingIn}>
             Sign In
