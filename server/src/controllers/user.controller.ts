@@ -64,29 +64,38 @@ export const updateUser = async (req: AuthenticatedRequest, res: Response) => {
         message: "Unauthorized",
       });
     }
-    const { username, name, password_hash, image } = req.body;
+
+    const { username, name, password } = req.body;
+
+    let image: string | undefined;
+
+    if (req.file) {
+      image = await uploadImage(req.file.buffer);
+    }
 
     const result = await updateUserService({
       id: Number(req.user.id),
       updates: {
         username,
         name,
-        password_hash,
+        password,
         image,
       },
     });
+
     if (!result) {
       return res.status(404).json({
         message: "User not found",
       });
     }
+
     return res.status(200).json({
       message: "User updated successfully",
       result,
     });
   } catch (err) {
     return res.status(500).json({
-      message: err instanceof Error ? err.message : "Internal Server error",
+      message: err instanceof Error ? err.message : "Internal Server Error",
     });
   }
 };

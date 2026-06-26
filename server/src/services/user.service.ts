@@ -1,4 +1,5 @@
 import { pool } from "../db";
+import bcrypt from "bcrypt";
 
 export const getUsersService = async () => {
   const result = await pool.query(
@@ -26,7 +27,7 @@ export const updateUserService = async ({
   updates: {
     username?: string;
     name?: string;
-    password_hash?: string;
+    password?: string;
     image?: string | null;
   };
 }) => {
@@ -34,15 +35,26 @@ export const updateUserService = async ({
   const values: (string | number | null)[] = [];
   let paramIndex = 1;
 
-  for (const [key, value] of Object.entries(updates)) {
-    if (
-      ["username", "name", "password_hash", "image"].includes(key) &&
-      value !== undefined
-    ) {
-      setClauses.push(`${key} = $${paramIndex}`);
-      values.push(value);
-      paramIndex++;
-    }
+  if (updates.username !== undefined) {
+    setClauses.push(`username = $${paramIndex++}`);
+    values.push(updates.username);
+  }
+
+  if (updates.name !== undefined) {
+    setClauses.push(`name = $${paramIndex++}`);
+    values.push(updates.name);
+  }
+
+  if (updates.password) {
+    const passwordHash = await bcrypt.hash(updates.password, 10);
+
+    setClauses.push(`password_hash = $${paramIndex++}`);
+    values.push(passwordHash);
+  }
+
+  if (updates.image !== undefined) {
+    setClauses.push(`image = $${paramIndex++}`);
+    values.push(updates.image);
   }
 
   if (values.length === 0) {
@@ -56,11 +68,11 @@ export const updateUserService = async ({
   values.push(id);
 
   const query = `
-  UPDATE users
-  SET ${setClauses.join(", ")}
-  WHERE id = $${paramIndex}
-  RETURNING *;
-`;
+    UPDATE users
+    SET ${setClauses.join(", ")}
+    WHERE id = $${paramIndex}
+    RETURNING *;
+  `;
 
   const result = await pool.query(query, values);
   return result.rows[0];

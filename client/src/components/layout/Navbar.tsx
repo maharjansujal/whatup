@@ -1,9 +1,9 @@
 // src/components/layout/Navbar.tsx
-import { LogOut, MessageSquare, Settings } from "lucide-react";
+import { ChevronDown, LogOut, MessageSquare, Settings } from "lucide-react";
 import { useAuth } from "../../hooks/post/useAuth";
-import { Button } from "../shared/Button";
 import { useModal } from "../../context/ModalContext";
 import { UserForm } from "../form/UserForm";
+import { useEffect, useRef, useState } from "react";
 
 export function Navbar() {
   const { logout } = useAuth();
@@ -12,9 +12,26 @@ export function Navbar() {
   const userString = localStorage.getItem("user");
   const currentUser = userString ? JSON.parse(userString) : null;
 
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
   const handleLogout = () => {
     logout();
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleUpdateProfile = () => {
     openModal(
@@ -59,24 +76,43 @@ export function Navbar() {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={handleUpdateProfile}
-              variant="secondary"
-              className="text-sm"
-              icon={<Settings />}
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => setIsMenuOpen((prev) => !prev)}
+              className="p-2 rounded-full hover:bg-sidebar-light transition"
             >
-              Update Profile
-            </Button>
+              <ChevronDown
+                size={20}
+                className={`transition-transform duration-200 ${
+                  isMenuOpen ? "rotate-180" : "rotate-0"
+                }`}
+              />
+            </button>
+            {isMenuOpen && (
+              <div className="absolute right-0 mt-2 w-fit text-xs rounded-lg bg-white shadow-lg border border-border-light overflow-hidden z-50">
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    handleUpdateProfile();
+                  }}
+                  className="flex items-center gap-3 px-4 py-2 text-sidebar hover:bg-chat transition whitespace-nowrap"
+                >
+                  <Settings size={18} />
+                  Update Profile
+                </button>
 
-            <Button
-              onClick={handleLogout}
-              variant="danger"
-              className="text-sm"
-              icon={<LogOut />}
-            >
-              Log out
-            </Button>
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="flex items-center gap-3 px-4 py-2 text-error hover:bg-error/10 transition whitespace-nowrap"
+                >
+                  <LogOut size={18} />
+                  Log Out
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
