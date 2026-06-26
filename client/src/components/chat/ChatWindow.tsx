@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useChatSocket } from "../../context/SocketContext";
-import { Send, User } from "lucide-react";
+import { Pencil, Send, Trash2, User } from "lucide-react";
 import { useSendMessage } from "../../hooks/post/useSendMessage";
 import { useFetchMessages } from "../../hooks/get/useFetchMessages";
+import { useUpdateMessage } from "../../hooks/update/useUpdateMessage";
+import { useDeleteMessage } from "../../hooks/delete/useDeleteMessage";
 
 export function ChatWindow() {
   const { activeUser, socket, isTyping } = useChatSocket();
@@ -16,6 +18,12 @@ export function ChatWindow() {
 
   const userString = localStorage.getItem("user");
   const currentUser = userString ? JSON.parse(userString) : null;
+
+  const { mutateAsync: updateMessage } = useUpdateMessage();
+  const { mutateAsync: deleteMessage } = useDeleteMessage();
+
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editedText, setEditedText] = useState("");
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -47,6 +55,32 @@ export function ChatWindow() {
         receiverId: activeUser.id,
       });
       setText("");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleUpdate = async (messageId: number) => {
+    if (!editedText.trim()) return;
+
+    try {
+      await updateMessage({
+        messageId,
+        content: editedText,
+      });
+
+      setEditingId(null);
+      setEditedText("");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDelete = async (messageId: number) => {
+    if (!window.confirm("Delete this message?")) return;
+
+    try {
+      await deleteMessage(messageId);
     } catch (err) {
       console.error(err);
     }
@@ -86,23 +120,64 @@ export function ChatWindow() {
                 className={`flex w-full ${isMe ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm shadow-2xs ${
+                  className={`group relative max-w-[70%] rounded-2xl px-4 py-2.5 text-sm shadow-2xs ${
                     isMe
                       ? "bg-sidebar text-white rounded-br-none"
                       : "bg-white text-sidebar border border-border-light rounded-bl-none"
                   }`}
                 >
-                  <p className="leading-relaxed wrap-break-word">
-                    {msg.content}
-                  </p>
-                  <span
-                    className={`text-[10px] block mt-1 text-right ${isMe ? "text-white/70" : "text-muted"}`}
-                  >
-                    {new Date(msg.created_at).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
+                  {editingId === msg.id ? (
+                    <div className="space-y-2">
+                      <input
+                        value={editedText}
+                        onChange={(e) => setEditedText(e.target.value)}
+                        className="w-full rounded px-2 py-1 text-"
+                      />
+
+                      <div className="flex gap-2">
+                        <button onClick={() => handleUpdate(msg.id)}>
+                          Save
+                        </button>
+                        <button onClick={() => setEditingId(null)}>
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="leading-relaxed wrap-break-word">
+                        {msg.content}
+                      </p>
+
+                      {isMe && (
+                        <div className="absolute -top-2 -right-2 hidden group-hover:flex gap-1 bg-white rounded shadow p-1">
+                          <button
+                            onClick={() => {
+                              setEditingId(msg.id);
+                              setEditedText(msg.content);
+                            }}
+                          >
+                            <Pencil size={14} />
+                          </button>
+
+                          <button onClick={() => handleDelete(msg.id)}>
+                            <Trash2 size={14} className="text-red-500" />
+                          </button>
+                        </div>
+                      )}
+
+                      <span
+                        className={`text-[10px] block mt-1 text-right ${
+                          isMe ? "text-white/70" : "text-muted"
+                        }`}
+                      >
+                        {new Date(msg.created_at).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             );

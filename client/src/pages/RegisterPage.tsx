@@ -103,7 +103,7 @@ export function RegisterPage() {
           <Input
             label="Full Name"
             type="text"
-            placeholder="John Doe"
+            placeholder="Your name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={isRegisteringUser}
@@ -113,7 +113,7 @@ export function RegisterPage() {
           <Input
             label="Username"
             type="text"
-            placeholder="johndoe123"
+            placeholder="Choose a username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             disabled={isRegisteringUser}

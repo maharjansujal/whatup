@@ -20,7 +20,6 @@ export function useFetchMessages(receiverId: number | undefined) {
       const res = await api.get("/messages", {
         params: { receiverId },
       });
-      console.log("Response", res);
       return res.data.messages;
     },
     enabled: !!receiverId, // Only execute if a target contact is selected

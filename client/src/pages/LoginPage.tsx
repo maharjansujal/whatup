@@ -57,7 +57,7 @@ export function LoginPage() {
           <Input
             label="Username"
             type="text"
-            placeholder="enter your username"
+            placeholder="Enter your username"
             disabled={isLoggingIn}
             {...register("username", { required: "Username is required" })}
           />
