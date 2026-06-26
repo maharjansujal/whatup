@@ -62,6 +62,7 @@ export const createMessage = async (
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newMessage", result);
     }
+
     return res.status(201).json({ message: "Message sent!", ...result });
   } catch (err) {
     return res.status(500).json({

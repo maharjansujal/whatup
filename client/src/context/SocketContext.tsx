@@ -17,7 +17,6 @@ interface SocketContextType {
   setActiveUser: (user: UserItem | null) => void;
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
-  sendMessage: (content: string) => void;
   isOnline: boolean;
   isTyping: boolean; // Added typing indicator state!
 }
@@ -91,15 +90,15 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   }, [socket, activeUser]);
 
   // Emitting payloads to your server
-  const sendMessage = (content: string) => {
-    if (!socket || !activeUser) return;
+  // const sendMessage = (content: string) => {
+  //   if (!socket || !activeUser) return;
 
-    // MATCHES SERVER: Emitting "newMessage" with camelCase receiverId
-    socket.emit("newMessage", {
-      receiverId: activeUser.id,
-      content,
-    });
-  };
+  //   // MATCHES SERVER: Emitting "newMessage" with camelCase receiverId
+  //   socket.emit("newMessage", {
+  //     receiverId: activeUser.id,
+  //     content,
+  //   });
+  // };
 
   return (
     <SocketContext.Provider
@@ -109,7 +108,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         setActiveUser,
         messages,
         setMessages,
-        sendMessage,
         isOnline,
         isTyping,
       }}

@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useChatSocket } from "../../context/SocketContext";
 import { Send, User } from "lucide-react";
+import { useSendMessage } from "../../hooks/post/useSendMessage";
 
 export function ChatWindow() {
-  const { activeUser, messages, sendMessage, socket, isTyping } =
-    useChatSocket();
+  const { activeUser, messages, socket, isTyping } = useChatSocket();
+
+  const { mutateAsync: sendMessageApi } = useSendMessage();
+
   const [text, setText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -29,15 +32,21 @@ export function ChatWindow() {
     return () => clearTimeout(timeoutId);
   };
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!text.trim()) return;
-
-    sendMessage(text.trim());
-
-    // Explicitly notify server typing has ended on click send
-    socket?.emit("stopTyping", { receiverId: activeUser?.id });
-    setText("");
+    if (!text.trim() || !activeUser) return;
+    try {
+      await sendMessageApi({
+        receiverId: activeUser.id,
+        content: text.trim(),
+      });
+      socket?.emit("stopTyping", {
+        receiverId: activeUser.id,
+      });
+      setText("");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (

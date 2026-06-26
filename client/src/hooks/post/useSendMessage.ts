@@ -9,7 +9,7 @@ interface SendMessagePayload {
 export function useSendMessage() {
   return useMutation({
     mutationFn: async (payload: SendMessagePayload) => {
-      const res = await api.post("/messages/send", payload);
+      const res = await api.post("/messages", payload);
       return res.data;
     },
   });
