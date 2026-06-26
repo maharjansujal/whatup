@@ -14,7 +14,7 @@ type LoginFormInputs = {
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { loginUser, isLoggingIn, loginError } = useAuth();
+  const { loginUser, isLoggingIn, loginError, isLoginError } = useAuth();
   const [showError, setShowError] = useState(false);
   const {
     register,
@@ -48,7 +48,7 @@ export function LoginPage() {
 
         {/* Form Container */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          {showError && errorMessage && (
+          {isLoginError && errorMessage && (
             <div className="p-3 bg-error/10 border border-error/20 rounded-lg text-sm text-error font-medium">
               {errorMessage}
             </div>

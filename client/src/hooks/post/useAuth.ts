@@ -17,28 +17,16 @@ export function useAuth() {
   const queryClient = useQueryClient();
 
   const registerUserMutation = useMutation({
-    mutationFn: async ({
-      name,
-      username,
-      password,
-      image,
-    }: RegisterPayload) => {
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("username", username);
-      formData.append("password", password);
-
-      if (image) {
-        formData.append("image", image);
-      }
-
+    mutationFn: async (formData: FormData) => {
       const res = await api.post("/users/register", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
+
       return res.data;
     },
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
@@ -83,6 +71,7 @@ export function useAuth() {
     loginUserMutation,
     isLoggingIn: loginUserMutation.isPending,
     loginError: loginUserMutation.error,
+    isLoginError: loginUserMutation.isError,
 
     logout,
   };

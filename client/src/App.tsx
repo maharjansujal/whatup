@@ -4,6 +4,7 @@ import { RegisterPage } from "./pages/RegisterPage";
 import { Navbar } from "./components/layout/Navbar";
 import { SocketProvider } from "./context/SocketContext";
 import { ChatMainWorkspace } from "./components/chat/ChatMainWorkspace";
+import { ModalProvider } from "./context/ModalContext";
 
 // Protected Layout wrapper injecting real-time socket listeners
 function ProtectedLayout() {
@@ -15,15 +16,17 @@ function ProtectedLayout() {
 
   return (
     <SocketProvider>
-      <div className="flex flex-col h-screen w-screen overflow-hidden">
-        {/* Top Navbar */}
-        <Navbar />
+      <ModalProvider>
+        <div className="flex flex-col h-screen w-screen overflow-hidden">
+          {/* Top Navbar */}
+          <Navbar />
 
-        {/* Main interactive chat panels */}
-        <div className="flex-1 flex overflow-hidden">
-          <Outlet />
+          {/* Main interactive chat panels */}
+          <div className="flex-1 flex overflow-hidden">
+            <Outlet />
+          </div>
         </div>
-      </div>
+      </ModalProvider>
     </SocketProvider>
   );
 }

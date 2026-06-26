@@ -20,7 +20,7 @@ router.post(
   uploadAvatar,
 );
 router.post("/register", upload.single("image"), register);
-router.patch("/me", authMiddleware, updateUser);
+router.patch("/me", authMiddleware, upload.single("image"), updateUser);
 router.post("/login", login);
 
 export default router;
