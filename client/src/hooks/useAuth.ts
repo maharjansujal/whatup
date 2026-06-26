@@ -13,10 +13,9 @@ type LoginPayload = {
   password: string;
 };
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 export function useAuth() {
   const queryClient = useQueryClient();
+
   const registerUserMutation = useMutation({
     mutationFn: async ({
       name,
@@ -25,7 +24,6 @@ export function useAuth() {
       image,
     }: RegisterPayload) => {
       const formData = new FormData();
-
       formData.append("name", name);
       formData.append("username", username);
       formData.append("password", password);
@@ -34,10 +32,13 @@ export function useAuth() {
         formData.append("image", image);
       }
 
-      const res = await api.post(`${API_URL}/users/register`, formData);
+      const res = await api.post("/users/register", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       return res.data;
     },
-
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
@@ -45,14 +46,12 @@ export function useAuth() {
 
   const loginUserMutation = useMutation({
     mutationFn: async ({ username, password }: LoginPayload) => {
-      const res = await api.post(`${API_URL}/users/login`, {
+      const res = await api.post("/users/login", {
         username,
         password,
       });
-
       return res.data;
     },
-
     onSuccess: (data) => {
       if (data?.token) {
         localStorage.setItem("token", data.token);
@@ -60,13 +59,21 @@ export function useAuth() {
       if (data?.user) {
         localStorage.setItem("user", JSON.stringify(data.user));
       }
+      queryClient.setQueryData(["auth-user"], data?.user);
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    queryClient.setQueryData(["auth-user"], null);
+    window.location.href = "/login";
+  };
+
   return {
     registerUser: registerUserMutation.mutateAsync,
     registerUserMutation,
-
     isRegisteringUser: registerUserMutation.isPending,
     registerError: registerUserMutation.error,
 
@@ -74,5 +81,7 @@ export function useAuth() {
     loginUserMutation,
     isLoggingIn: loginUserMutation.isPending,
     loginError: loginUserMutation.error,
+
+    logout,
   };
 }
