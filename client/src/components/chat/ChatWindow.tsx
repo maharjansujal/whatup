@@ -72,6 +72,7 @@ export function ChatWindow() {
       await updateMessage({
         messageId,
         content: editedText,
+        receiverId: activeUser?.id,
       });
 
       setEditingId(null);

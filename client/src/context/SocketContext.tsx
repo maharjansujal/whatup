@@ -77,12 +77,24 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         return [...old, message];
       });
     });
+
+    socket.on("messageUpdated", (updatedMessage: Message) => {
+      console.log("Received update:", updatedMessage);
+      const chatId = activeUser?.id;
+
+      queryClient.setQueryData(["messages", chatId], (old: Message[] = []) => {
+        return old.map((msg) =>
+          msg.id === updatedMessage.id ? updatedMessage : msg,
+        );
+      });
+    });
     socket.on("userTyping", handleUserTyping);
     socket.on("userStoppedTyping", handleUserStoppedTyping);
 
     return () => {
       socket.off("userTyping", handleUserTyping);
       socket.off("userStoppedTyping", handleUserStoppedTyping);
+      socket.off("messageUpdated");
     };
   }, [socket, activeUser]);
 

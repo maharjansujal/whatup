@@ -91,7 +91,7 @@ export const updateMessage = async (
 ) => {
   try {
     const messageId = Number(req.params.messageId);
-    const { content } = req.body;
+    const { content, receiverId } = req.body;
     if (isNaN(messageId)) {
       return res.status(400).json({
         message: "Invalid message id",
@@ -103,6 +103,13 @@ export const updateMessage = async (
       return res.status(404).json({
         message: "Message not found",
       });
+    }
+
+    if (receiverId) {
+      const receiverSocketId = getReceiverSocketId(Number(receiverId));
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("messageUpdated", result);
+      }
     }
     return res.status(200).json({
       message: "Message updated successfully",
