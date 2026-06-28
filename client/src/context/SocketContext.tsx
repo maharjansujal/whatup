@@ -88,6 +88,19 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         );
       });
     });
+
+    socket.on("messageSeenUpdate", (updatedMessage: Message) => {
+      const conversationId = updatedMessage.receiver_id;
+
+      queryClient.setQueryData(
+        ["messages", conversationId],
+        (old: Message[] = []) => {
+          return old.map((msg) =>
+            msg.id === updatedMessage.id ? { ...msg, is_seen: true } : msg,
+          );
+        },
+      );
+    });
     socket.on("userTyping", handleUserTyping);
     socket.on("userStoppedTyping", handleUserStoppedTyping);
 
@@ -95,6 +108,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       socket.off("userTyping", handleUserTyping);
       socket.off("userStoppedTyping", handleUserStoppedTyping);
       socket.off("messageUpdated");
+      socket.off("messageSeenUpdate");
     };
   }, [socket, activeUser]);
 

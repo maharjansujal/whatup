@@ -4,6 +4,7 @@ import {
   deleteMessageService,
   getAllMessagesService,
   getConversationMessagesService,
+  markMessageSeenService,
   updateMessageService,
 } from "../services/message.service";
 import { getReceiverSocketId } from "../socket/socket";
@@ -120,6 +121,10 @@ export const updateMessage = async (
       message: err instanceof Error ? err.message : "Internal Server error",
     });
   }
+};
+
+export const markMessageSeen = async (messageId: number) => {
+  return await markMessageSeenService(messageId);
 };
 
 export const deleteMessage = async (

@@ -45,6 +45,22 @@ export const updateMessageService = async (
   return result.rows[0];
 };
 
+export const markMessageSeenService = async (messageId: number) => {
+  const currentMsg = await pool.query(
+    "SELECT is_seen FROM messages WHERE id = $1",
+    [messageId],
+  );
+  if (!currentMsg.rows[0] || currentMsg.rows[0].is_seen) {
+    return null;
+  }
+
+  const result = await pool.query(
+    "UPDATE messages SET is_seen = true WHERE id = $1 RETURNING *",
+    [messageId],
+  );
+  return result.rows[0];
+};
+
 export const deleteMessageService = async (messageId: number) => {
   const result = await pool.query("DELETE FROM messages WHERE id = $1", [
     messageId,

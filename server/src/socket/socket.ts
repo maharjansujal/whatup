@@ -1,4 +1,5 @@
 import { Server, Socket } from "socket.io";
+import { markMessageSeen } from "../controllers/message.controller";
 
 const userSocketMap = new Map<number, string>();
 
@@ -37,6 +38,20 @@ export const initSocket = (io: Server) => {
       const receiverSocketId = getReceiverSocketId(Number(receiverId));
       if (receiverSocketId) {
         io.to(receiverSocketId).emit("userStoppedTyping", { senderId });
+      }
+    });
+
+    socket.on("messageSeen", async ({ messageId }) => {
+      const updatedMessage = await markMessageSeen(Number(messageId));
+
+      // If the message was already seen or doesn't exist, updatedMessage will be null
+      if (!updatedMessage) return;
+
+      const senderSocketId = getReceiverSocketId(updatedMessage.sender_id);
+
+      if (senderSocketId) {
+        // Notify the sender that the receiver saw their message
+        io.to(senderSocketId).emit("messageSeenUpdate", updatedMessage);
       }
     });
   });

@@ -16,6 +16,13 @@ export function ChatWindow() {
 
   const [text, setText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (activeUser) {
+      inputRef.current?.focus();
+    }
+  }, [activeUser]);
 
   const userString = localStorage.getItem("user");
   const currentUser = userString ? JSON.parse(userString) : null;
@@ -27,12 +34,8 @@ export function ChatWindow() {
   const [editedText, setEditedText] = useState("");
 
   useEffect(() => {
-    console.log(messages);
-  }, [messages]);
-
-  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping]);
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
@@ -150,6 +153,7 @@ export function ChatWindow() {
         className="p-4 bg-white border-t border-border-light flex items-center gap-3 shrink-0"
       >
         <input
+          ref={inputRef}
           type="text"
           placeholder={`Message @${activeUser?.username}...`}
           value={text}

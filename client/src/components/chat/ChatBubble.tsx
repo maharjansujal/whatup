@@ -1,5 +1,7 @@
-import { Check, Pencil, Trash2, X } from "lucide-react";
+import { Check, CheckCheck, Pencil, Trash2, X } from "lucide-react";
 import type { MessageItem } from "../../hooks/get/useFetchMessages";
+import { useEffect, useRef } from "react";
+import { useChatSocket } from "../../context/SocketContext";
 
 interface ChatBubbleProps {
   msg: MessageItem;
@@ -21,8 +23,44 @@ export const ChatBubble = ({
   onUpdate,
   onDelete,
 }: ChatBubbleProps) => {
+  const { socket, activeUser } = useChatSocket();
+  const bubbleRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const isCurrentChatActive = activeUser && activeUser.id === msg.sender_id;
+    if (
+      isMe ||
+      msg.is_seen ||
+      !socket ||
+      !bubbleRef.current ||
+      !isCurrentChatActive
+    )
+      return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          // Emit event to the server passing the seen message_id
+          socket.emit("messageSeen", { messageId: msg.id });
+          // Stop observing immediately once marked seen
+          observer.unobserve(entry.target);
+        }
+      },
+      { root: null, threshold: 0.5 }, // Trigger when 50% of the bubble is in viewport
+    );
+
+    observer.observe(bubbleRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [isMe, msg.id, msg.is_seen, socket]);
+
   return (
-    <div className={`flex w-full ${isMe ? "justify-end" : "justify-start"}`}>
+    <div
+      ref={bubbleRef}
+      className={`flex w-full ${isMe ? "justify-end" : "justify-start"}`}
+    >
       <div
         className={`group relative max-w-[70%] rounded-2xl px-4 py-2.5 text-sm shadow-xs ${
           isMe
@@ -92,6 +130,22 @@ export const ChatBubble = ({
                   minute: "2-digit",
                 })}
               </span>
+              {isMe && (
+                <span className="flex items-center ml-0.5">
+                  {msg.is_seen ? (
+                    <CheckCheck
+                      size={15}
+                      className="text-sky-400 stroke-[2.5]"
+                    />
+                  ) : (
+                    // Double Gray Check (Received but unseen)
+                    <CheckCheck
+                      size={15}
+                      className="text-white/50 stroke-[2]"
+                    />
+                  )}
+                </span>
+              )}
             </div>
           </>
         )}
