@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useFetchUsers, type UserItem } from "../../hooks/get/useFetchUsers";
 import { Search } from "lucide-react";
-import { SidebarHeader } from "../sidebar/SidebarHeader";
 import { SidebarUserList } from "../sidebar/SidebarUserList";
 
 interface SidebarProps {
@@ -22,7 +21,6 @@ export function Sidebar({ onSelectUser, selectedUser }: SidebarProps) {
 
   return (
     <aside className="h-full bg-sidebar border-r border-border-dark flex flex-col text-slate-200">
-      <SidebarHeader />
       <div className="p-4 border-b border-border-dark">
         <div className="relative flex items-center">
           <Search className="absolute left-3 text-muted" size={16} />

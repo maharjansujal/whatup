@@ -47,8 +47,12 @@ export function Navbar() {
     <nav className="h-16 w-full bg-sidebar text-white flex items-center justify-between px-6 border-b border-border-dark relative z-50">
       {/* Left side: Application Brand Logo */}
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center text-white">
-          <MessageSquare size={18} />
+        <div className="w-10 h-auto aspect-square">
+          <img
+            src="/logo.webp"
+            alt="Company logo"
+            className="w-full h-full rounded-full"
+          />
         </div>
         <span className="font-bold text-lg tracking-wide">Whatup</span>
       </div>

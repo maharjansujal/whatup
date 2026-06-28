@@ -139,10 +139,7 @@ export const ChatBubble = ({
                     />
                   ) : (
                     // Double Gray Check (Received but unseen)
-                    <CheckCheck
-                      size={15}
-                      className="text-white/50 stroke-[2]"
-                    />
+                    <CheckCheck size={15} className="text-white/50 stroke-2" />
                   )}
                 </span>
               )}
