@@ -132,14 +132,22 @@ export const ChatBubble = ({
               </span>
               {isMe && (
                 <span className="flex items-center ml-0.5">
-                  {msg.status === "seen" ? (
+                  {msg.status === "sent" && (
+                    <Check size={15} className="text-white/50 stroke-[2.5]" />
+                  )}
+
+                  {msg.status === "delivered" && (
+                    <CheckCheck
+                      size={15}
+                      className="text-white/50 stroke-[2.5]"
+                    />
+                  )}
+
+                  {msg.status === "seen" && (
                     <CheckCheck
                       size={15}
                       className="text-sky-400 stroke-[2.5]"
                     />
-                  ) : (
-                    // Double Gray Check (Received but unseen)
-                    <CheckCheck size={15} className="text-white/50 stroke-2" />
                   )}
                 </span>
               )}

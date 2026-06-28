@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { type UserItem } from "../hooks/get/useFetchUsers";
 import { useQueryClient } from "@tanstack/react-query";
+import type { MessageItem } from "../hooks/get/useFetchMessages";
 
 interface Message {
   id: number;
@@ -54,6 +55,21 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!socket) return;
 
+    const handleBulkDelivery = ({ receiverId }: { receiverId: number }) => {
+      if (activeUser && activeUser.id === receiverId) {
+        queryClient.setQueryData(
+          ["messages", receiverId],
+          (oldMessages: MessageItem[] = []) => {
+            return oldMessages.map((msg) =>
+              msg.status === "sent" ? { ...msg, status: "delivered" } : msg,
+            );
+          },
+        );
+      }
+    };
+
+    socket.on("messagesDeliveredBulk", handleBulkDelivery);
+
     const handleUserTyping = ({ senderId }: { senderId: number }) => {
       if (activeUser && senderId === activeUser.id) {
         setIsTyping(true);
@@ -99,7 +115,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         ["messages", conversationId],
         (old: Message[] = []) => {
           return old.map((msg) =>
-            msg.id === updatedMessage.id ? { ...msg, is_seen: true } : msg,
+            msg.id === updatedMessage.id ? { ...msg, status: "seen" } : msg,
           );
         },
       );
@@ -112,6 +128,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       socket.off("userStoppedTyping", handleUserStoppedTyping);
       socket.off("messageUpdated");
       socket.off("messageSeenUpdate");
+      socket.off("messagesDeliveredBulk", handleBulkDelivery);
     };
   }, [socket, activeUser]);
 

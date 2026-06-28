@@ -99,7 +99,7 @@ export function Navbar() {
                     setIsMenuOpen(false);
                     handleUpdateProfile();
                   }}
-                  className="flex items-center gap-3 px-4 py-2 text-sidebar hover:bg-chat transition whitespace-nowrap"
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sidebar hover:bg-chat transition whitespace-nowrap"
                 >
                   <Settings size={18} />
                   Update Profile
@@ -110,7 +110,7 @@ export function Navbar() {
                     setIsMenuOpen(false);
                     handleLogout();
                   }}
-                  className="flex items-center gap-3 px-4 py-2 text-error hover:bg-error/10 transition whitespace-nowrap"
+                  className="w-full flex items-center gap-3 px-4 py-2 text-error hover:bg-error/10 transition whitespace-nowrap"
                 >
                   <LogOut size={18} />
                   Log Out

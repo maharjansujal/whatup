@@ -1,10 +1,13 @@
 import { Server, Socket } from "socket.io";
-import { markMessageSeen } from "../controllers/message.controller";
+import {
+  markMessageDelivered,
+  markMessageSeen,
+} from "../controllers/message.controller";
 
 const userSocketMap = new Map<number, string>();
 
 export const initSocket = (io: Server) => {
-  io.on("connection", (socket: Socket) => {
+  io.on("connection", async (socket: Socket) => {
     const user = socket.data.user;
     if (!user || !user.id) {
       console.error("Socket connected without a valid user ID payload");
@@ -14,6 +17,18 @@ export const initSocket = (io: Server) => {
 
     userSocketMap.set(userId, socket.id);
     console.log(`Client connected: ${socket.id}`);
+
+    try {
+      const updatedMessages = await markMessageDelivered(userId);
+
+      if (updatedMessages.length > 0) {
+        socket.broadcast.emit("messagesDeliveredBulk", {
+          receiverId: userId,
+        });
+      }
+    } catch (err) {
+      console.error("failed to run connection catch-up delivery", err);
+    }
 
     // handle disconnects
     socket.on("disconnect", () => {

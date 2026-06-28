@@ -4,6 +4,7 @@ import {
   deleteMessageService,
   getAllMessagesService,
   getConversationMessagesService,
+  markMessageDeliveredService,
   markMessageSeenService,
   updateMessageService,
 } from "../services/message.service";
@@ -65,10 +66,18 @@ export const createMessage = async (
     if (!senderId) {
       return res.status(401).json({ message: "User not logged in" });
     }
-    const result = await createMessageService(receiverId, senderId, content);
 
     const receiverSocketId = getReceiverSocketId(Number(receiverId));
     const senderSocketId = getReceiverSocketId(Number(senderId));
+
+    const initialStatus = receiverSocketId ? "delivered" : "sent";
+
+    const result = await createMessageService(
+      receiverId,
+      senderId,
+      content,
+      initialStatus,
+    );
 
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newMessage", result);
@@ -125,6 +134,10 @@ export const updateMessage = async (
 
 export const markMessageSeen = async (messageId: number) => {
   return await markMessageSeenService(messageId);
+};
+
+export const markMessageDelivered = async (userId: number) => {
+  return await markMessageDeliveredService(userId);
 };
 
 export const deleteMessage = async (
