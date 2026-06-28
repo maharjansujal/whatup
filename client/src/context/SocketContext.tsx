@@ -76,6 +76,9 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
         return [...old, message];
       });
+      queryClient.invalidateQueries({
+        queryKey: ["users"],
+      });
     });
 
     socket.on("messageUpdated", (updatedMessage: Message) => {

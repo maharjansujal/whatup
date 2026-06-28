@@ -27,9 +27,13 @@ export const uploadAvatar = async (req: Request, res: Response) => {
   }
 };
 
-export const getUsers = async (_req: Request, res: Response) => {
+export const getUsers = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const result = await getUsersService();
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Invalid or expired token" });
+    }
+    const result = await getUsersService(userId);
     return res
       .status(200)
       .json({ message: "Users retrieved successfully", result });

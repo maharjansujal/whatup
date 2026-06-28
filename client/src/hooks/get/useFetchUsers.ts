@@ -7,6 +7,10 @@ export interface UserItem {
   username: string;
   image?: string;
   created_at: string;
+  last_message?: string | null;
+  last_message_sender_id?: number | null;
+  last_message_is_seen?: boolean;
+  last_message_time?: string | null;
 }
 
 export function useFetchUsers() {

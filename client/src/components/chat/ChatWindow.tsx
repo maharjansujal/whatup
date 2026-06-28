@@ -34,8 +34,12 @@ export function ChatWindow() {
   const [editedText, setEditedText] = useState("");
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, []);
+    if (!messages || messages.length === 0) return;
+
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "auto",
+    });
+  }, [activeUser]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);

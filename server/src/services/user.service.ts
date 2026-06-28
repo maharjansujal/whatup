@@ -1,9 +1,28 @@
 import { pool } from "../db";
 import bcrypt from "bcrypt";
 
-export const getUsersService = async () => {
+export const getUsersService = async (userId: number) => {
   const result = await pool.query(
-    "SELECT id, name, username, image FROM users",
+    `SELECT 
+    u.id, 
+    u.name, 
+    u.username,
+    lm.content AS last_message,
+    lm.sender_id AS last_message_sender_id,
+    lm.is_seen AS last_message_is_seen,
+    lm.created_at AS last_message_time
+    FROM users u
+    LEFT JOIN LATERAL (
+        SELECT content, sender_id, is_seen, created_at
+        FROM messages
+        WHERE (sender_id = $1 AND receiver_id = u.id)
+          OR (sender_id = u.id AND receiver_id = $1)
+        ORDER BY created_at DESC
+        LIMIT 1
+    ) lm ON true
+    WHERE u.id != $1
+    ORDER BY COALESCE(lm.created_at, '1970-01-01'::timestamp) DESC`, // Order by created_at so that user whom you communicate the most comes at the top of the list
+    [userId],
   );
   return result.rows;
 };

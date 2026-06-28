@@ -16,6 +16,8 @@ export function SidebarUserList({
   selectedUser,
   onSelectUser,
 }: SidebarUserListProps) {
+  const userString = localStorage.getItem("user");
+  const currentUser = userString ? JSON.parse(userString) : null;
   return (
     <div className="flex-1 overflow-y-auto custom-scrollbar">
       {isLoading ? (
@@ -28,13 +30,16 @@ export function SidebarUserList({
           Failed to populate contacts list.
         </div>
       ) : users && users.length > 0 ? (
-        users.map((item) => {
-          const isSelected = selectedUser?.id === item.id;
+        users.map((user) => {
+          const isUnseen =
+            !user.last_message_is_seen &&
+            user.last_message_sender_id !== currentUser.id;
+          const isSelected = selectedUser?.id === user.id;
 
           return (
             <div
-              key={item.id}
-              onClick={() => onSelectUser(item)}
+              key={user.id}
+              onClick={() => onSelectUser(user)}
               className={`flex items-center gap-3 p-4 border-b border-border-dark/30 cursor-pointer transition-all ${
                 isSelected
                   ? "bg-brand/20 border-l-4 border-brand text-white"
@@ -42,10 +47,10 @@ export function SidebarUserList({
               }`}
             >
               <div className="w-11 h-11 rounded-full bg-border-dark flex items-center justify-center border border-border-dark overflow-hidden shrink-0">
-                {item.image ? (
+                {user.image ? (
                   <img
-                    src={item.image}
-                    alt={item.name}
+                    src={user.image}
+                    alt={user.name}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -53,9 +58,22 @@ export function SidebarUserList({
                 )}
               </div>
 
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold truncate">{item.name}</p>
-                <p className="text-xs text-muted truncate">@{item.username}</p>
+              <div className="flex-1 min-w-0">
+                <h4
+                  className={`text-sm font-semibold truncate ${
+                    isSelected ? "text-white" : "text-slate-100"
+                  }`}
+                >
+                  {user.name}
+                </h4>
+
+                <p
+                  className={`text-xs truncate mt-0.5 ${
+                    isUnseen ? "text-white font-semibold" : "text-muted/70"
+                  }`}
+                >
+                  {user.last_message ?? ""}
+                </p>
               </div>
             </div>
           );
