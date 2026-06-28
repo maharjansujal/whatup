@@ -8,9 +8,9 @@ import {
   markMessageSeenService,
   updateMessageService,
 } from "../services/message.service";
-import { getReceiverSocketId } from "../socket/socket";
 import { io } from "../../index";
 import { AuthenticatedRequest } from "../middleware/auth.middleware";
+import { getUserSocket } from "../socket/users";
 
 export const getAllMessages = async (req: Request, res: Response) => {
   try {
@@ -63,31 +63,37 @@ export const createMessage = async (
   try {
     const { receiverId, content } = req.body;
     const senderId = req.user?.id;
+
     if (!senderId) {
       return res.status(401).json({ message: "User not logged in" });
     }
 
-    const receiverSocketId = getReceiverSocketId(Number(receiverId));
-    const senderSocketId = getReceiverSocketId(Number(senderId));
-
+    const receiverSocketId = getUserSocket(Number(receiverId));
     const initialStatus = receiverSocketId ? "delivered" : "sent";
 
-    const result = await createMessageService(
-      receiverId,
-      senderId,
+    const message = await createMessageService(
+      Number(receiverId),
+      Number(senderId),
       content,
       initialStatus,
     );
 
+    // 3. Socket emit (kept here for now, but will move to emitter later)
+    const senderSocketId = getUserSocket(Number(senderId));
+
     if (receiverSocketId) {
-      io.to(receiverSocketId).emit("newMessage", result);
+      io.to(receiverSocketId).emit("newMessage", message);
     }
 
     if (senderSocketId) {
-      io.to(senderSocketId).emit("newMessage", result);
+      io.to(senderSocketId).emit("newMessage", message);
     }
 
-    return res.status(201).json({ message: "Message sent!", ...result });
+    // 4. HTTP response
+    return res.status(201).json({
+      message: "Message sent successfully",
+      data: message,
+    });
   } catch (err) {
     return res.status(500).json({
       message: err instanceof Error ? err.message : "Internal Server error",
@@ -116,7 +122,7 @@ export const updateMessage = async (
     }
 
     if (receiverId) {
-      const receiverSocketId = getReceiverSocketId(Number(receiverId));
+      const receiverSocketId = getUserSocket(Number(receiverId));
       if (receiverSocketId) {
         io.to(receiverSocketId).emit("messageUpdated", result);
       }

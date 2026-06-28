@@ -5,7 +5,7 @@ import { Server } from "socket.io";
 
 import userRouter from "./src/routes/user.routes";
 import messageRoutes from "./src/routes/message.routes";
-import { initSocket } from "./src/socket/socket";
+import { initSocket } from "./src/socket";
 import { registerSocketMiddleware } from "./src/middleware/socket.middleware";
 
 const app = express();
