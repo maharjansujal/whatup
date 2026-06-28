@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { MessageSquare, Upload, User } from "lucide-react";
-import { useAuth } from "../../hooks/post/usePostAuth";
 import { Input } from "./Input";
 import { Button } from "../shared/Button";
 import { Link } from "react-router-dom";
 import { normalizeError } from "../../utils/normalizeError";
 import { useUpdateUser } from "../../hooks/update/useUpdateUser";
+import { usePostAuth } from "../../hooks/post/usePostAuth";
 
 type Mode = "create" | "edit";
 
@@ -36,7 +36,7 @@ export function UserForm({
   const isEdit = mode === "edit";
 
   const { registerUser, isRegisteringUser, registerError, isRegisterError } =
-    useAuth();
+    usePostAuth();
   const { mutateAsync: updateUser, isPending: isUpdating } = useUpdateUser();
 
   const [imageFile, setImageFile] = useState<File | undefined>();

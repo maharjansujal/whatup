@@ -30,7 +30,7 @@ export function Sidebar({ onSelectUser, selectedUser }: SidebarProps) {
             placeholder="Search users..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-border-dark/40 border border-border-dark rounded-xl text-sm text-white placeholder:text-muted/60 focus:outline-none focus:border-brand/60 transition-all"
+            className="w-full pl-9 pr-4 py-2 bg-slate-700/50 border border-slate-600 rounded-xl text-sm text-white placeholder:text-slate-300/70 focus:outline-none focus:border-brand/60 focus:bg-slate-700 transition-all"
           />
         </div>
       </div>
