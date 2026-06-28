@@ -9,11 +9,11 @@ export const getUsersService = async (userId: number) => {
     u.username,
     lm.content AS last_message,
     lm.sender_id AS last_message_sender_id,
-    lm.is_seen AS last_message_is_seen,
+    lm.status AS last_message_status,
     lm.created_at AS last_message_time
     FROM users u
     LEFT JOIN LATERAL (
-        SELECT content, sender_id, is_seen, created_at
+        SELECT content, sender_id, status, created_at
         FROM messages
         WHERE (sender_id = $1 AND receiver_id = u.id)
           OR (sender_id = u.id AND receiver_id = $1)

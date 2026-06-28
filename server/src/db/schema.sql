@@ -1,3 +1,5 @@
+CREATE TYPE message_status AS ENUM ('sent', 'delivered', 'seen');
+
 CREATE TABLE
     users (
         id SERIAL PRIMARY KEY,
@@ -17,5 +19,5 @@ CREATE TABLE
         content TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT NOW (),
         updated_at TIMESTAMP,
-        is_seen BOOLEAN DEFAULT false
+        status message_status DEFAULT 'sent'
     );

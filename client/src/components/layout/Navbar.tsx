@@ -1,5 +1,5 @@
 // src/components/layout/Navbar.tsx
-import { ChevronDown, LogOut, MessageSquare, Settings } from "lucide-react";
+import { ChevronDown, LogOut, Settings } from "lucide-react";
 import { useAuth } from "../../hooks/post/useAuth";
 import { useModal } from "../../context/ModalContext";
 import { UserForm } from "../form/UserForm";

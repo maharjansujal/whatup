@@ -25,7 +25,7 @@ export function useUpdateMessage() {
 
       return data;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       queryClient.setQueryData(
         ["messages", variables.receiverId],
         (old: MessageItem[] = []) =>

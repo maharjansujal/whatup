@@ -30,7 +30,7 @@ export const ChatBubble = ({
     const isCurrentChatActive = activeUser && activeUser.id === msg.sender_id;
     if (
       isMe ||
-      msg.is_seen ||
+      msg.status === "seen" ||
       !socket ||
       !bubbleRef.current ||
       !isCurrentChatActive
@@ -54,7 +54,7 @@ export const ChatBubble = ({
     return () => {
       observer.disconnect();
     };
-  }, [isMe, msg.id, msg.is_seen, socket]);
+  }, [isMe, msg.id, msg.status === "seen", socket]);
 
   return (
     <div
@@ -132,7 +132,7 @@ export const ChatBubble = ({
               </span>
               {isMe && (
                 <span className="flex items-center ml-0.5">
-                  {msg.is_seen ? (
+                  {msg.status === "seen" ? (
                     <CheckCheck
                       size={15}
                       className="text-sky-400 stroke-[2.5]"

@@ -32,7 +32,7 @@ export function SidebarUserList({
       ) : users && users.length > 0 ? (
         users.map((user) => {
           const isUnseen =
-            !user.last_message_is_seen &&
+            user.last_message_status !== "seen" &&
             user.last_message_sender_id !== currentUser.id;
           const isSelected = selectedUser?.id === user.id;
 

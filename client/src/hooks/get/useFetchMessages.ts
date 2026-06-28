@@ -10,7 +10,7 @@ export interface MessageItem {
   content: string;
   created_at: string;
   updated_at?: string;
-  is_seen: boolean;
+  status: "sent" | "delivered" | "seen";
 }
 
 export function useFetchMessages(receiverId: number | undefined) {
