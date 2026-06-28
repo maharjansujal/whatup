@@ -19,7 +19,7 @@ export function SidebarUserList({
   const userString = localStorage.getItem("user");
   const currentUser = userString ? JSON.parse(userString) : null;
   return (
-    <div className="flex-1 overflow-y-auto custom-scrollbar">
+    <div className="flex-1 overflow-y-auto px-2">
       {isLoading ? (
         <div className="flex flex-col items-center justify-center h-32 gap-2 text-muted">
           <Loader2 className="animate-spin text-brand" size={24} />
@@ -40,9 +40,9 @@ export function SidebarUserList({
             <div
               key={user.id}
               onClick={() => onSelectUser(user)}
-              className={`flex items-center gap-3 p-4 border-b border-border-dark/30 cursor-pointer transition-all ${
+              className={`flex items-center gap-3 p-2 border-b border-border-dark/30 cursor-pointer transition-all rounded-lg ${
                 isSelected
-                  ? "bg-brand/20 border-l-4 border-brand text-white"
+                  ? "bg-brand/40 text-white"
                   : "hover:bg-border-dark/30 text-slate-300"
               }`}
             >
