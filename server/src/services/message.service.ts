@@ -1,4 +1,5 @@
 import { pool } from "../db";
+import { Message } from "../types/message";
 
 export const createMessageService = async (
   receiverId: number,
@@ -17,7 +18,7 @@ export const getConversationMessagesService = async (
   senderId: number,
   receiverId: number,
 ) => {
-  const result = await pool.query(
+  const result = await pool.query<Message>(
     "SELECT * FROM messages WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1) ORDER BY created_at ASC",
     [senderId, receiverId],
   );
@@ -25,7 +26,7 @@ export const getConversationMessagesService = async (
 };
 
 export const getAllMessagesService = async (receiverId: number) => {
-  const result = await pool.query(
+  const result = await pool.query<Message>(
     "SELECT * FROM messages WHERE receiver_id = $1",
     [receiverId],
   );

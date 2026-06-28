@@ -1,16 +1,9 @@
 import bcrypt from "bcrypt";
 import { pool } from "../db";
 import { generateToken } from "../utils/jwt";
+import { User } from "../types/user";
 
 const SALT_ROUNDS = 10;
-
-interface User {
-  id: number;
-  name: string;
-  username: string;
-  password_hash: string;
-  image?: string;
-}
 
 export async function registerUserService({
   username,
