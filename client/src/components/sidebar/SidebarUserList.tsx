@@ -1,12 +1,12 @@
 import { Loader2, User } from "lucide-react";
-import type { UserItem } from "../../hooks/get/useFetchUsers";
+import type { UserMessage } from "../../types/user";
 
 interface SidebarUserListProps {
   isLoading: boolean;
   error: Error | null;
-  users?: UserItem[];
-  selectedUser: UserItem | null;
-  onSelectUser: (user: UserItem) => void;
+  users?: UserMessage[];
+  selectedUser: UserMessage | null;
+  onSelectUser: (user: UserMessage) => void;
 }
 
 export function SidebarUserList({

@@ -1,12 +1,11 @@
-// src/components/layout/Navbar.tsx
 import { ChevronDown, LogOut, Settings } from "lucide-react";
-import { useAuth } from "../../hooks/post/useAuth";
 import { useModal } from "../../context/ModalContext";
 import { UserForm } from "../form/UserForm";
 import { useEffect, useRef, useState } from "react";
+import { usePostAuth } from "../../hooks/post/usePostAuth";
 
 export function Navbar() {
-  const { logout } = useAuth();
+  const { logout } = usePostAuth();
   const { openModal, closeModal } = useModal();
 
   const userString = localStorage.getItem("user");

@@ -1,21 +1,13 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import { type UserItem } from "../hooks/get/useFetchUsers";
 import { useQueryClient } from "@tanstack/react-query";
-import type { MessageItem } from "../hooks/get/useFetchMessages";
-
-interface Message {
-  id: number;
-  sender_id: number;
-  receiver_id: number;
-  content: string;
-  created_at: string;
-}
+import type { UserMessage } from "../types/user";
+import type { Message } from "../types/message";
 
 interface SocketContextType {
   socket: Socket | null;
-  activeUser: UserItem | null;
-  setActiveUser: (user: UserItem | null) => void;
+  activeUser: UserMessage | null;
+  setActiveUser: (user: UserMessage | null) => void;
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   isOnline: boolean;
@@ -28,7 +20,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isOnline, setIsOnline] = useState(false);
-  const [activeUser, setActiveUser] = useState<UserItem | null>(null);
+  const [activeUser, setActiveUser] = useState<UserMessage | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
 
@@ -59,7 +51,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       if (activeUser && activeUser.id === receiverId) {
         queryClient.setQueryData(
           ["messages", receiverId],
-          (oldMessages: MessageItem[] = []) => {
+          (oldMessages: Message[] = []) => {
             return oldMessages.map((msg) =>
               msg.status === "sent" ? { ...msg, status: "delivered" } : msg,
             );

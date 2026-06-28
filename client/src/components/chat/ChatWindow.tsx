@@ -1,18 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 import { useChatSocket } from "../../context/SocketContext";
-import { useSendMessage } from "../../hooks/post/useSendMessage";
-import { useFetchMessages } from "../../hooks/get/useFetchMessages";
 import { useUpdateMessage } from "../../hooks/update/useUpdateMessage";
 import { useDeleteMessage } from "../../hooks/delete/useDeleteMessage";
 import { ChatBubble } from "./ChatBubble";
 import { Send, User } from "lucide-react";
+import { useGetMessages } from "../../hooks/get/useGetMessages";
+import { usePostMessage } from "../../hooks/post/usePostMessage";
 
 export function ChatWindow() {
   const { activeUser, socket, isTyping } = useChatSocket();
 
-  const { mutateAsync: sendMessageApi } = useSendMessage();
+  const { mutateAsync: sendMessageApi } = usePostMessage();
 
-  const { data: messages } = useFetchMessages(activeUser?.id);
+  const { data: messages } = useGetMessages(activeUser?.id);
 
   const [text, setText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);

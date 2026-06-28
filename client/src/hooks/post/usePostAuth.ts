@@ -1,13 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "../../instance/api";
+import { api } from "../../api/api";
 import { useNavigate } from "react-router-dom";
+import type { LoginPayload } from "../../types/user";
 
-type LoginPayload = {
-  username: string;
-  password: string;
-};
-
-export function useAuth() {
+export function usePostAuth() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 

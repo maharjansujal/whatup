@@ -1,12 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "../../instance/api";
-
-export type UpdateUserPayload = {
-  username?: string;
-  name?: string;
-  password_hash?: string;
-  image?: string | null;
-};
+import { api } from "../../api/api";
 
 const updateUser = async (formData: FormData) => {
   const { data } = await api.patch("/users/me", formData);

@@ -1,4 +1,3 @@
-// ModalProvider.tsx
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { Modal } from "../components/shared/Modal";
 

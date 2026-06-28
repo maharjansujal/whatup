@@ -1,10 +1,10 @@
 import { Check, CheckCheck, Pencil, Trash2, X } from "lucide-react";
-import type { MessageItem } from "../../hooks/get/useFetchMessages";
 import { useEffect, useRef } from "react";
 import { useChatSocket } from "../../context/SocketContext";
+import type { Message } from "../../types/message";
 
 interface ChatBubbleProps {
-  msg: MessageItem;
+  msg: Message;
   isMe: boolean;
   editingId: number | null;
   editedText: string;

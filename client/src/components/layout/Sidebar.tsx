@@ -1,15 +1,16 @@
 import { useState } from "react";
-import { useFetchUsers, type UserItem } from "../../hooks/get/useFetchUsers";
 import { Search } from "lucide-react";
 import { SidebarUserList } from "../sidebar/SidebarUserList";
+import type { UserMessage } from "../../types/user";
+import { useGetUsers } from "../../hooks/get/useGetUsers";
 
 interface SidebarProps {
-  onSelectUser: (user: UserItem) => void;
-  selectedUser: UserItem | null;
+  onSelectUser: (user: UserMessage) => void;
+  selectedUser: UserMessage | null;
 }
 
 export function Sidebar({ onSelectUser, selectedUser }: SidebarProps) {
-  const { data: users, isLoading, error } = useFetchUsers();
+  const { data: users, isLoading, error } = useGetUsers();
   const [search, setSearch] = useState("");
 
   // Filter users locally based on search input text

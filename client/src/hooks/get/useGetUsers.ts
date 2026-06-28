@@ -1,24 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { api } from "../../instance/api";
+import { api } from "../../api/api";
+import type { UserMessage } from "../../types/user";
 
-export interface UserItem {
-  id: number;
-  name: string;
-  username: string;
-  image?: string;
-  created_at: string;
-  last_message?: string | null;
-  last_message_sender_id?: number | null;
-  last_message_status?: "sent" | "delivered" | "seen";
-  last_message_time?: string | null;
-}
-
-export function useFetchUsers() {
+export function useGetUsers() {
   // Extract current user from localStorage to exclude them from the list
   const userString = localStorage.getItem("user");
   const currentUser = userString ? JSON.parse(userString) : null;
 
-  return useQuery<UserItem[]>({
+  return useQuery<UserMessage[]>({
     queryKey: ["users"],
     queryFn: async () => {
       const res = await api.get("/users");

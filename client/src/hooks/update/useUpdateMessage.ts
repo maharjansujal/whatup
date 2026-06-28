@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "../../instance/api";
-import type { MessageItem } from "../get/useFetchMessages";
+import { api } from "../../api/api";
+import type { Message } from "../../types/message";
 
 type UpdateMessageData = {
   messageId: number;
@@ -28,7 +28,7 @@ export function useUpdateMessage() {
     onSuccess: (_data, variables) => {
       queryClient.setQueryData(
         ["messages", variables.receiverId],
-        (old: MessageItem[] = []) =>
+        (old: Message[] = []) =>
           old.map((msg) =>
             msg.id === variables.messageId
               ? { ...msg, content: variables.content }

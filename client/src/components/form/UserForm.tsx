@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { MessageSquare, Upload, User } from "lucide-react";
-import { useAuth } from "../../hooks/post/useAuth";
+import { useAuth } from "../../hooks/post/usePostAuth";
 import { Input } from "./Input";
 import { Button } from "../shared/Button";
 import { Link } from "react-router-dom";

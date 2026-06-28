@@ -1,12 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "../../instance/api";
+import { api } from "../../api/api";
+import type { SendMessagePayload } from "../../types/message";
 
-interface SendMessagePayload {
-  receiverId: number;
-  content: string;
-}
-
-export function useSendMessage() {
+export function usePostMessage() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: SendMessagePayload) => {

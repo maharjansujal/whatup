@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Input } from "../components/form/Input";
 import { Button } from "../components/shared/Button";
 import { MessageSquare } from "lucide-react";
-import { useAuth } from "../hooks/post/useAuth";
+import { useAuth } from "../hooks/post/usePostAuth";
 import { normalizeError } from "../utils/normalizeError";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
