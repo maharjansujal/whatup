@@ -6,11 +6,16 @@ import { ChatBubble } from "./ChatBubble";
 import { Send, User } from "lucide-react";
 import { useGetMessages } from "../../hooks/get/useGetMessages";
 import { usePostMessage } from "../../hooks/post/usePostMessage";
+import { useMessageListeners } from "../../hooks/socket/useMessageListeners";
+import { useTypingListeners } from "../../hooks/socket/useTypingListeners";
 
 export function ChatWindow() {
   const { activeUser, socket, isTyping } = useChatSocket();
 
   const { mutateAsync: sendMessageApi } = usePostMessage();
+
+  useMessageListeners();
+  useTypingListeners();
 
   const { data: messages } = useGetMessages(activeUser?.id);
 

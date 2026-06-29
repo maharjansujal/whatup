@@ -1,27 +1,24 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import { useQueryClient } from "@tanstack/react-query";
 import type { UserMessage } from "../types/user";
-import type { Message } from "../types/message";
 
 interface SocketContextType {
   socket: Socket | null;
   activeUser: UserMessage | null;
   setActiveUser: (user: UserMessage | null) => void;
-  messages: Message[];
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   isOnline: boolean;
-  isTyping: boolean; // Added typing indicator state!
+  isTyping: boolean;
+  setIsTyping: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
+
 const VITE_API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 export function SocketProvider({ children }: { children: React.ReactNode }) {
-  const queryClient = useQueryClient();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isOnline, setIsOnline] = useState(false);
   const [activeUser, setActiveUser] = useState<UserMessage | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
 
   const token = localStorage.getItem("token");
@@ -35,6 +32,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     });
 
     setSocket(newSocket);
+
     newSocket.on("connect", () => setIsOnline(true));
     newSocket.on("disconnect", () => setIsOnline(false));
 
@@ -43,97 +41,15 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     };
   }, [token]);
 
-  // Handle incoming real-time events from your server
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleBulkDelivery = ({ receiverId }: { receiverId: number }) => {
-      if (activeUser && activeUser.id === receiverId) {
-        queryClient.setQueryData(
-          ["messages", receiverId],
-          (oldMessages: Message[] = []) => {
-            return oldMessages.map((msg) =>
-              msg.status === "sent" ? { ...msg, status: "delivered" } : msg,
-            );
-          },
-        );
-      }
-    };
-
-    socket.on("messagesDeliveredBulk", handleBulkDelivery);
-
-    const handleUserTyping = ({ senderId }: { senderId: number }) => {
-      if (activeUser && senderId === activeUser.id) {
-        setIsTyping(true);
-      }
-    };
-
-    const handleUserStoppedTyping = ({ senderId }: { senderId: number }) => {
-      if (activeUser && senderId === activeUser.id) {
-        setIsTyping(false);
-      }
-    };
-
-    socket.on("newMessage", (message: Message) => {
-      const chatId = activeUser?.id;
-
-      queryClient.setQueryData(["messages", chatId], (old: Message[] = []) => {
-        // Check if the message already exists in the cache to prevent duplicates
-        const messageExists = old.some((msg) => msg.id === message.id);
-        if (messageExists) return old;
-
-        return [...old, message];
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["users"],
-      });
-    });
-
-    socket.on("messageUpdated", (updatedMessage: Message) => {
-      console.log("Received update:", updatedMessage);
-      const chatId = activeUser?.id;
-
-      queryClient.setQueryData(["messages", chatId], (old: Message[] = []) => {
-        return old.map((msg) =>
-          msg.id === updatedMessage.id ? updatedMessage : msg,
-        );
-      });
-    });
-
-    socket.on("messageSeenUpdate", (updatedMessage: Message) => {
-      const conversationId = updatedMessage.receiver_id;
-
-      queryClient.setQueryData(
-        ["messages", conversationId],
-        (old: Message[] = []) => {
-          return old.map((msg) =>
-            msg.id === updatedMessage.id ? { ...msg, status: "seen" } : msg,
-          );
-        },
-      );
-    });
-    socket.on("userTyping", handleUserTyping);
-    socket.on("userStoppedTyping", handleUserStoppedTyping);
-
-    return () => {
-      socket.off("userTyping", handleUserTyping);
-      socket.off("userStoppedTyping", handleUserStoppedTyping);
-      socket.off("messageUpdated");
-      socket.off("messageSeenUpdate");
-      socket.off("messagesDeliveredBulk", handleBulkDelivery);
-    };
-  }, [socket, activeUser]);
-
   return (
     <SocketContext.Provider
       value={{
         socket,
         activeUser,
         setActiveUser,
-        messages,
-        setMessages,
         isOnline,
         isTyping,
+        setIsTyping,
       }}
     >
       {children}
@@ -143,7 +59,8 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
 export function useChatSocket() {
   const context = useContext(SocketContext);
-  if (!context)
+  if (!context) {
     throw new Error("useChatSocket must be used within a SocketProvider");
+  }
   return context;
 }
