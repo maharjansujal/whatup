@@ -8,6 +8,7 @@ interface SocketContextType {
   setActiveUser: (user: UserMessage | null) => void;
   isOnline: boolean;
   isTyping: boolean;
+  onlineUsers: number[];
   setIsTyping: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -19,6 +20,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isOnline, setIsOnline] = useState(false);
   const [activeUser, setActiveUser] = useState<UserMessage | null>(null);
+  const [onlineUsers, setOnlineUsers] = useState<number[]>([]);
   const [isTyping, setIsTyping] = useState(false);
 
   const token = localStorage.getItem("token");
@@ -34,7 +36,14 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     setSocket(newSocket);
 
     newSocket.on("connect", () => setIsOnline(true));
-    newSocket.on("disconnect", () => setIsOnline(false));
+    newSocket.on("disconnect", () => {
+      setIsOnline(false);
+      setOnlineUsers([]);
+    });
+
+    newSocket.on("getOnlineUsers", (users: number[]) => {
+      setOnlineUsers(users);
+    });
 
     return () => {
       newSocket.close();
@@ -49,6 +58,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         setActiveUser,
         isOnline,
         isTyping,
+        onlineUsers,
         setIsTyping,
       }}
     >

@@ -104,34 +104,61 @@ export function ChatWindow() {
     }
   };
 
+  const { onlineUsers } = useChatSocket();
+  const isUserOnline = onlineUsers.includes(activeUser?.id || -1);
+
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
+      {/* Header */}
       <div className="h-16 w-full bg-white border-b border-border-light px-6 flex items-center justify-between shadow-xs shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-chat border border-border-light flex items-center justify-center overflow-hidden">
+          {/* Avatar + online dot */}
+          <div className="relative w-10 h-10 rounded-full bg-chat border border-border-light flex items-center justify-center">
             {activeUser?.image ? (
               <img
                 src={activeUser.image}
                 alt={activeUser.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover rounded-full"
               />
             ) : (
               <User size={18} className="text-muted" />
             )}
+
+            {activeUser?.id && (
+              <span
+                className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${
+                  isUserOnline ? "bg-green-500" : "bg-gray-400"
+                }`}
+              />
+            )}
           </div>
+
+          {/* User info */}
           <div>
             <h4 className="text-sm font-bold text-sidebar">
               {activeUser?.name}
             </h4>
-            <p className="text-xs text-muted">@{activeUser?.username}</p>
+
+            <div className="flex items-center gap-2">
+              <p className="text-xs text-muted">@{activeUser?.username}</p>
+
+              {/* optional status text */}
+              {activeUser?.id && (
+                <span className="text-xs text-muted/70">
+                  • {isUserOnline ? "online" : "offline"}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages &&
           messages.map((msg) => {
             const isMe = msg.sender_id === currentUser?.id;
+
             return (
               <ChatBubble
                 key={msg.id}
@@ -154,9 +181,11 @@ export function ChatWindow() {
             </div>
           </div>
         )}
+
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Input */}
       <form
         onSubmit={handleSend}
         className="p-4 bg-white border-t border-border-light flex items-center gap-3 shrink-0"
@@ -169,6 +198,7 @@ export function ChatWindow() {
           onChange={handleInputChange}
           className="flex-1 bg-chat border border-border-light rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand/60 focus:ring-1 focus:ring-brand/40 transition-all text-sidebar placeholder:text-muted/50"
         />
+
         <button
           type="submit"
           disabled={!text.trim()}

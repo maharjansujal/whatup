@@ -1,5 +1,6 @@
 import { Loader2, User } from "lucide-react";
 import type { UserMessage } from "../../types/user";
+import { useChatSocket } from "../../context/SocketContext";
 
 interface SidebarUserListProps {
   isLoading: boolean;
@@ -18,6 +19,8 @@ export function SidebarUserList({
 }: SidebarUserListProps) {
   const userString = localStorage.getItem("user");
   const currentUser = userString ? JSON.parse(userString) : null;
+  const { onlineUsers } = useChatSocket();
+
   return (
     <div className="flex-1 overflow-y-auto px-2">
       {isLoading ? (
@@ -34,7 +37,9 @@ export function SidebarUserList({
           const isUnseen =
             user.last_message_status !== "seen" &&
             user.last_message_sender_id !== currentUser.id;
+
           const isSelected = selectedUser?.id === user.id;
+          const isUserOnline = onlineUsers.includes(user.id);
 
           return (
             <div
@@ -46,18 +51,29 @@ export function SidebarUserList({
                   : "hover:bg-border-dark/30 text-slate-300"
               }`}
             >
-              <div className="w-11 h-11 rounded-full bg-border-dark flex items-center justify-center border border-border-dark overflow-hidden shrink-0">
-                {user.image ? (
-                  <img
-                    src={user.image}
-                    alt={user.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <User size={18} className="text-muted" />
-                )}
+              {/* Avatar + Online Status */}
+              <div className="relative w-11 h-11 shrink-0">
+                <div className="w-full h-full rounded-full bg-border-dark flex items-center justify-center border border-border-dark overflow-hidden">
+                  {user.image ? (
+                    <img
+                      src={user.image}
+                      alt={user.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User size={18} className="text-muted" />
+                  )}
+                </div>
+
+                {/* Online indicator */}
+                <span
+                  className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-black ${
+                    isUserOnline ? "bg-green-500" : "bg-orange-500"
+                  }`}
+                />
               </div>
 
+              {/* User Info */}
               <div className="flex-1 min-w-0">
                 <h4
                   className={`text-sm font-semibold truncate ${

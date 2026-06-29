@@ -1,11 +1,12 @@
 import { Server, Socket } from "socket.io";
-import { registerUser } from "../users";
+import { getOnlineUsersList, registerUser } from "../users";
 import { markMessageDelivered } from "../../controllers/message.controller";
 
 import { registerTypingHandler } from "./typing.handler";
 import { registerMessageSeenHandler } from "./messageSeen.handler";
 import { registerDisconnectHandler } from "./disconnect.handler";
 import { emitMessageDeliveredBulk } from "../emitters/message.emitter";
+import { SocketEvents } from "../events";
 
 const handleUserRegistration = (socket: Socket, userId: number) => {
   registerUser(userId, socket.id);
@@ -31,7 +32,7 @@ const registerFeatureHandlers = (
 ) => {
   registerTypingHandler(socket, io);
   registerMessageSeenHandler(socket, io);
-  registerDisconnectHandler(socket, userId);
+  registerDisconnectHandler(socket, io, userId);
 };
 
 export const registerConnection = async (socket: Socket, io: Server) => {
@@ -45,6 +46,8 @@ export const registerConnection = async (socket: Socket, io: Server) => {
   const userId = Number(user.id);
 
   handleUserRegistration(socket, userId);
+
+  io.emit(SocketEvents.GET_ONLINE_USERS, getOnlineUsersList());
 
   await handleDeliveryCatchup(io, userId);
 

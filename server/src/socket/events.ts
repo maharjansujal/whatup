@@ -16,4 +16,6 @@ export const SocketEvents = {
   USER_STOPPED_TYPING: "userStoppedTyping",
 
   BULK_DELIVERY: "messagesDeliveredBulk",
+
+  GET_ONLINE_USERS: "getOnlineUsers",
 } as const;

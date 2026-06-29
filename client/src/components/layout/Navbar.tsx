@@ -53,23 +53,29 @@ export function Navbar() {
             className="w-full h-full rounded-full"
           />
         </div>
-        <span className="font-bold text-lg tracking-wide">Whatup</span>
+        <span className="font-bold text-lg tracking-wide">
+          Moonlight Jyaasa
+        </span>
       </div>
 
       {/* Right side: User Info + Actions */}
       {currentUser && (
         <div className="flex items-center gap-4">
           {/* Avatar */}
-          <div className="w-10 h-10 rounded-full bg-brand-muted text-sidebar font-bold flex items-center justify-center border-2 border-brand overflow-hidden">
-            {currentUser.image ? (
-              <img
-                src={currentUser.image}
-                alt={currentUser.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span>{currentUser.name.charAt(0).toUpperCase()}</span>
-            )}
+          <div className="relative w-10 h-10 shrink-0">
+            <div className="w-full h-full rounded-full bg-brand-muted text-sidebar font-bold flex items-center justify-center border-2 border-brand overflow-hidden">
+              {currentUser.image ? (
+                <img
+                  src={currentUser.image}
+                  alt={currentUser.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{currentUser.name.charAt(0).toUpperCase()}</span>
+              )}
+            </div>
+
+            <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white bg-green-500" />
           </div>
 
           {/* Name + Username */}

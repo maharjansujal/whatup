@@ -11,3 +11,7 @@ export function removeUser(userId: number) {
 export function getUserSocket(userId: number) {
   return userSocketMap.get(userId);
 }
+
+export function getOnlineUsersList(): number[] {
+  return Array.from(userSocketMap.keys());
+}

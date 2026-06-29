@@ -17,7 +17,6 @@ export function useUpdateMessage() {
       content,
       receiverId,
     }: UpdateMessageData) => {
-      console.log(content, receiverId);
       const { data } = await api.patch(`/messages/${messageId}`, {
         content,
         receiverId,

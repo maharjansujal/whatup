@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../api/api";
+import toast from "react-hot-toast";
 
 export const useDeleteMessage = () => {
   const queryClient = useQueryClient();
@@ -15,6 +16,7 @@ export const useDeleteMessage = () => {
       queryClient.invalidateQueries({
         queryKey: ["messages"],
       });
+      toast.success("Deleted message successfully");
     },
   });
 };
