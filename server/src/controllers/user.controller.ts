@@ -113,11 +113,11 @@ export const updateStatus = async (
 ) => {
   try {
     const user = req.user;
-    const { status } = req.body;
+    const { custom_status } = req.body;
     if (!user?.id) {
       return res.status(401).json({ message: "Invalid or expired token" });
     }
-    const result = await updateStatusService(user.id, status);
+    const result = await updateStatusService(user.id, custom_status);
     return res.status(200).json({ message: "Status updated", ...result });
   } catch (err) {
     return res.status(500).json({
@@ -128,4 +128,27 @@ export const updateStatus = async (
 
 export const updateLastSeenAt = async (id: number) => {
   await updateLastSeenAtService(id);
+};
+
+export const getMe = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        message: "Invalid or expired token",
+      });
+    }
+
+    const result = await getUserByIdService(Number(userId));
+
+    return res.status(200).json({
+      message: "User retrieved successfully",
+      result,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: err instanceof Error ? err.message : "Internal server error",
+    });
+  }
 };

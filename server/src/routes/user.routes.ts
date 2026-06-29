@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  getMe,
   getUserById,
   getUsers,
   updateStatus,
@@ -14,6 +15,7 @@ const router = Router();
 
 router.get("/", authMiddleware, getUsers);
 router.get("/:id", authMiddleware, getUserById);
+router.get("/me", authMiddleware, getMe);
 router.post(
   "/upload-avatar",
   authMiddleware,

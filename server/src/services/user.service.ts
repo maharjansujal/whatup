@@ -99,10 +99,10 @@ export const updateUserService = async ({
   return result.rows[0];
 };
 
-export const updateStatusService = async (id: number, status: Status) => {
+export const updateStatusService = async (id: number, customStatus: Status) => {
   const result = await pool.query(
-    "UPDATE users SET status = $2 WHERE id = $1 RETURNING *",
-    [id, status],
+    "UPDATE users SET custom_status = $2 WHERE id = $1 RETURNING *",
+    [id, customStatus],
   );
   return result.rows[0];
 };

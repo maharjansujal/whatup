@@ -3,14 +3,15 @@ import { useModal } from "../../context/ModalContext";
 import { UserForm } from "../form/UserForm";
 import { useEffect, useRef, useState } from "react";
 import { usePostAuth } from "../../hooks/post/usePostAuth";
-import { Avatar } from "../shared/Avatar";
+import { Avatar, PresenceDot } from "../shared/Avatar";
+import type { User } from "../../types/user";
 
 export function Navbar() {
   const { logout } = usePostAuth();
   const { openModal, closeModal } = useModal();
 
   const userString = localStorage.getItem("user");
-  const currentUser = userString ? JSON.parse(userString) : null;
+  const currentUser = userString ? (JSON.parse(userString) as User) : null;
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -37,7 +38,7 @@ export function Navbar() {
     openModal(
       <UserForm
         mode="edit"
-        initialValues={currentUser}
+        initialValues={currentUser!}
         onFormSubmit={closeModal}
       />,
     );
@@ -71,7 +72,7 @@ export function Navbar() {
               className="border-2 border-brand bg-brand-muted text-sidebar font-bold"
             />
 
-            <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white bg-green-500" />
+            <PresenceDot presence={currentUser.custom_status ?? "online"} />
           </div>
 
           {/* Name + Username */}
