@@ -7,6 +7,7 @@ import { registerMessageSeenHandler } from "./messageSeen.handler";
 import { registerDisconnectHandler } from "./disconnect.handler";
 import { emitMessageDeliveredBulk } from "../emitters/message.emitter";
 import { SocketEvents } from "../events";
+import { registerPresenceHandler } from "./presence.handler";
 
 const handleUserRegistration = (socket: Socket, userId: number) => {
   registerUser(userId, socket.id);
@@ -33,6 +34,7 @@ const registerFeatureHandlers = (
   registerTypingHandler(socket, io);
   registerMessageSeenHandler(socket, io);
   registerDisconnectHandler(socket, io, userId);
+  registerPresenceHandler(socket);
 };
 
 export const registerConnection = async (socket: Socket, io: Server) => {

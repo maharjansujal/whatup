@@ -50,6 +50,16 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     };
   }, [token]);
 
+  useEffect(() => {
+    if (!socket) return;
+
+    const interval = setInterval(() => {
+      socket.emit("heartbeat");
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [socket]);
+
   return (
     <SocketContext.Provider
       value={{

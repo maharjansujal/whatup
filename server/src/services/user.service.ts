@@ -1,5 +1,6 @@
 import { pool } from "../db";
 import bcrypt from "bcrypt";
+import { Status, User } from "../types/user";
 
 export const getUsersService = async (userId: number) => {
   const result = await pool.query(
@@ -7,6 +8,7 @@ export const getUsersService = async (userId: number) => {
     u.id, 
     u.name, 
     u.username,
+    u.custom_status,
     lm.content AS last_message,
     lm.sender_id AS last_message_sender_id,
     lm.status AS last_message_status,
@@ -28,7 +30,7 @@ export const getUsersService = async (userId: number) => {
 };
 
 export const getUserByIdService = async (userId: number) => {
-  const result = await pool.query(
+  const result = await pool.query<User>(
     "SELECT id, name, username, image FROM users WHERE id = $1",
     [userId],
   );
@@ -95,4 +97,16 @@ export const updateUserService = async ({
 
   const result = await pool.query(query, values);
   return result.rows[0];
+};
+
+export const updateStatusService = async (id: number, status: Status) => {
+  const result = await pool.query(
+    "UPDATE users SET status = $2 WHERE id = $1 RETURNING *",
+    [id, status],
+  );
+  return result.rows[0];
+};
+
+export const updateLastSeenAtService = async (id: number) => {
+  await pool.query("UPDATE users SET last_seen_at = NOW() WHERE id = $1", [id]);
 };

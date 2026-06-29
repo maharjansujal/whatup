@@ -18,4 +18,8 @@ export const SocketEvents = {
   BULK_DELIVERY: "messagesDeliveredBulk",
 
   GET_ONLINE_USERS: "getOnlineUsers",
+
+  SET_ONLINE_STATUS: "setOnlineStatus",
+
+  HEARTBEAT: "heartbeat",
 } as const;

@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   getUserById,
   getUsers,
+  updateStatus,
   updateUser,
   uploadAvatar,
 } from "../controllers/user.controller";
@@ -22,5 +23,6 @@ router.post(
 router.post("/register", upload.single("image"), register);
 router.patch("/me", authMiddleware, upload.single("image"), updateUser);
 router.post("/login", login);
+router.patch("/my-status", authMiddleware, updateStatus);
 
 export default router;

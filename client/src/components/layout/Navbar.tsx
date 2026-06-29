@@ -3,6 +3,7 @@ import { useModal } from "../../context/ModalContext";
 import { UserForm } from "../form/UserForm";
 import { useEffect, useRef, useState } from "react";
 import { usePostAuth } from "../../hooks/post/usePostAuth";
+import { Avatar } from "../shared/Avatar";
 
 export function Navbar() {
   const { logout } = usePostAuth();
@@ -62,18 +63,13 @@ export function Navbar() {
       {currentUser && (
         <div className="flex items-center gap-4">
           {/* Avatar */}
-          <div className="relative w-10 h-10 shrink-0">
-            <div className="w-full h-full rounded-full bg-brand-muted text-sidebar font-bold flex items-center justify-center border-2 border-brand overflow-hidden">
-              {currentUser.image ? (
-                <img
-                  src={currentUser.image}
-                  alt={currentUser.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span>{currentUser.name.charAt(0).toUpperCase()}</span>
-              )}
-            </div>
+          <div className="relative shrink-0">
+            <Avatar
+              image={currentUser.image}
+              name={currentUser.name}
+              size="sm"
+              className="border-2 border-brand bg-brand-muted text-sidebar font-bold"
+            />
 
             <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white bg-green-500" />
           </div>

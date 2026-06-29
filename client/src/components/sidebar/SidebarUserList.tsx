@@ -1,6 +1,7 @@
-import { Loader2, User } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import type { UserMessage } from "../../types/user";
 import { useChatSocket } from "../../context/SocketContext";
+import { Avatar, getPresence, PresenceDot } from "../shared/Avatar";
 
 interface SidebarUserListProps {
   isLoading: boolean;
@@ -17,8 +18,6 @@ export function SidebarUserList({
   selectedUser,
   onSelectUser,
 }: SidebarUserListProps) {
-  const userString = localStorage.getItem("user");
-  const currentUser = userString ? JSON.parse(userString) : null;
   const { onlineUsers } = useChatSocket();
 
   return (
@@ -34,60 +33,27 @@ export function SidebarUserList({
         </div>
       ) : users && users.length > 0 ? (
         users.map((user) => {
-          const isUnseen =
-            user.last_message_status !== "seen" &&
-            user.last_message_sender_id !== currentUser.id;
-
           const isSelected = selectedUser?.id === user.id;
           const isUserOnline = onlineUsers.includes(user.id);
+
+          const presence = getPresence(isUserOnline, user.custom_status);
 
           return (
             <div
               key={user.id}
               onClick={() => onSelectUser(user)}
-              className={`flex items-center gap-3 p-2 border-b border-border-dark/30 cursor-pointer transition-all rounded-lg ${
-                isSelected
-                  ? "bg-brand/40 text-white"
-                  : "hover:bg-border-dark/30 text-slate-300"
+              className={`flex items-center gap-3 p-2 cursor-pointer rounded-lg ${
+                isSelected ? "bg-brand/40" : "hover:bg-border-dark/30"
               }`}
             >
-              {/* Avatar + Online Status */}
-              <div className="relative w-11 h-11 shrink-0">
-                <div className="w-full h-full rounded-full bg-border-dark flex items-center justify-center border border-border-dark overflow-hidden">
-                  {user.image ? (
-                    <img
-                      src={user.image}
-                      alt={user.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <User size={18} className="text-muted" />
-                  )}
-                </div>
-
-                {/* Online indicator */}
-                <span
-                  className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-black ${
-                    isUserOnline ? "bg-green-500" : "bg-orange-500"
-                  }`}
-                />
+              <div className="relative">
+                <Avatar image={user.image} name={user.name} />
+                <PresenceDot presence={presence} />
               </div>
 
-              {/* User Info */}
               <div className="flex-1 min-w-0">
-                <h4
-                  className={`text-sm font-semibold truncate ${
-                    isSelected ? "text-white" : "text-slate-100"
-                  }`}
-                >
-                  {user.name}
-                </h4>
-
-                <p
-                  className={`text-xs truncate mt-0.5 ${
-                    isUnseen ? "text-white font-semibold" : "text-muted/70"
-                  }`}
-                >
+                <h4 className="text-sm font-semibold truncate">{user.name}</h4>
+                <p className="text-xs truncate mt-0.5">
                   {user.last_message ?? ""}
                 </p>
               </div>

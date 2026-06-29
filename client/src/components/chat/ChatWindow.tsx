@@ -3,11 +3,12 @@ import { useChatSocket } from "../../context/SocketContext";
 import { useUpdateMessage } from "../../hooks/update/useUpdateMessage";
 import { useDeleteMessage } from "../../hooks/delete/useDeleteMessage";
 import { ChatBubble } from "./ChatBubble";
-import { Send, User } from "lucide-react";
+import { Send } from "lucide-react";
 import { useGetMessages } from "../../hooks/get/useGetMessages";
 import { usePostMessage } from "../../hooks/post/usePostMessage";
 import { useMessageListeners } from "../../hooks/socket/useMessageListeners";
 import { useTypingListeners } from "../../hooks/socket/useTypingListeners";
+import { Avatar, getPresence, PresenceDot } from "../shared/Avatar";
 
 export function ChatWindow() {
   const { activeUser, socket, isTyping } = useChatSocket();
@@ -106,31 +107,21 @@ export function ChatWindow() {
 
   const { onlineUsers } = useChatSocket();
   const isUserOnline = onlineUsers.includes(activeUser?.id || -1);
-
+  const presence = getPresence(isUserOnline, activeUser?.custom_status ?? null);
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       {/* Header */}
       <div className="h-16 w-full bg-white border-b border-border-light px-6 flex items-center justify-between shadow-xs shrink-0">
         <div className="flex items-center gap-3">
           {/* Avatar + online dot */}
-          <div className="relative w-10 h-10 rounded-full bg-chat border border-border-light flex items-center justify-center">
-            {activeUser?.image ? (
-              <img
-                src={activeUser.image}
-                alt={activeUser.name}
-                className="w-full h-full object-cover rounded-full"
-              />
-            ) : (
-              <User size={18} className="text-muted" />
-            )}
+          <div className="relative">
+            <Avatar
+              image={activeUser?.image}
+              name={activeUser?.name ?? "User"}
+              size="sm"
+            />
 
-            {activeUser?.id && (
-              <span
-                className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${
-                  isUserOnline ? "bg-green-500" : "bg-gray-400"
-                }`}
-              />
-            )}
+            {activeUser?.id && <PresenceDot presence={presence} />}
           </div>
 
           {/* User info */}
@@ -145,7 +136,9 @@ export function ChatWindow() {
               {/* optional status text */}
               {activeUser?.id && (
                 <span className="text-xs text-muted/70">
-                  • {isUserOnline ? "online" : "offline"}
+                  •{" "}
+                  {activeUser.custom_status ??
+                    (isUserOnline ? "online" : "offline")}
                 </span>
               )}
             </div>

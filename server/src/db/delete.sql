@@ -1,3 +1,3 @@
-DROP TABLE messages;
+DROP SCHEMA public CASCADE;
 
-DROP TABLE users;
+CREATE SCHEMA public;

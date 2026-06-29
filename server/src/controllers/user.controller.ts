@@ -2,10 +2,13 @@ import { Request, Response } from "express";
 import {
   getUserByIdService,
   getUsersService,
+  updateLastSeenAtService,
+  updateStatusService,
   updateUserService,
 } from "../services/user.service";
 import { uploadImage } from "../services/upload.service";
 import { AuthenticatedRequest } from "../middleware/auth.middleware";
+import { Status } from "../types/user";
 
 export const uploadAvatar = async (req: Request, res: Response) => {
   try {
@@ -102,4 +105,27 @@ export const updateUser = async (req: AuthenticatedRequest, res: Response) => {
       message: err instanceof Error ? err.message : "Internal Server Error",
     });
   }
+};
+
+export const updateStatus = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
+  try {
+    const user = req.user;
+    const { status } = req.body;
+    if (!user?.id) {
+      return res.status(401).json({ message: "Invalid or expired token" });
+    }
+    const result = await updateStatusService(user.id, status);
+    return res.status(200).json({ message: "Status updated", ...result });
+  } catch (err) {
+    return res.status(500).json({
+      message: err instanceof Error ? err.message : "Internal server error",
+    });
+  }
+};
+
+export const updateLastSeenAt = async (id: number) => {
+  await updateLastSeenAtService(id);
 };
