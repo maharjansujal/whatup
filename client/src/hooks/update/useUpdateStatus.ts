@@ -10,6 +10,7 @@ export function useUpdateStatus() {
       status_mode: Mode;
       custom_status: Status | null;
     }) => {
+      console.log("Got status", payload);
       await api.patch("/users/my-status", payload);
       return payload;
     },

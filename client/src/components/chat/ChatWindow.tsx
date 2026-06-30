@@ -10,6 +10,7 @@ import { useMessageListeners } from "../../hooks/socket/useMessageListeners";
 import { useTypingListeners } from "../../hooks/socket/useTypingListeners";
 import { Avatar, getPresence, PresenceDot } from "../shared/Avatar";
 import { useCurrentUser } from "../../hooks/get/useCurrentUser";
+import { formatStatus } from "../../utils/formatStatus";
 
 export function ChatWindow() {
   const { activeUser, socket, isTyping } = useChatSocket();
@@ -137,7 +138,7 @@ export function ChatWindow() {
               {activeUser?.id && (
                 <span className="text-xs text-muted/70">
                   •{" "}
-                  {activeUser.custom_status ??
+                  {formatStatus(activeUser.custom_status) ??
                     (isUserOnline ? "online" : "offline")}
                 </span>
               )}
