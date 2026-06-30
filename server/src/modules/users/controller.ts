@@ -15,7 +15,14 @@ const getUserById = asyncHandler(async (req, res) => {
   res.status(200).json({ status: "success", data: user });
 });
 
+const getMe = asyncHandler(async (req, res) => {
+  const userId = req.user?.id;
+  const you = await userService.getUserById(Number(userId));
+  res.status(200).json({ status: "success", data: you });
+});
+
 export const userController = {
   getAllUsers,
   getUserById,
+  getMe,
 };
