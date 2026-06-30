@@ -28,6 +28,7 @@ async function register(data: RegisterDto) {
 }
 
 async function login(data: LoginDto) {
+  console.log(data);
   const user = data.email
     ? await authRepository.findByEmail(data.email)
     : await authRepository.findByUsername(data.username!);

@@ -9,6 +9,13 @@ const getAllUsers = asyncHandler(async (_req, res) => {
     data: users,
   });
 });
+
+const getUserById = asyncHandler(async (req, res) => {
+  const user = await userService.getUserById(Number(req.params.id));
+  res.status(200).json({ status: "success", data: user });
+});
+
 export const userController = {
   getAllUsers,
+  getUserById,
 };
