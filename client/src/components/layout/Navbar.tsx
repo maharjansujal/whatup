@@ -36,6 +36,13 @@ const STATUS_OPTIONS: StatusOption[] = [
     value: { status_mode: "manual", custom_status: "do-not-disturb" },
   },
   {
+    id: "idle",
+    label: "Idle",
+    description: "",
+    colorClass: "bg-orange-400",
+    value: { status_mode: "manual", custom_status: "idle" },
+  },
+  {
     id: "away",
     label: "Set as away",
     description: "",
