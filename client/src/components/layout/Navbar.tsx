@@ -7,7 +7,6 @@ import { Avatar, PresenceDot } from "../shared/Avatar";
 import type { Mode, Status } from "../../types/user";
 import { useUpdateStatus } from "../../hooks/update/useUpdateStatus";
 import { useCurrentUser } from "../../hooks/get/useCurrentUser";
-import { formatStatus } from "../../utils/formatStatus";
 
 interface StatusOption {
   id: "auto" | "idle" | "away" | "do-not-disturb";
