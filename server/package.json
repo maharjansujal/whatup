@@ -91,13 +91,13 @@
     "unpipe": "^1.0.0",
     "vary": "^1.1.2",
     "wrappy": "^1.0.2",
-    "xtend": "^4.0.2"
+    "xtend": "^4.0.2",
+    "zod": "^4.4.3"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx watch index.ts",
-    "migration": "tsx script/migrate.ts",
-    "deletion": "tsx script/delete.ts"
+    "dev": "tsx watch app.ts",
+    "migration": "tsx script/migrate.ts"
   },
   "keywords": [],
   "author": "",
@@ -109,7 +109,6 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.1.0",
-    "@types/pg": "^8.20.0",
-    "@types/streamifier": "^0.1.2"
+    "@types/pg": "^8.20.0"
   }
 }

@@ -14,7 +14,7 @@ const pool = new Pool({
 
 async function runMigrations() {
   try {
-    const sqlPath = path.join(__dirname, "../src/db/schema.sql");
+    const sqlPath = path.join(__dirname, "../src/shared/db/schema.sql");
     const sql = fs.readFileSync(sqlPath, "utf8");
     await pool.query(sql);
     console.log("Database tables initialized successfully!");

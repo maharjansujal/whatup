@@ -14,7 +14,7 @@ const pool = new Pool({
 
 async function runMigrations() {
   try {
-    const sqlPath = path.join(__dirname, "../src/db/delete.sql");
+    const sqlPath = path.join(__dirname, "../src/shared/db/delete.sql");
     const sql = fs.readFileSync(sqlPath, "utf8");
     await pool.query(sql);
     console.log("Database tables deleted successfully!");
