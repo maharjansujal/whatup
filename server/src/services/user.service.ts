@@ -31,7 +31,7 @@ export const getUsersService = async (userId: number) => {
 
 export const getUserByIdService = async (userId: number) => {
   const result = await pool.query<User>(
-    "SELECT id, name, username, image FROM users WHERE id = $1",
+    "SELECT id, name, username, image, custom_status, status_mode FROM users WHERE id = $1",
     [userId],
   );
   if (!result.rowCount) {
@@ -92,7 +92,7 @@ export const updateUserService = async ({
     UPDATE users
     SET ${setClauses.join(", ")}
     WHERE id = $${paramIndex}
-    RETURNING *;
+    RETURNING id, name, username, image, custom_status, status_mode;
   `;
 
   const result = await pool.query(query, values);
