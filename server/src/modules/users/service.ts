@@ -11,7 +11,7 @@ const getUserById = (id: number) => {
   return result;
 };
 
-const update = (id: number, data: UpdateUserDto) => {
+const update = (id: string, data: UpdateUserDto) => {
   const result = userRepository.update(id, data);
   return result;
 };

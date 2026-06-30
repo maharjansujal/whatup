@@ -16,7 +16,7 @@ export const getUserById = async (id: number): Promise<User> => {
 };
 
 export const update = async (
-  id: number,
+  id: string,
   data: UpdateUserDto,
 ): Promise<User> => {
   const updates: string[] = [];

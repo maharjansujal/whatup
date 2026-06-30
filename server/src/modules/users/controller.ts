@@ -23,7 +23,7 @@ const getMe = asyncHandler(async (req, res) => {
 
 const updateMe = asyncHandler(async (req, res) => {
   const userId = req.user!.id;
-  const result = await userService.update(Number(userId), req.body);
+  const result = await userService.update(userId, req.body);
   res.status(200).json({
     status: "success",
     data: result,
