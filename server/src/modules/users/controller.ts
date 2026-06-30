@@ -21,8 +21,18 @@ const getMe = asyncHandler(async (req, res) => {
   res.status(200).json({ status: "success", data: you });
 });
 
+const updateMe = asyncHandler(async (req, res) => {
+  const userId = req.user!.id;
+  const result = await userService.update(Number(userId), req.body);
+  res.status(200).json({
+    status: "success",
+    data: result,
+  });
+});
+
 export const userController = {
   getAllUsers,
   getUserById,
   getMe,
+  updateMe,
 };

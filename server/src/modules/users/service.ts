@@ -1,4 +1,5 @@
 import { userRepository } from "./repository";
+import { UpdateUserDto } from "./types";
 
 const getAllUsers = () => {
   const result = userRepository.getAllUsers();
@@ -10,7 +11,13 @@ const getUserById = (id: number) => {
   return result;
 };
 
+const update = (id: number, data: UpdateUserDto) => {
+  const result = userRepository.update(id, data);
+  return result;
+};
+
 export const userService = {
   getAllUsers,
   getUserById,
+  update,
 };

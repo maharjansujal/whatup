@@ -10,4 +10,6 @@ router.get("/me", requireAuth, userController.getMe);
 
 router.get("/:id", requireAuth, userController.getUserById);
 
+router.patch("/me", requireAuth, userController.updateMe);
+
 export default router;
