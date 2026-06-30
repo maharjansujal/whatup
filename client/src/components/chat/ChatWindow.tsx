@@ -9,6 +9,7 @@ import { usePostMessage } from "../../hooks/post/usePostMessage";
 import { useMessageListeners } from "../../hooks/socket/useMessageListeners";
 import { useTypingListeners } from "../../hooks/socket/useTypingListeners";
 import { Avatar, getPresence, PresenceDot } from "../shared/Avatar";
+import { useCurrentUser } from "../../hooks/get/useCurrentUser";
 
 export function ChatWindow() {
   const { activeUser, socket, isTyping } = useChatSocket();
@@ -24,14 +25,13 @@ export function ChatWindow() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const { currentUser } = useCurrentUser();
+
   useEffect(() => {
     if (activeUser) {
       inputRef.current?.focus();
     }
   }, [activeUser]);
-
-  const userString = localStorage.getItem("user");
-  const currentUser = userString ? JSON.parse(userString) : null;
 
   const { mutateAsync: updateMessage } = useUpdateMessage();
   const { mutateAsync: deleteMessage } = useDeleteMessage();

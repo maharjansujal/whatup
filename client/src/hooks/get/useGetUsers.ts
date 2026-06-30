@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../api/api";
 import type { UserMessage } from "../../types/user";
+import { useCurrentUser } from "./useCurrentUser";
 
 export function useGetUsers() {
-  // Extract current user from localStorage to exclude them from the list
-  const userString = localStorage.getItem("user");
-  const currentUser = userString ? JSON.parse(userString) : null;
+  const { currentUser } = useCurrentUser();
 
   return useQuery<UserMessage[]>({
     queryKey: ["users"],

@@ -55,7 +55,7 @@ export function Navbar() {
   const { logout } = usePostAuth();
   const { openModal, closeModal } = useModal();
 
-  const { data: currentUser } = useCurrentUser();
+  const { currentUser } = useCurrentUser();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);

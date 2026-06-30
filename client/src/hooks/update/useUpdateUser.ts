@@ -12,18 +12,7 @@ export const useUpdateUser = () => {
   return useMutation({
     mutationFn: updateUser,
     onSuccess: (updatedUser) => {
-      queryClient.setQueryData(["me"], updatedUser);
-
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            ...JSON.parse(storedUser),
-            ...updatedUser,
-          }),
-        );
-      }
+      queryClient.setQueryData(["current-user"], updatedUser);
 
       queryClient.invalidateQueries({
         queryKey: ["users"],
