@@ -6,5 +6,6 @@ const router = Router();
 
 router.post("/direct", requireAuth, conversationController.createConversation);
 router.patch("/:id", requireAuth, conversationController.updateConversation);
+router.delete("/:id", requireAuth, conversationController.deleteConversation);
 
 export default router;

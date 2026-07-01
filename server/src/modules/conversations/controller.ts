@@ -26,7 +26,16 @@ const updateConversation = asyncHandler(async (req, res) => {
   return res.status(200).json(result);
 });
 
+const deleteConversation = asyncHandler(async (req, res) => {
+  const conversationId = req.params.id;
+  const result = await conversationService.deleteConversation(
+    conversationId.toString(),
+  );
+  return res.status(200).json(result);
+});
+
 export const conversationController = {
   createConversation,
   updateConversation,
+  deleteConversation,
 };

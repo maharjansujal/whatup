@@ -52,6 +52,10 @@ const updateConversation = async ({
   if (!conversation) {
     throw createAppError("Conversation does not exist", 404);
   }
+  if (conversation.type === "direct") {
+    throw createAppError("Direct conversations cannot be updated", 400);
+  }
+
   if (conversation.created_by_user_id !== userId) {
     throw createAppError("You are not allowed to edit this conversation", 403);
   }
@@ -62,7 +66,17 @@ const updateConversation = async ({
   return result;
 };
 
+const deleteConversation = async (id: string) => {
+  const conversation = await conversationRepository.findById(id);
+  if (!conversation) {
+    throw createAppError("Conversation does not exist", 404);
+  }
+  const result = await conversationRepository.deleteConversation(id);
+  return result;
+};
+
 export const conversationService = {
   createDirectConversation,
   updateConversation,
+  deleteConversation,
 };

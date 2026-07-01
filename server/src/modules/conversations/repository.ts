@@ -21,9 +21,10 @@ const create = async ({
 };
 
 const findById = async (id: string): Promise<Conversation> => {
-  const result = await db.query("SELECT * FROM conversations WHERE id = $1", [
-    id,
-  ]);
+  const result = await db.query(
+    "SELECT * FROM conversations WHERE id = $1 AND deleted_at IS NULL",
+    [id],
+  );
   return result.rows[0];
 };
 
@@ -96,6 +97,14 @@ const updateConversation = async ({
   return result;
 };
 
+const deleteConversation = async (id: string): Promise<Conversation> => {
+  const result = await db.query(
+    "UPDATE conversations SET deleted_at = NOW() WHERE id = $1 RETURNING *",
+    [id],
+  );
+  return result.rows[0];
+};
+
 export const conversationRepository = {
   create,
   findById,
@@ -103,4 +112,5 @@ export const conversationRepository = {
   findDirectConversation,
   findUserConversations,
   updateConversation,
+  deleteConversation,
 };
