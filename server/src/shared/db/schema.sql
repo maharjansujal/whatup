@@ -21,6 +21,12 @@ CREATE INDEX idx_users_last_seen_at ON users (last_seen_at);
 
 CREATE TYPE conversation_type AS ENUM ('group', 'direct');
 
+CREATE TYPE conversation_role AS ENUM ('owner', 'admin', 'member');
+
+CREATE TYPE message_type AS ENUM ('text', 'image', 'file', 'system');
+
+CREATE TYPE conversation_request_status AS ENUM ('pending', 'accepted', 'declined', 'cancelled');
+
 CREATE TABLE
     conversations (
         id BIGSERIAL PRIMARY KEY,
@@ -59,8 +65,6 @@ CREATE INDEX idx_invites_code ON conversation_invites (code);
 
 CREATE INDEX idx_invites_expires_at ON conversation_invites (expires_at);
 
-CREATE TYPE conversation_role AS ENUM ('owner', 'admin', 'member');
-
 CREATE TABLE
     conversation_members (
         id BIGSERIAL PRIMARY KEY,
@@ -80,8 +84,6 @@ CREATE INDEX idx_members_user_id ON conversation_members (user_id);
 
 CREATE INDEX idx_members_conversation_id ON conversation_members (conversation_id);
 
-CREATE TYPE message_type AS ENUM ('text', 'image', 'file', 'system');
-
 CREATE TABLE
     messages (
         id BIGSERIAL PRIMARY KEY,
@@ -90,7 +92,7 @@ CREATE TABLE
         type message_type NOT NULL,
         content TEXT,
         reply_to_message_id BIGINT REFERENCES messages (id),
-        edited_at TIMESTAMPTZ,
+        updated_at TIMESTAMPTZ,
         deleted_at TIMESTAMPTZ,
         created_at TIMESTAMPTZ NOT NULL DEFAULT now ()
     );
@@ -131,3 +133,34 @@ CREATE TABLE
 CREATE INDEX idx_attachments_message_id ON message_attachments (message_id);
 
 CREATE INDEX idx_attachments_mime_type ON message_attachments (mime_type);
+
+CREATE TABLE
+    conversation_requests (
+        id BIGSERIAL PRIMARY KEY,
+        conversation_id BIGINT NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
+        requester_id BIGINT NOT NULL REFERENCES users (id),
+        recipient_id BIGINT NOT NULL REFERENCES users (id),
+        status conversation_request_status NOT NULL DEFAULT 'pending',
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now (),
+        responded_at TIMESTAMPTZ
+    );
+
+CREATE INDEX idx_conversation_requests_requester ON conversation_requests (requester_id);
+
+CREATE INDEX idx_conversation_requests_recipient ON conversation_requests (recipient_id);
+
+CREATE TABLE
+    user_blocks (
+        blocker_id BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+        blocked_id BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now (),
+        PRIMARY KEY (blocker_id, blocked_id)
+    );
+
+CREATE INDEX idx_user_blocks_blocker ON user_blocks (blocker_id);
+
+CREATE INDEX idx_user_blocks_blocked ON user_blocks (blocked_id);
+
+ALTER TABLE conversations ADD CONSTRAINT fk_conversations_last_message FOREIGN KEY (last_message_id) REFERENCES messages (id);
+
+ALTER TABLE conversation_members ADD CONSTRAINT fk_conversation_members_last_read_message FOREIGN KEY (last_read_message_id) REFERENCES messages (id);
