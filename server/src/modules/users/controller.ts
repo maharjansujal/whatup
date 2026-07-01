@@ -11,13 +11,13 @@ const getAllUsers = asyncHandler(async (_req, res) => {
 });
 
 const getUserById = asyncHandler(async (req, res) => {
-  const user = await userService.getUserById(Number(req.params.id));
+  const user = await userService.getUserById(req.params.id.toString());
   res.status(200).json({ status: "success", data: user });
 });
 
 const getMe = asyncHandler(async (req, res) => {
-  const userId = req.user?.id;
-  const you = await userService.getUserById(Number(userId));
+  const userId = req.user.id;
+  const you = await userService.getUserById(userId!.toString());
   res.status(200).json({ status: "success", data: you });
 });
 

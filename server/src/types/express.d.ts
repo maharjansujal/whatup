@@ -7,7 +7,8 @@ export interface AuthUser extends JwtPayload {
 declare global {
   namespace Express {
     interface Request {
-      user?: AuthUser;
+      user: AuthUser;
     }
   }
 }
+export {};

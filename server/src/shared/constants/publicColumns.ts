@@ -8,7 +8,7 @@ export const USER_PUBLIC_COLUMNS = [
   "created_at",
   "updated_at",
   "deleted_at",
-].join(", ");
+] as const;
 
 export const USER_AUTH_COLUMNS = [
   "id",

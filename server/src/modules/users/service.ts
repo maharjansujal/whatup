@@ -6,7 +6,7 @@ const getAllUsers = () => {
   return result;
 };
 
-const getUserById = (id: number) => {
+const getUserById = (id: string) => {
   const result = userRepository.getUserById(id);
   return result;
 };
