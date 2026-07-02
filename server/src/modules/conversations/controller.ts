@@ -1,4 +1,3 @@
-import { createAppError } from "../../shared/errors/appError";
 import { asyncHandler } from "../../shared/utils/asyncHandler";
 import { conversationService } from "./service";
 

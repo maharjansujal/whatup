@@ -1,0 +1,174 @@
+import { db } from "../../shared/db";
+import { CreateMemberInput, Member } from "./types";
+
+const createMember = async ({
+  conversationId,
+  userId,
+  role = "member",
+}: CreateMemberInput): Promise<Member> => {
+  const result = await db.query(
+    "INSERT INTO conversation_members (conversation_id, user_id, role) VALUES ($1, $2, $3) RETURNING *",
+    [conversationId, userId, role],
+  );
+
+  return result.rows[0];
+};
+
+const deleteMember = async ({
+  conversationId,
+  userId,
+}: {
+  conversationId: string;
+  userId: string;
+}): Promise<Member> => {
+  const result = await db.query(
+    "DELETE FROM conversation_members WHERE conversation_id = $1 AND user_id = $2 RETURNING *",
+    [conversationId, userId],
+  );
+  return result.rows[0];
+};
+
+const promoteMember = async ({
+  conversationId,
+  userId,
+}: {
+  conversationId: string;
+  userId: string;
+}): Promise<Member> => {
+  const result = await db.query(
+    "UPDATE conversation_members SET role = 'admin' WHERE conversation_id = $1 AND user_id = $2 RETURNING *",
+    [conversationId, userId],
+  );
+  return result.rows[0];
+};
+
+const demoteMember = async ({
+  conversationId,
+  userId,
+}: {
+  conversationId: string;
+  userId: string;
+}): Promise<Member> => {
+  const result = await db.query(
+    "UPDATE conversation_members SET role = 'member' WHERE conversation_id = $1 AND user_id = $2 RETURNING *",
+    [conversationId, userId],
+  );
+  return result.rows[0];
+};
+
+const getAllMembers = async (conversationId: string) => {
+  const result = await db.query(
+    `SELECT u.username, u.display_name, cm.nickname, u.avatar_url, cm."role", u.bio 
+    FROM users u
+    JOIN conversation_members cm ON u.id = cm.user_id
+    WHERE cm.conversation_id = $1`,
+    [conversationId],
+  );
+  return result.rows;
+};
+
+const getMemberById = async ({
+  conversationId,
+  userId,
+}: {
+  conversationId: string;
+  userId: string;
+}) => {
+  const result = await db.query(
+    `SELECT u.username, u.display_name, cm.nickname, u.avatar_url, cm."role", u.bio 
+      FROM users u
+      JOIN conversation_members cm ON u.id = cm.user_id
+      WHERE cm.conversation_id = $1 AND u.id = $2`,
+    [conversationId, userId],
+  );
+  return result.rows[0];
+};
+
+const isMember = async ({
+  conversationId,
+  userId,
+}: {
+  conversationId: string;
+  userId: string;
+}): Promise<boolean> => {
+  const result = await db.query(
+    "SELECT EXISTS (SELECT 1 FROM conversation_members WHERE conversation_id = $1 AND user_id = $2)",
+    [conversationId, userId],
+  );
+  return result.rows[0].exists;
+};
+
+const updateLastRead = async ({
+  lastReadMessageId,
+  conversationId,
+  userId,
+}: {
+  lastReadMessageId: string;
+  conversationId: string;
+  userId: string;
+}): Promise<Member> => {
+  const result = await db.query(
+    "UPDATE conversation_members SET last_read_message_id = $1, last_read_at = NOW() WHERE conversation_id = $2 AND user_id = $3 RETURNING *",
+    [lastReadMessageId, conversationId, userId],
+  );
+  return result.rows[0];
+};
+
+const updateNickname = async ({
+  conversation_id,
+  nickname,
+  user_id,
+}: {
+  conversation_id: string;
+  nickname: string;
+  user_id: string;
+}) => {
+  const result = await db.query(
+    "UPDATE conversation_members SET nickname = $2 WHERE conversation_id = $1 AND user_id = $3 RETURNING *",
+    [conversation_id, nickname, user_id],
+  );
+  return result.rows[0];
+};
+
+const muteConversation = async ({
+  conversation_id,
+  user_id,
+}: {
+  conversation_id: string;
+  user_id: string;
+}) => {
+  const result = await db.query(
+    "UPDATE conversation_members SET is_muted = TRUE WHERE conversation_id = $1 AND user_id = $2 RETURNING *",
+    [conversation_id, user_id],
+  );
+  return result.rows[0];
+};
+
+const archiveConversation = async ({
+  conversation_id,
+  user_id,
+}: {
+  conversation_id: string;
+  user_id: string;
+}) => {
+  const result = await db.query(
+    "UPDATE conversation_members SET is_archived = TRUE WHERE conversation_id = $1 AND user_id = $2 RETURNING *",
+    [conversation_id, user_id],
+  );
+  return result.rows[0];
+};
+
+export const memberRepository = {
+  createMember,
+  deleteMember,
+  promoteMember,
+  demoteMember,
+  getAllMembers,
+  getMemberById,
+
+  isMember,
+  updateLastRead,
+  updateNickname,
+  muteConversation,
+  archiveConversation,
+};

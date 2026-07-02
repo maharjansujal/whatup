@@ -137,7 +137,6 @@ CREATE INDEX idx_attachments_mime_type ON message_attachments (mime_type);
 CREATE TABLE
     conversation_requests (
         id BIGSERIAL PRIMARY KEY,
-        conversation_id BIGINT NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
         requester_id BIGINT NOT NULL REFERENCES users (id),
         recipient_id BIGINT NOT NULL REFERENCES users (id),
         status conversation_request_status NOT NULL DEFAULT 'pending',
