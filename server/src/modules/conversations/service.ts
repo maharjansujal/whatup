@@ -3,10 +3,13 @@ import { userRepository } from "../users/repository";
 import { conversationRepository } from "./repository";
 import { ConversationUpdateInput } from "./types";
 
-const createDirectConversation = async (
-  currentUserId: string,
-  otherUserId: string,
-) => {
+const createDirectConversation = async ({
+  currentUserId,
+  otherUserId,
+}: {
+  currentUserId: string;
+  otherUserId: string;
+}) => {
   const otherUser = await userRepository.getUserById(otherUserId);
 
   if (!otherUser) {
@@ -36,6 +39,44 @@ const createDirectConversation = async (
     userId: otherUserId,
   });
 
+  return conversation;
+};
+
+const createGroupConversation = async ({
+  currentUserId,
+  otherUserIds,
+}: {
+  currentUserId: string;
+  otherUserIds: string[];
+}) => {
+  const otherUsers: string[] = [];
+
+  for (const id of otherUserIds) {
+    const user = await userRepository.getUserById(id);
+
+    if (!user) {
+      throw createAppError(`User ${id} not found`, 404);
+    }
+
+    otherUsers.push(user.id);
+  }
+  if (otherUsers.length === 0) {
+    throw createAppError("No user to add", 401);
+  }
+  const conversation = await conversationRepository.create({
+    type: "group",
+    createdByUserId: currentUserId,
+  });
+  await conversationRepository.createMember({
+    userId: currentUserId,
+    conversationId: conversation.id,
+  });
+  for (let i = 0; i < otherUsers.length; i++) {
+    await conversationRepository.createMember({
+      userId: otherUsers[i],
+      conversationId: conversation.id,
+    });
+  }
   return conversation;
 };
 
@@ -77,6 +118,7 @@ const deleteConversation = async (id: string) => {
 
 export const conversationService = {
   createDirectConversation,
+  createGroupConversation,
   updateConversation,
   deleteConversation,
 };

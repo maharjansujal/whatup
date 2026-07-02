@@ -5,11 +5,20 @@ const createConversation = asyncHandler(async (req, res) => {
   const currentUserId = req.user.id;
   const userId = req.body.id;
 
-  const result = await conversationService.createDirectConversation(
-    String(currentUserId),
-    userId,
-  );
+  const result = await conversationService.createDirectConversation({
+    currentUserId: String(currentUserId),
+    otherUserId: userId,
+  });
   return res.status(201).json(result);
+});
+
+const createGroupConversation = asyncHandler(async (req, res) => {
+  const currentUserId = req.user.id;
+  const otherUserIds = req.body.id;
+  const result = await conversationService.createGroupConversation({
+    currentUserId: currentUserId.toString(),
+    otherUserIds: otherUserIds,
+  });
 });
 
 const updateConversation = asyncHandler(async (req, res) => {
@@ -35,6 +44,7 @@ const deleteConversation = asyncHandler(async (req, res) => {
 
 export const conversationController = {
   createConversation,
+  createGroupConversation,
   updateConversation,
   deleteConversation,
 };

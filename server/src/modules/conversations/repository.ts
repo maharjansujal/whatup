@@ -1,5 +1,6 @@
 import { db } from "../../shared/db";
 import { updateTable } from "../../shared/utils/updateTable";
+import { Member } from "../members/types";
 import {
   Conversation,
   ConversationUpdateInput,
@@ -32,7 +33,7 @@ const createMember = async ({
   conversationId,
   userId,
   role = "member",
-}: CreateMemberInput) => {
+}: CreateMemberInput): Promise<Member> => {
   const result = await db.query(
     "INSERT INTO conversation_members (conversation_id, user_id, role) VALUES ($1, $2, $3) RETURNING *",
     [conversationId, userId, role],
