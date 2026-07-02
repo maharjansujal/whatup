@@ -11,8 +11,19 @@ const getUserById = (id: string) => {
   return result;
 };
 
-const update = (id: string, data: UpdateUserDto) => {
-  const result = userRepository.update(id, data);
+const update = ({ id, data }: { id: string; data: UpdateUserDto }) => {
+  const result = userRepository.update({ id, data });
+  return result;
+};
+
+const searchUser = ({
+  username,
+  email,
+}: {
+  username?: string;
+  email?: string;
+}) => {
+  const result = userRepository.searchUser({ username, email });
   return result;
 };
 
@@ -20,4 +31,5 @@ export const userService = {
   getAllUsers,
   getUserById,
   update,
+  searchUser,
 };

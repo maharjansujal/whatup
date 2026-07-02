@@ -22,12 +22,21 @@ const getMe = asyncHandler(async (req, res) => {
 });
 
 const updateMe = asyncHandler(async (req, res) => {
-  const userId = req.user!.id;
-  const result = await userService.update(userId, req.body);
+  const userId = req.user.id;
+  const result = await userService.update({ id: userId, data: req.body });
   res.status(200).json({
     status: "success",
     data: result,
   });
+});
+
+const searchUser = asyncHandler(async (req, res) => {
+  const { username, email } = req.query;
+  const result = await userService.searchUser({
+    username: username as string | undefined,
+    email: email as string | undefined,
+  });
+  return res.status(200).json(result);
 });
 
 export const userController = {
@@ -35,4 +44,5 @@ export const userController = {
   getUserById,
   getMe,
   updateMe,
+  searchUser,
 };
