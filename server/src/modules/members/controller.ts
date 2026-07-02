@@ -21,11 +21,11 @@ const createMember = asyncHandler(async (req, res) => {
 });
 
 const deleteMember = asyncHandler(async (req, res) => {
-  const { conversationId, userId } = req.params;
+  const { id, userId } = req.params;
   const requestingUserId = req.user.id;
 
   const requestingUser = await memberService.getMemberById({
-    conversationId: conversationId.toString(),
+    conversationId: id.toString(),
     userId: requestingUserId,
   });
 
@@ -33,7 +33,7 @@ const deleteMember = asyncHandler(async (req, res) => {
     throw createAppError("You are not allowed to kick out a member", 403);
   }
   const result = await memberService.deleteMember({
-    conversationId: conversationId.toString(),
+    conversationId: id.toString(),
     userId: userId.toString(),
   });
   return res.status(200).json(result);
@@ -41,7 +41,7 @@ const deleteMember = asyncHandler(async (req, res) => {
 
 const getAllMembers = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const result = memberService.getAllMembers(id.toString());
+  const result = await memberService.getAllMembers(id.toString());
   return res.status(200).json(result);
 });
 
@@ -60,11 +60,32 @@ const promoteUser = asyncHandler(async (req, res) => {
     conversationId: id.toString(),
     userId: userId.toString(),
   });
+
+  const requestingUserId = req.user.id;
+
+  const requestingUser = await memberService.getMemberById({
+    conversationId: id.toString(),
+    userId: requestingUserId,
+  });
+
+  if (requestingUser.role !== "owner") {
+    throw createAppError("You are not allowed to promote a member", 403);
+  }
   return res.status(200).json(result);
 });
 
 const demoteUser = asyncHandler(async (req, res) => {
   const { id, userId } = req.params;
+  const requestingUserId = req.user.id;
+
+  const requestingUser = await memberService.getMemberById({
+    conversationId: id.toString(),
+    userId: requestingUserId,
+  });
+
+  if (requestingUser.role !== "owner") {
+    throw createAppError("You are not allowed to demote a member", 403);
+  }
   const result = await memberService.demoteUser({
     conversationId: id.toString(),
     userId: userId.toString(),
@@ -73,10 +94,43 @@ const demoteUser = asyncHandler(async (req, res) => {
 });
 
 const updateLastRead = asyncHandler(async (req, res) => {
+  const conversationId = req.params.id;
+  const { lastReadMessageId } = req.body;
+  const userId = req.user.id;
+
   const result = await memberService.updateLastRead({
-    lastReadMessageId,
-    conversationId,
+    conversationId: conversationId.toString(),
     userId,
+    lastReadMessageId,
+  });
+  return res.status(200).json(result);
+});
+
+const updateNickname = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { nickname } = req.body;
+  const result = await memberService.updateNickname({
+    conversation_id: id.toString(),
+    nickname,
+    user_id: req.user.id,
+  });
+  return res.status(200).json(result);
+});
+
+const muteConversation = asyncHandler(async function (req, res) {
+  const { id } = req.params;
+  const result = await memberService.muteConversation({
+    conversation_id: id.toString(),
+    user_id: req.user.id,
+  });
+  return res.status(200).json(result);
+});
+
+const archiveConversation = asyncHandler(async function (req, res) {
+  const { id } = req.params;
+  const result = await memberService.archiveConversation({
+    conversation_id: id.toString(),
+    user_id: req.user.id,
   });
   return res.status(200).json(result);
 });
@@ -90,4 +144,9 @@ export const memberController = {
 
   promoteUser,
   demoteUser,
+
+  updateLastRead,
+  updateNickname,
+  muteConversation,
+  archiveConversation,
 };
