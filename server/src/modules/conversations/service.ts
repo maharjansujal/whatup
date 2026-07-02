@@ -1,3 +1,4 @@
+import { db } from "../../shared/db";
 import { createAppError } from "../../shared/errors/appError";
 import { userRepository } from "../users/repository";
 import { conversationRepository } from "./repository";
@@ -18,28 +19,51 @@ const createDirectConversation = async ({
   if (currentUserId === otherUserId) {
     throw createAppError("You cannot start a conversation with yourself", 400);
   }
+
   const existing = await conversationRepository.findDirectConversation(
     currentUserId,
     otherUserId,
   );
   if (existing) return existing;
 
-  const conversation = await conversationRepository.create({
-    type: "direct",
-    createdByUserId: currentUserId,
-  });
+  // Initialize Connection Client for the Transaction Block
+  const txClient = await db.connect();
 
-  await conversationRepository.createMember({
-    conversationId: conversation.id,
-    userId: currentUserId,
-  });
+  try {
+    await txClient.query("BEGIN");
 
-  await conversationRepository.createMember({
-    conversationId: conversation.id,
-    userId: otherUserId,
-  });
+    const conversation = await conversationRepository.create(
+      {
+        type: "direct",
+        createdByUserId: currentUserId,
+      },
+      txClient,
+    );
 
-  return conversation;
+    await conversationRepository.createMember(
+      {
+        conversationId: conversation.id,
+        userId: currentUserId,
+      },
+      txClient,
+    );
+
+    await conversationRepository.createMember(
+      {
+        conversationId: conversation.id,
+        userId: otherUserId,
+      },
+      txClient,
+    );
+
+    await txClient.query("COMMIT");
+    return conversation;
+  } catch (error) {
+    await txClient.query("ROLLBACK");
+    throw error;
+  } finally {
+    txClient.release(); // Releases pool connection back safely
+  }
 };
 
 const createGroupConversation = async ({
@@ -49,35 +73,54 @@ const createGroupConversation = async ({
   currentUserId: string;
   otherUserIds: string[];
 }) => {
-  const otherUsers: string[] = [];
+  if (!otherUserIds || otherUserIds.length === 0) {
+    throw createAppError(
+      "Group conversations require at least one other member",
+      400,
+    );
+  }
+  const txClient = await db.connect();
+  try {
+    await txClient.query("BEGIN");
+    const conversation = await conversationRepository.create(
+      {
+        type: "group",
+        createdByUserId: currentUserId,
+        name: "New Group Chat", // You can pass dynamic metadata fields as needed
+      },
+      txClient,
+    );
 
-  for (const id of otherUserIds) {
-    const user = await userRepository.getUserById(id);
+    // Add owner / creator member
+    await conversationRepository.createMember(
+      {
+        userId: currentUserId,
+        conversationId: conversation.id,
+        role: "owner",
+      },
+      txClient,
+    );
 
-    if (!user) {
-      throw createAppError(`User ${id} not found`, 404);
+    // Add each invitee
+    for (const userId of otherUserIds) {
+      await conversationRepository.createMember(
+        {
+          userId,
+          conversationId: conversation.id,
+          role: "member",
+        },
+        txClient,
+      );
     }
 
-    otherUsers.push(user.id);
+    await txClient.query("COMMIT");
+    return conversation;
+  } catch (error) {
+    await txClient.query("ROLLBACK");
+    throw error;
+  } finally {
+    txClient.release();
   }
-  if (otherUsers.length === 0) {
-    throw createAppError("No user to add", 401);
-  }
-  const conversation = await conversationRepository.create({
-    type: "group",
-    createdByUserId: currentUserId,
-  });
-  await conversationRepository.createMember({
-    userId: currentUserId,
-    conversationId: conversation.id,
-  });
-  for (let i = 0; i < otherUsers.length; i++) {
-    await conversationRepository.createMember({
-      userId: otherUsers[i],
-      conversationId: conversation.id,
-    });
-  }
-  return conversation;
 };
 
 const updateConversation = async ({
@@ -100,6 +143,7 @@ const updateConversation = async ({
   if (conversation.created_by_user_id !== userId) {
     throw createAppError("You are not allowed to edit this conversation", 403);
   }
+
   const result = await conversationRepository.updateConversation({
     id,
     updates,

@@ -1,4 +1,10 @@
+import { Pool } from "undici-types";
 import { db } from "../db";
+import { PoolClient } from "pg";
+
+type DBExecutor = {
+  query: (text: string, params?: any[]) => Promise<any>;
+};
 
 interface Database {
   users: {
@@ -60,8 +66,13 @@ export async function updateTable<T extends keyof Database>(
   table: T,
   id: number | string,
   updateDto: Update<T>,
-  publicColumns?: ReadonlyArray<keyof Database[T]>,
+  options: {
+    publicColumns?: ReadonlyArray<keyof Database[T]>;
+    executor?: DBExecutor;
+  } = {},
 ) {
+  const { publicColumns, executor = db } = options;
+
   if (Object.keys(updateDto).length === 0) {
     throw new Error("No fields to update");
   }
@@ -81,15 +92,16 @@ export async function updateTable<T extends keyof Database>(
   }
 
   updates.push("updated_at = NOW()");
-
   values.push(id);
 
-  const stmt = `UPDATE ${table}
-     SET ${updates.join(", ")}
-     WHERE id = $${index}
-     RETURNING ${returning}`;
+  const stmt = `
+    UPDATE ${table}
+    SET ${updates.join(", ")}
+    WHERE id = $${index}
+    RETURNING ${returning}
+  `;
 
-  const result = await db.query(`${stmt}`, values);
+  const result = await executor.query(stmt, values);
 
   return result.rows[0];
 }

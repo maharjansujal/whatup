@@ -1,51 +1,67 @@
-import { db } from "../../shared/db";
-import { updateTable } from "../../shared/utils/updateTable";
-import { Member } from "../members/types";
+import { Pool, PoolClient } from "pg";
 import {
   Conversation,
   ConversationUpdateInput,
   CreateConversationInput,
   CreateMemberInput,
 } from "./types";
+import { db } from "../../shared/db";
+import { Member } from "../members/types";
+import { updateTable } from "../../shared/utils/updateTable";
 
-const create = async ({
-  type,
-  createdByUserId,
-  name,
-}: CreateConversationInput) => {
-  const result = await db.query(
-    "INSERT INTO conversations (type, created_by_user_id, name) VALUES ($1, $2, $3) RETURNING *",
+type DBExecutor = Pool | PoolClient;
+
+const create = async (
+  { type, createdByUserId, name }: CreateConversationInput,
+  executor: DBExecutor = db,
+): Promise<Conversation> => {
+  const result = await executor.query(
+    `INSERT INTO conversations (type, created_by_user_id, name)
+     VALUES ($1, $2, $3)
+     RETURNING *`,
     [type, createdByUserId, name ?? null],
   );
 
   return result.rows[0];
 };
 
-const findById = async (id: string): Promise<Conversation> => {
-  const result = await db.query(
-    "SELECT * FROM conversations WHERE id = $1 AND deleted_at IS NULL",
+const findById = async (
+  id: string,
+  executor: DBExecutor = db,
+): Promise<Conversation> => {
+  const result = await executor.query(
+    `SELECT *
+     FROM conversations
+     WHERE id = $1
+       AND deleted_at IS NULL`,
     [id],
   );
+
   return result.rows[0];
 };
 
-const createMember = async ({
-  conversationId,
-  userId,
-  role = "member",
-}: CreateMemberInput): Promise<Member> => {
-  const result = await db.query(
-    "INSERT INTO conversation_members (conversation_id, user_id, role) VALUES ($1, $2, $3) RETURNING *",
+const createMember = async (
+  { conversationId, userId, role = "member" }: CreateMemberInput,
+  executor: DBExecutor = db,
+): Promise<Member> => {
+  const result = await executor.query(
+    `INSERT INTO conversation_members (conversation_id, user_id, role)
+     VALUES ($1, $2, $3)
+     RETURNING *`,
     [conversationId, userId, role],
   );
 
   return result.rows[0];
 };
 
-const findDirectConversation = async (userId1: string, userId2: string) => {
-  const result = await db.query(
+const findDirectConversation = async (
+  userId1: string,
+  userId2: string,
+  executor: DBExecutor = db,
+): Promise<Conversation | null> => {
+  const result = await executor.query(
     `
-   SELECT c.*
+    SELECT c.*
     FROM conversations c
     JOIN conversation_members cm1
       ON cm1.conversation_id = c.id
@@ -55,9 +71,9 @@ const findDirectConversation = async (userId1: string, userId2: string) => {
       AND cm1.user_id = $1
       AND cm2.user_id = $2
       AND (
-          SELECT COUNT(*)
-          FROM conversation_members cm
-          WHERE cm.conversation_id = c.id
+        SELECT COUNT(*)
+        FROM conversation_members cm
+        WHERE cm.conversation_id = c.id
       ) = 2
     `,
     [userId1, userId2],
@@ -66,14 +82,13 @@ const findDirectConversation = async (userId1: string, userId2: string) => {
   return result.rows[0] ?? null;
 };
 
-const findUserConversations = async (userId: string) => {
-  const result = await db.query(
+const findUserConversations = async (
+  userId: string,
+  executor: DBExecutor = db,
+) => {
+  const result = await executor.query(
     `
-    SELECT
-      c.*,
-      cm.role,
-      cm.is_muted,
-      cm.is_archived
+    SELECT c.*, cm.role, cm.is_muted, cm.is_archived
     FROM conversations c
     JOIN conversation_members cm
       ON cm.conversation_id = c.id
@@ -90,19 +105,28 @@ const findUserConversations = async (userId: string) => {
 const updateConversation = async ({
   id,
   updates,
+  executor = db,
 }: {
   id: string;
   updates: ConversationUpdateInput;
+  executor?: DBExecutor;
 }) => {
-  const result = await updateTable("conversations", id, updates);
-  return result;
+  return updateTable("conversations", id, updates, {
+    executor,
+  });
 };
 
-const deleteConversation = async (id: string): Promise<Conversation> => {
-  const result = await db.query(
-    "UPDATE conversations SET deleted_at = NOW() WHERE id = $1 RETURNING *",
+const deleteConversation = async (id: string, executor: DBExecutor = db) => {
+  const result = await executor.query(
+    `
+    UPDATE conversations
+    SET deleted_at = NOW(), updated_at = NOW()
+    WHERE id = $1 AND deleted_at IS NULL
+    RETURNING *
+    `,
     [id],
   );
+
   return result.rows[0];
 };
 

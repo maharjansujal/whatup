@@ -19,6 +19,7 @@ const createGroupConversation = asyncHandler(async (req, res) => {
     currentUserId: currentUserId.toString(),
     otherUserIds: otherUserIds,
   });
+  return res.status(201).json(result);
 });
 
 const updateConversation = asyncHandler(async (req, res) => {
