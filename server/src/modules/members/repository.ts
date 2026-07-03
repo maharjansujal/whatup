@@ -1,4 +1,5 @@
 import { db } from "../../shared/db";
+import { createAppError } from "../../shared/errors/appError";
 import { CreateMemberInput, Member } from "./types";
 import { Pool, PoolClient } from "pg";
 
@@ -18,11 +19,13 @@ const createMember = async ({
 const deleteMember = async ({
   conversationId,
   userId,
+  executor = db,
 }: {
   conversationId: string;
   userId: string;
+  executor?: DBExecutor;
 }): Promise<Member> => {
-  const result = await db.query(
+  const result = await executor.query(
     "DELETE FROM conversation_members WHERE conversation_id = $1 AND user_id = $2 RETURNING *",
     [conversationId, userId],
   );
@@ -71,11 +74,13 @@ const getAllMembers = async (conversationId: string) => {
 const getMemberById = async ({
   conversationId,
   userId,
+  executor = db,
 }: {
   conversationId: string;
   userId: string;
+  executor?: DBExecutor;
 }) => {
-  const result = await db.query(
+  const result = await executor.query(
     `SELECT u.username, u.display_name, cm.nickname, u.avatar_url, cm."role", u.bio 
       FROM users u
       JOIN conversation_members cm ON u.id = cm.user_id
@@ -237,6 +242,50 @@ const countMuted = async (
   return parseInt(result.rows[0].count, 10);
 };
 
+const leaveGroup = async ({
+  conversationId,
+  userId,
+}: {
+  conversationId: string;
+  userId: string;
+}) => {
+  const executor = await db.connect(); // PoolClient, matches DBExecutor
+  try {
+    await executor.query("BEGIN");
+
+    const member = await memberRepository.getMemberById({
+      conversationId,
+      userId,
+      executor,
+    });
+
+    if (!member) {
+      throw createAppError("You are not a member of this conversation", 404);
+    }
+
+    if (member.role === "owner") {
+      throw createAppError(
+        "You need to transfer ownership before leaving the group",
+        403,
+      );
+    }
+
+    const deleted = await memberRepository.deleteMember({
+      conversationId,
+      userId,
+      executor,
+    });
+
+    await executor.query("COMMIT");
+    return deleted;
+  } catch (err) {
+    await executor.query("ROLLBACK");
+    throw err;
+  } finally {
+    executor.release();
+  }
+};
+
 export const memberRepository = {
   createMember,
   deleteMember,
@@ -256,4 +305,5 @@ export const memberRepository = {
   getUserConversationIds,
   countArchived,
   countMuted,
+  leaveGroup,
 };

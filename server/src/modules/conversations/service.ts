@@ -20,10 +20,10 @@ const createDirectConversation = async ({
     throw createAppError("You cannot start a conversation with yourself", 400);
   }
 
-  const existing = await conversationRepository.findDirectConversation(
-    currentUserId,
-    otherUserId,
-  );
+  const existing = await conversationRepository.findDirectConversation({
+    userId1: currentUserId,
+    userId2: otherUserId,
+  });
   if (existing) return existing;
 
   const txClient = await db.connect();
@@ -153,7 +153,7 @@ const deleteConversation = async (id: string) => {
   if (!conversation) {
     throw createAppError("Conversation does not exist", 404);
   }
-  const result = await conversationRepository.deleteConversation(id);
+  const result = await conversationRepository.deleteConversation({ id });
   return result;
 };
 
@@ -166,7 +166,7 @@ const getConversationById = async (id: string) => {
 };
 
 const listUserConversations = async (userId: string) => {
-  return conversationRepository.findUserConversations(userId);
+  return conversationRepository.findUserConversations({ userId });
 };
 
 const updateLastMessage = async ({
@@ -186,7 +186,7 @@ const updateLastMessage = async ({
 };
 
 const exists = async (conversationId: string): Promise<boolean> => {
-  return conversationRepository.exists(conversationId);
+  return conversationRepository.exists({ conversationId });
 };
 
 const isGroup = async (conversationId: string): Promise<boolean> => {

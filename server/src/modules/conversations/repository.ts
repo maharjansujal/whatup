@@ -54,11 +54,15 @@ const createMember = async (
   return result.rows[0];
 };
 
-const findDirectConversation = async (
-  userId1: string,
-  userId2: string,
-  executor: DBExecutor = db,
-): Promise<Conversation | null> => {
+const findDirectConversation = async ({
+  userId1,
+  userId2,
+  executor = db,
+}: {
+  userId1: string;
+  userId2: string;
+  executor?: DBExecutor;
+}): Promise<Conversation | null> => {
   const result = await executor.query(
     `
     SELECT c.*
@@ -82,10 +86,13 @@ const findDirectConversation = async (
   return result.rows[0] ?? null;
 };
 
-const findUserConversations = async (
-  userId: string,
-  executor: DBExecutor = db,
-) => {
+const findUserConversations = async ({
+  userId,
+  executor = db,
+}: {
+  userId: string;
+  executor?: DBExecutor;
+}) => {
   const result = await executor.query(
     `
     SELECT c.*, cm.role, cm.is_muted, cm.is_archived
@@ -116,7 +123,13 @@ const updateConversation = async ({
   });
 };
 
-const deleteConversation = async (id: string, executor: DBExecutor = db) => {
+const deleteConversation = async ({
+  id,
+  executor = db,
+}: {
+  id: string;
+  executor?: DBExecutor;
+}) => {
   const result = await executor.query(
     `
     UPDATE conversations
@@ -155,10 +168,13 @@ const updateLastMessage = async ({
   return result.rows[0];
 };
 
-const exists = async (
-  conversationId: string,
-  executor: DBExecutor = db,
-): Promise<boolean> => {
+const exists = async ({
+  conversationId,
+  executor = db,
+}: {
+  conversationId: string;
+  executor?: DBExecutor;
+}): Promise<boolean> => {
   const result = await executor.query(
     `SELECT EXISTS (
       SELECT 1
@@ -172,10 +188,13 @@ const exists = async (
   return result.rows[0].exists;
 };
 
-const isGroup = async (
-  conversationId: string,
-  executor: DBExecutor = db,
-): Promise<boolean> => {
+const isGroup = async ({
+  conversationId,
+  executor = db,
+}: {
+  conversationId: string;
+  executor?: DBExecutor;
+}): Promise<boolean> => {
   const result = await executor.query(
     `SELECT type FROM conversations WHERE id = $1 AND deleted_at IS NULL`,
     [conversationId],
@@ -194,11 +213,15 @@ const getCreator = async (
   return result.rows[0]?.created_by_user_id ?? null;
 };
 
-const isOwner = async (
-  conversationId: string,
-  userId: string,
-  executor: DBExecutor = db,
-): Promise<boolean> => {
+const isOwner = async ({
+  conversationId,
+  userId,
+  executor = db,
+}: {
+  conversationId: string;
+  userId: string;
+  executor?: DBExecutor;
+}): Promise<boolean> => {
   const result = await executor.query(
     `
     SELECT 1
@@ -212,11 +235,15 @@ const isOwner = async (
   return (result.rowCount ?? 0) > 0;
 };
 
-const isAdmin = async (
-  conversationId: string,
-  userId: string,
-  executor: DBExecutor = db,
-): Promise<boolean> => {
+const isAdmin = async ({
+  conversationId,
+  userId,
+  executor = db,
+}: {
+  conversationId: string;
+  userId: string;
+  executor?: DBExecutor;
+}): Promise<boolean> => {
   const result = await executor.query(
     `
     SELECT 1

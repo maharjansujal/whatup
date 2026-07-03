@@ -8,3 +8,5 @@ router.get("/blocks", requireAuth, blockController.getBlockedUsers);
 router.post("/block", requireAuth, blockController.blockUser);
 router.delete("/unblock", requireAuth, blockController.unblockUser);
 router.post("/can-communicate", requireAuth, blockController.canCommunicate);
+
+export default router;

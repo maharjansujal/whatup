@@ -1,4 +1,4 @@
-interface ConversationRequest {
+export interface ConversationRequest {
   id: string;
   requester_id: string;
   recipient_id: string;

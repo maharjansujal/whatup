@@ -1,5 +1,6 @@
 import { Pool, PoolClient } from "pg";
 import { db } from "../../shared/db";
+import { ConversationRequest } from "./types";
 
 type DBExecutor = Pool | PoolClient;
 

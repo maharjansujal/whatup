@@ -148,8 +148,8 @@ const addAttachments = async (
     duration?: number;
     thumbnailUrl?: string;
   }[],
-): Promise<AttachmentInput[]> => {
-  const results: AttachmentInput[] = [];
+): Promise<Attachment[]> => {
+  const results: Attachment[] = [];
   for (const attachment of data) {
     const result = await db.query(
       `INSERT INTO message_attachments 
