@@ -1,5 +1,6 @@
 import { db } from "../../shared/db";
 import { CreateMemberInput, Member } from "./types";
+import { Pool, PoolClient } from "pg";
 
 const createMember = async ({
   conversationId,
@@ -174,6 +175,45 @@ const getMemberIds = async (conversationId: string): Promise<string[]> => {
   return result.rows.map((row) => row.user_id);
 };
 
+type DBExecutor = Pool | PoolClient;
+
+// List all archived chats for a user
+const listArchivedChats = async (
+  userId: string,
+  executor: DBExecutor = db,
+): Promise<Member[]> => {
+  const result = await executor.query(
+    `SELECT * FROM conversation_members
+     WHERE user_id = $1 AND is_archived = TRUE`,
+    [userId],
+  );
+  return result.rows;
+};
+
+const listMuted = async (
+  userId: string,
+  executor: DBExecutor = db,
+): Promise<Member[]> => {
+  const result = await executor.query(
+    `SELECT * FROM conversation_members
+     WHERE user_id = $1 AND is_muted = TRUE`,
+    [userId],
+  );
+  return result.rows;
+};
+
+const getUserConversationIds = async (
+  userId: string,
+  executor: DBExecutor = db,
+): Promise<string[]> => {
+  const result = await executor.query(
+    `SELECT conversation_id FROM conversation_members
+     WHERE user_id = $1`,
+    [userId],
+  );
+  return result.rows.map((r) => r.conversation_id);
+};
+
 export const memberRepository = {
   createMember,
   deleteMember,
@@ -188,4 +228,7 @@ export const memberRepository = {
   archiveConversation,
   countMembers,
   getMemberIds,
+  listArchivedChats,
+  listMuted,
+  getUserConversationIds,
 };
