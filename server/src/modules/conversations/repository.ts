@@ -189,6 +189,42 @@ const getCreator = async (
   return result.rows[0]?.created_by_user_id ?? null;
 };
 
+const isOwner = async (
+  conversationId: string,
+  userId: string,
+  executor: DBExecutor = db,
+): Promise<boolean> => {
+  const result = await executor.query(
+    `
+    SELECT 1
+    FROM conversation_members
+    WHERE conversation_id = $1
+      AND user_id = $2
+      AND role = 'owner'
+    `,
+    [conversationId, userId],
+  );
+  return (result.rowCount ?? 0) > 0;
+};
+
+const isAdmin = async (
+  conversationId: string,
+  userId: string,
+  executor: DBExecutor = db,
+): Promise<boolean> => {
+  const result = await executor.query(
+    `
+    SELECT 1
+    FROM conversation_members
+    WHERE conversation_id = $1
+      AND user_id = $2
+      AND role = 'admin'
+    `,
+    [conversationId, userId],
+  );
+  return (result.rowCount ?? 0) > 0;
+};
+
 export const conversationRepository = {
   create,
   findById,
@@ -201,4 +237,6 @@ export const conversationRepository = {
   exists,
   isGroup,
   getCreator,
+  isAdmin,
+  isOwner,
 };
