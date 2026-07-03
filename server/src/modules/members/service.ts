@@ -1,3 +1,4 @@
+import { createAppError } from "../../shared/errors/appError";
 import { memberRepository } from "./repository";
 import { ChatMember, CreateMemberInput } from "./types";
 
@@ -43,30 +44,42 @@ const getMemberById = ({
   });
 };
 
-const promoteUser = ({
+const promoteUser = async ({
   conversationId,
   userId,
+  requestingUserId,
 }: {
   conversationId: string;
   userId: string;
+  requestingUserId: string;
 }) => {
-  return memberRepository.promoteMember({
+  const requester = await memberRepository.getMemberById({
     conversationId,
-    userId,
+    userId: requestingUserId,
   });
+  if (requester.role !== "owner") {
+    throw createAppError("You are not allowed to promote a member", 403);
+  }
+  return memberRepository.promoteMember({ conversationId, userId });
 };
 
-const demoteUser = ({
+const demoteUser = async ({
   conversationId,
   userId,
+  requestingUserId,
 }: {
   conversationId: string;
   userId: string;
+  requestingUserId: string;
 }) => {
-  return memberRepository.demoteMember({
+  const requester = await memberRepository.getMemberById({
     conversationId,
-    userId,
+    userId: requestingUserId,
   });
+  if (requester.role !== "owner") {
+    throw createAppError("You are not allowed to demote a member", 403);
+  }
+  return memberRepository.demoteMember({ conversationId, userId });
 };
 
 const updateLastRead = ({
@@ -162,13 +175,10 @@ export const memberService = {
   getMemberById,
   promoteUser,
   demoteUser,
-
   updateLastRead,
   updateNickname,
-
   muteConversation,
   archiveConversation,
-
   listArchivedChats,
   listMuted,
   getUserConversationIds,

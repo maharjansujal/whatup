@@ -59,36 +59,17 @@ const promoteUser = asyncHandler(async (req, res) => {
   const result = await memberService.promoteUser({
     conversationId: id.toString(),
     userId: userId.toString(),
+    requestingUserId: req.user.id,
   });
-
-  const requestingUserId = req.user.id;
-
-  const requestingUser = await memberService.getMemberById({
-    conversationId: id.toString(),
-    userId: requestingUserId,
-  });
-
-  if (requestingUser.role !== "owner") {
-    throw createAppError("You are not allowed to promote a member", 403);
-  }
   return res.status(200).json(result);
 });
 
 const demoteUser = asyncHandler(async (req, res) => {
   const { id, userId } = req.params;
-  const requestingUserId = req.user.id;
-
-  const requestingUser = await memberService.getMemberById({
-    conversationId: id.toString(),
-    userId: requestingUserId,
-  });
-
-  if (requestingUser.role !== "owner") {
-    throw createAppError("You are not allowed to demote a member", 403);
-  }
   const result = await memberService.demoteUser({
     conversationId: id.toString(),
     userId: userId.toString(),
+    requestingUserId: req.user.id,
   });
   return res.status(200).json(result);
 });
@@ -135,6 +116,48 @@ const archiveConversation = asyncHandler(async function (req, res) {
   return res.status(200).json(result);
 });
 
+const countMembers = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const result = await memberService.countMembers(id.toString());
+  return res.status(200).json({ count: result });
+});
+
+const getMemberIds = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const result = await memberService.getMemberIds(id.toString());
+  return res.status(200).json(result);
+});
+
+const getUserConversationIds = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const result = await memberService.getUserConversationIds(userId.toString());
+  return res.status(200).json(result);
+});
+
+const listArchivedChats = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const result = await memberService.listArchivedChats(userId.toString());
+  return res.status(200).json(result);
+});
+
+const listMuted = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const result = await memberService.listMuted(userId.toString());
+  return res.status(200).json(result);
+});
+
+const countArchived = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const result = await memberService.countArchived(userId.toString());
+  return res.status(200).json({ count: result });
+});
+
+const countMuted = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const result = await memberService.countMuted(userId.toString());
+  return res.status(200).json({ count: result });
+});
+
 export const memberController = {
   createMember,
   deleteMember,
@@ -149,4 +172,12 @@ export const memberController = {
   updateNickname,
   muteConversation,
   archiveConversation,
+
+  countMembers,
+  getMemberIds,
+  getUserConversationIds,
+  listArchivedChats,
+  listMuted,
+  countArchived,
+  countMuted,
 };
