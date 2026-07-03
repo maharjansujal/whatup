@@ -130,6 +130,65 @@ const deleteConversation = async (id: string, executor: DBExecutor = db) => {
   return result.rows[0];
 };
 
+const updateLastMessage = async (
+  conversationId: string,
+  messageId: string,
+  createdAt: Date,
+  executor: DBExecutor = db,
+): Promise<Conversation> => {
+  const result = await executor.query(
+    `
+    UPDATE conversations
+    SET last_message_id = $2,
+        last_message_at = $3,
+        updated_at = NOW()
+    WHERE id = $1 AND deleted_at IS NULL
+    RETURNING *
+    `,
+    [conversationId, messageId, createdAt],
+  );
+  return result.rows[0];
+};
+
+const exists = async (
+  conversationId: string,
+  executor: DBExecutor = db,
+): Promise<boolean> => {
+  const result = await executor.query(
+    `SELECT EXISTS (
+      SELECT 1
+      FROM conversations
+      WHERE id = $1
+        AND deleted_at IS NULL
+    )`,
+    [conversationId],
+  );
+
+  return result.rows[0].exists;
+};
+
+const isGroup = async (
+  conversationId: string,
+  executor: DBExecutor = db,
+): Promise<boolean> => {
+  const result = await executor.query(
+    `SELECT type FROM conversations WHERE id = $1 AND deleted_at IS NULL`,
+    [conversationId],
+  );
+  return result.rows[0]?.type === "group";
+};
+
+const getCreator = async (
+  conversationId: string,
+  executor: DBExecutor = db,
+): Promise<string | null> => {
+  const result = await executor.query(
+    `SELECT created_by_user_id FROM conversations WHERE id = $1 AND deleted_at IS NULL`,
+    [conversationId],
+  );
+  return result.rows[0]?.created_by_user_id ?? null;
+};
+
 export const conversationRepository = {
   create,
   findById,
@@ -138,4 +197,8 @@ export const conversationRepository = {
   findUserConversations,
   updateConversation,
   deleteConversation,
+  updateLastMessage,
+  exists,
+  isGroup,
+  getCreator,
 };
