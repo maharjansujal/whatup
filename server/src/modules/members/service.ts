@@ -1,89 +1,75 @@
 import { memberRepository } from "./repository";
-import { createAppError } from "../../shared/errors/appError";
 import { ChatMember, CreateMemberInput } from "./types";
 
-const createMember = async ({
+const createMember = ({
   conversationId,
   userId,
   role = "member",
 }: CreateMemberInput) => {
-  const isMember = await memberRepository.isMember({ conversationId, userId });
-  if (isMember) {
-    throw createAppError("Member already exists", 409);
-  }
-  const member = await memberRepository.createMember({
+  return memberRepository.createMember({
     conversationId,
     userId,
     role,
   });
-  return member;
 };
 
-const deleteMember = async ({
+const deleteMember = ({
   conversationId,
   userId,
 }: {
   conversationId: string;
   userId: string;
 }) => {
-  const result = await memberRepository.deleteMember({
+  return memberRepository.deleteMember({
     conversationId,
     userId,
   });
-  if (!result) {
-    throw createAppError("This user is not a member of this conversation", 404);
-  }
-  return result;
 };
 
-const getAllMembers = async (conversationId: string): Promise<ChatMember[]> => {
-  const result = await memberRepository.getAllMembers(conversationId);
-  return result;
+const getAllMembers = (conversationId: string): Promise<ChatMember[]> => {
+  return memberRepository.getAllMembers(conversationId);
 };
 
-const getMemberById = async ({
+const getMemberById = ({
   conversationId,
   userId,
 }: {
   conversationId: string;
   userId: string;
 }): Promise<ChatMember> => {
-  const result = await memberRepository.getMemberById({
+  return memberRepository.getMemberById({
     conversationId,
     userId,
   });
-  return result;
 };
 
-const promoteUser = async ({
+const promoteUser = ({
   conversationId,
   userId,
 }: {
   conversationId: string;
   userId: string;
 }) => {
-  const result = await memberRepository.promoteMember({
+  return memberRepository.promoteMember({
     conversationId,
     userId,
   });
-  return result;
 };
 
-const demoteUser = async ({
+const demoteUser = ({
   conversationId,
   userId,
 }: {
   conversationId: string;
   userId: string;
 }) => {
-  const result = await memberRepository.demoteMember({
+  return memberRepository.demoteMember({
     conversationId,
     userId,
   });
-  return result;
 };
 
-const updateLastRead = async ({
+const updateLastRead = ({
   lastReadMessageId,
   conversationId,
   userId,
@@ -92,15 +78,14 @@ const updateLastRead = async ({
   conversationId: string;
   userId: string;
 }) => {
-  const result = await memberRepository.updateLastRead({
+  return memberRepository.updateLastRead({
     lastReadMessageId,
     conversationId,
     userId,
   });
-  return result;
 };
 
-const updateNickname = async ({
+const updateNickname = ({
   conversation_id,
   nickname,
   user_id,
@@ -109,40 +94,65 @@ const updateNickname = async ({
   nickname: string;
   user_id: string;
 }) => {
-  const result = await memberRepository.updateNickname({
+  return memberRepository.updateNickname({
     conversation_id,
     nickname,
     user_id,
   });
-  return result;
 };
 
-const muteConversation = async ({
+const muteConversation = ({
   conversation_id,
   user_id,
 }: {
   conversation_id: string;
   user_id: string;
 }) => {
-  const result = await memberRepository.muteConversation({
+  return memberRepository.muteConversation({
     conversation_id,
     user_id,
   });
-  return result;
 };
 
-const archiveConversation = async ({
+const archiveConversation = ({
   conversation_id,
   user_id,
 }: {
   conversation_id: string;
   user_id: string;
 }) => {
-  const result = await memberRepository.archiveConversation({
+  return memberRepository.archiveConversation({
     conversation_id,
     user_id,
   });
-  return result;
+};
+
+const listArchivedChats = (userId: string) => {
+  return memberRepository.listArchivedChats(userId);
+};
+
+const listMuted = (userId: string) => {
+  return memberRepository.listMuted(userId);
+};
+
+const getUserConversationIds = (userId: string) => {
+  return memberRepository.getUserConversationIds(userId);
+};
+
+const countArchived = (userId: string) => {
+  return memberRepository.countArchived(userId);
+};
+
+const countMuted = (userId: string) => {
+  return memberRepository.countMuted(userId);
+};
+
+const countMembers = (conversationId: string) => {
+  return memberRepository.countMembers(conversationId);
+};
+
+const getMemberIds = (conversationId: string) => {
+  return memberRepository.getMemberIds(conversationId);
 };
 
 export const memberService = {
@@ -158,4 +168,12 @@ export const memberService = {
 
   muteConversation,
   archiveConversation,
+
+  listArchivedChats,
+  listMuted,
+  getUserConversationIds,
+  countArchived,
+  countMuted,
+  countMembers,
+  getMemberIds,
 };

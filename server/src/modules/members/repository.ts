@@ -177,7 +177,6 @@ const getMemberIds = async (conversationId: string): Promise<string[]> => {
 
 type DBExecutor = Pool | PoolClient;
 
-// List all archived chats for a user
 const listArchivedChats = async (
   userId: string,
   executor: DBExecutor = db,
@@ -214,6 +213,30 @@ const getUserConversationIds = async (
   return result.rows.map((r) => r.conversation_id);
 };
 
+const countArchived = async (
+  userId: string,
+  executor: DBExecutor = db,
+): Promise<number> => {
+  const result = await executor.query(
+    `SELECT COUNT(*) FROM conversation_members
+     WHERE user_id = $1 AND is_archived = TRUE`,
+    [userId],
+  );
+  return parseInt(result.rows[0].count, 10);
+};
+
+const countMuted = async (
+  userId: string,
+  executor: DBExecutor = db,
+): Promise<number> => {
+  const result = await executor.query(
+    `SELECT COUNT(*) FROM conversation_members
+     WHERE user_id = $1 AND is_muted = TRUE`,
+    [userId],
+  );
+  return parseInt(result.rows[0].count, 10);
+};
+
 export const memberRepository = {
   createMember,
   deleteMember,
@@ -231,4 +254,6 @@ export const memberRepository = {
   listArchivedChats,
   listMuted,
   getUserConversationIds,
+  countArchived,
+  countMuted,
 };
