@@ -98,7 +98,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch app.ts",
     "deletion": "tsx script/delete.ts",
-    "migration": "tsx script/migrate.ts"
+    "migration": "tsx script/migrate.ts",
+    "seed": "tsx script/seed.ts"
   },
   "keywords": [],
   "author": "",
