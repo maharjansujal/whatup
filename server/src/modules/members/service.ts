@@ -1,5 +1,5 @@
+import { db } from "../../shared/db";
 import { createAppError } from "../../shared/errors/appError";
-import { conversationRepository } from "../conversations/repository";
 import { memberRepository } from "./repository";
 import { ChatMember, CreateMemberInput } from "./types";
 
@@ -176,25 +176,45 @@ const leaveGroup = async ({
   conversationId: string;
   userId: string;
 }) => {
-  const member = await memberRepository.getMemberById({
-    conversationId,
-    userId,
-  });
-  // prevent owners from leaving unless they transfer ownership
-  const isOwner = await conversationRepository.isOwner({
-    conversationId,
-    userId,
-  });
-  if (isOwner) {
-    throw createAppError(
-      "You need to transfer ownership before leaving the group",
-      403,
+  const executor = await db.connect();
+  try {
+    await executor.query("BEGIN");
+
+    const member = await memberRepository.getMemberById(
+      {
+        conversationId,
+        userId,
+      },
+      executor,
     );
+
+    if (!member) {
+      throw createAppError("You are not a member of this conversation", 404);
+    }
+
+    if (member.role === "owner") {
+      throw createAppError(
+        "You need to transfer ownership before leaving the group",
+        403,
+      );
+    }
+
+    const deleted = await memberRepository.deleteMember(
+      {
+        conversationId,
+        userId,
+      },
+      executor,
+    );
+
+    await executor.query("COMMIT");
+    return deleted;
+  } catch (err) {
+    await executor.query("ROLLBACK");
+    throw err;
+  } finally {
+    executor.release();
   }
-  if (!member) {
-    throw createAppError("You are not a member of this conversation", 404);
-  }
-  return memberRepository.deleteMember({ conversationId, userId });
 };
 
 export const memberService = {

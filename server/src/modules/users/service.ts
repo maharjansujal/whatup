@@ -7,7 +7,7 @@ const getAllUsers = () => {
 };
 
 const getUserById = (id: string) => {
-  const result = userRepository.getUserById(id);
+  const result = userRepository.findById(id);
   return result;
 };
 
