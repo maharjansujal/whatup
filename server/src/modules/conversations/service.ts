@@ -11,7 +11,7 @@ const createDirectConversation = async ({
   currentUserId: string;
   otherUserId: string;
 }) => {
-  const otherUser = await userRepository.getUserById(otherUserId);
+  const otherUser = await userRepository.findById(otherUserId);
 
   if (!otherUser) {
     throw createAppError("User not found", 404);
@@ -26,7 +26,6 @@ const createDirectConversation = async ({
   );
   if (existing) return existing;
 
-  // Initialize Connection Client for the Transaction Block
   const txClient = await db.connect();
 
   try {
@@ -62,7 +61,7 @@ const createDirectConversation = async ({
     await txClient.query("ROLLBACK");
     throw error;
   } finally {
-    txClient.release(); // Releases pool connection back safely
+    txClient.release();
   }
 };
 
@@ -86,12 +85,11 @@ const createGroupConversation = async ({
       {
         type: "group",
         createdByUserId: currentUserId,
-        name: "New Group Chat", // You can pass dynamic metadata fields as needed
+        name: "New Group Chat",
       },
       txClient,
     );
 
-    // Add owner / creator member
     await conversationRepository.createMember(
       {
         userId: currentUserId,
@@ -101,7 +99,6 @@ const createGroupConversation = async ({
       txClient,
     );
 
-    // Add each invitee
     for (const userId of otherUserIds) {
       await conversationRepository.createMember(
         {
@@ -160,9 +157,59 @@ const deleteConversation = async (id: string) => {
   return result;
 };
 
+const getConversationById = async (id: string) => {
+  const conversation = await conversationRepository.findById(id);
+  if (!conversation) {
+    throw createAppError("Conversation does not exist", 404);
+  }
+  return conversation;
+};
+
+const listUserConversations = async (userId: string) => {
+  return conversationRepository.findUserConversations(userId);
+};
+
+const updateLastMessage = async ({
+  conversationId,
+  messageId,
+  createdAt,
+}: {
+  conversationId: string;
+  messageId: string;
+  createdAt: Date;
+}) => {
+  return conversationRepository.updateLastMessage({
+    conversationId,
+    messageId,
+    createdAt,
+  });
+};
+
+const exists = async (conversationId: string): Promise<boolean> => {
+  return conversationRepository.exists(conversationId);
+};
+
+const isGroup = async (conversationId: string): Promise<boolean> => {
+  const convo = await conversationRepository.findById(conversationId);
+  if (!convo) throw createAppError("Conversation does not exist", 404);
+  return convo.type === "group";
+};
+
+const getCreator = async (conversationId: string): Promise<string> => {
+  const convo = await conversationRepository.findById(conversationId);
+  if (!convo) throw createAppError("Conversation does not exist", 404);
+  return convo.created_by_user_id;
+};
+
 export const conversationService = {
   createDirectConversation,
   createGroupConversation,
   updateConversation,
   deleteConversation,
+  getConversationById,
+  listUserConversations,
+  updateLastMessage,
+  exists,
+  isGroup,
+  getCreator,
 };

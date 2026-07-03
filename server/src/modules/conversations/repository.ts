@@ -130,12 +130,17 @@ const deleteConversation = async (id: string, executor: DBExecutor = db) => {
   return result.rows[0];
 };
 
-const updateLastMessage = async (
-  conversationId: string,
-  messageId: string,
-  createdAt: Date,
-  executor: DBExecutor = db,
-): Promise<Conversation> => {
+const updateLastMessage = async ({
+  conversationId,
+  messageId,
+  createdAt,
+  executor = db,
+}: {
+  conversationId: string;
+  messageId: string;
+  createdAt: Date;
+  executor?: DBExecutor;
+}): Promise<Conversation> => {
   const result = await executor.query(
     `
     UPDATE conversations
