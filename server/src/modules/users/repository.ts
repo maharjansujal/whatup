@@ -1,4 +1,7 @@
-import { USER_PUBLIC_COLUMNS } from "../../shared/constants/publicColumns";
+import {
+  USER_AUTH_COLUMNS,
+  USER_PUBLIC_COLUMNS,
+} from "../../shared/constants/publicColumns";
 import { db } from "../../shared/db";
 import { updateTable } from "../../shared/utils/updateTable";
 import { UpdateUserDto, User } from "./types";
@@ -10,7 +13,25 @@ export const getAllUsers = async (): Promise<User[]> => {
   return result.rows;
 };
 
-export const getUserById = async (id: string): Promise<User> => {
+const findByEmail = async (email: string) => {
+  const result = await db.query(
+    `SELECT ${USER_AUTH_COLUMNS} FROM users WHERE email = $1`,
+    [email],
+  );
+
+  return result.rows[0];
+};
+
+const findByUsername = async (username: string) => {
+  const result = await db.query(
+    `SELECT ${USER_AUTH_COLUMNS} FROM users WHERE username = $1`,
+    [username],
+  );
+
+  return result.rows[0];
+};
+
+export const findById = async (id: string): Promise<User> => {
   const result = await db.query(
     `SELECT ${USER_PUBLIC_COLUMNS.join(", ")} FROM users WHERE id = $1`,
     [id],
@@ -50,7 +71,9 @@ const searchUser = async ({
 
 export const userRepository = {
   getAllUsers,
-  getUserById,
+  findByEmail,
+  findByUsername,
+  findById,
   update,
   searchUser,
 };

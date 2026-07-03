@@ -4,10 +4,11 @@ import { createAppError } from "../../shared/errors/appError";
 import { authRepository } from "./repository";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { userRepository } from "../users/repository";
 
 async function register(data: RegisterDto) {
-  const emailExists = await authRepository.findByEmail(data.email);
-  const usernameExists = await authRepository.findByUsername(data.username);
+  const emailExists = await userRepository.findByEmail(data.email);
+  const usernameExists = await userRepository.findByUsername(data.username);
 
   if (emailExists) {
     throw createAppError("Email already exists", 400);
@@ -29,8 +30,8 @@ async function register(data: RegisterDto) {
 
 async function login(data: LoginDto) {
   const user = data.email
-    ? await authRepository.findByEmail(data.email)
-    : await authRepository.findByUsername(data.username!);
+    ? await userRepository.findByEmail(data.email)
+    : await userRepository.findByUsername(data.username!);
 
   if (!user) {
     throw createAppError("Invalid credentials", 401);
