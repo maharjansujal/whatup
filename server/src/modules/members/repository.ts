@@ -158,6 +158,22 @@ const archiveConversation = async ({
   return result.rows[0];
 };
 
+const countMembers = async (conversationId: string): Promise<number> => {
+  const result = await db.query(
+    "SELECT COUNT(*) FROM conversation_members WHERE conversation_id = $1",
+    [conversationId],
+  );
+  return parseInt(result.rows[0].count, 10);
+};
+
+const getMemberIds = async (conversationId: string): Promise<string[]> => {
+  const result = await db.query(
+    "SELECT user_id FROM conversation_members WHERE conversation_id = $1",
+    [conversationId],
+  );
+  return result.rows.map((row) => row.user_id);
+};
+
 export const memberRepository = {
   createMember,
   deleteMember,
@@ -165,10 +181,11 @@ export const memberRepository = {
   demoteMember,
   getAllMembers,
   getMemberById,
-
   isMember,
   updateLastRead,
   updateNickname,
   muteConversation,
   archiveConversation,
+  countMembers,
+  getMemberIds,
 };
