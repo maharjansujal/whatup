@@ -19,7 +19,17 @@ const login = asyncHandler(async (req, res) => {
   res.status(200).json({ user }); // don’t expose token in body
 });
 
+const logout = asyncHandler(async (_req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  });
+  res.status(200).json({ message: "Logged out successfully" });
+});
+
 export const authController = {
   register,
   login,
+  logout,
 };
