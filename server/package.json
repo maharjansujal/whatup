@@ -13,6 +13,7 @@
     "content-disposition": "^1.1.0",
     "content-type": "^1.0.5",
     "cookie": "^0.7.2",
+    "cookie-parser": "^1.4.7",
     "cookie-signature": "^1.2.2",
     "cors": "^2.8.6",
     "debug": "^4.4.3",
@@ -107,6 +108,7 @@
   "description": "",
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
