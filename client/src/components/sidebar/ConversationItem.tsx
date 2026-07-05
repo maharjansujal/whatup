@@ -47,10 +47,8 @@ export function ConversationItem({
   return (
     <button
       onClick={onSelect}
-      className={`group flex w-full items-center gap-3 rounded-xl border-l-[3px] px-3 py-2.5 text-left transition-colors ${
-        isActive
-          ? "border-l-[#00C2A8] bg-[#1D1F2E]"
-          : "border-l-transparent hover:bg-[#181A26]"
+      className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
+        isActive ? "bg-[#1D1F2E]" : "hover:bg-[#181A26]"
       }`}
     >
       {conversation.type === "group" ? (
