@@ -13,6 +13,7 @@ export interface CreateMessageInput {
 export interface Message extends CreateMessageInput {
   id: string;
   created_at: string;
+  attachments?: Attachment[];
 }
 
 export interface AttachmentInput {
