@@ -18,29 +18,28 @@ export function usePostAuth() {
     },
   });
 
-  const loginMutation = useMutation<User, Error, LoginDto>({
-    mutationFn: async (data) => {
-      const res = await api.post("/auth/login", data);
-      return res.data.user; // backend returns { user }, cookie is set automatically
-    },
-    onSuccess: (user) => {
-      queryClient.setQueryData(["auth-user"], user);
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      navigate("/");
-    },
-  });
-
   const logoutMutation = useMutation({
     mutationFn: async () => {
       await api.post("/auth/logout"); // backend clears cookie
     },
     onSuccess: () => {
-      // Clear cached auth state
       queryClient.removeQueries({ queryKey: ["auth-user"] });
       queryClient.removeQueries({ queryKey: ["users"] });
 
       // Redirect to login
       navigate("/login");
+    },
+  });
+
+  const loginMutation = useMutation<User, Error, LoginDto>({
+    mutationFn: async (data) => {
+      const res = await api.post("/auth/login", data);
+      return res.data.user;
+    },
+    onSuccess: (user) => {
+      queryClient.setQueryData(["auth-user"], user);
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      navigate("/"); // redirect to home/dashboard
     },
   });
 

@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import type { User } from "../../types/user";
 import { api } from "../../api/api";
+import type { User } from "../../types/user";
 import axios from "axios";
 
-export function useGetAuthUser() {
+export function useGetAuth() {
   return useQuery<User | null>({
     queryKey: ["auth-user"],
     queryFn: async () => {
