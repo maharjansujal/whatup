@@ -33,26 +33,18 @@ async function login(data: LoginDto) {
     ? await userRepository.findByEmail(data.email)
     : await userRepository.findByUsername(data.username!);
 
-  if (!user) {
-    throw createAppError("Invalid credentials", 401);
-  }
+  if (!user) throw createAppError("Invalid credentials", 401);
 
   const valid = await bcrypt.compare(data.password, user.password_hash);
-
-  if (!valid) {
-    throw createAppError("Invalid credentials", 401);
-  }
+  if (!valid) throw createAppError("Invalid credentials", 401);
 
   const token = jwt.sign(
-    {
-      id: user.id,
-      email: user.email,
-    },
+    { id: user.id, email: user.email },
     process.env.JWT_SECRET!,
     { expiresIn: "1h" },
   );
 
-  return { token };
+  return { token, user };
 }
 
 export const authService = {
