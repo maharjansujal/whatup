@@ -17,6 +17,6 @@ export function useGetAuth() {
         throw err;
       }
     },
-    retry: false, // don’t retry endlessly if unauthorized
+    retry: false,
   });
 }

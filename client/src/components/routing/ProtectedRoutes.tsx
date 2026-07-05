@@ -5,7 +5,10 @@ export function ProtectedRoute() {
   const { authUser, isLoading } = useAuth();
 
   if (isLoading) return <div>Loading...</div>;
-  if (!authUser) return <Navigate to="/login" replace />;
+
+  if (authUser === null) {
+    return <Navigate to="/login" replace />;
+  }
 
   return <Outlet />;
 }
