@@ -1,70 +1,61 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "../../api/api";
 import { useNavigate } from "react-router-dom";
-import type { LoginPayload } from "../../types/user";
+import { api } from "../../api/api";
+import type { LoginDto, RegisterDto, User } from "../../types/user";
 
 export function usePostAuth() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const registerUserMutation = useMutation({
-    mutationFn: async (formData: FormData) => {
-      const res = await api.post("/users/register", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
+  const registerMutation = useMutation<User, Error, RegisterDto>({
+    mutationFn: async (data) => {
+      const res = await api.post("/auth/register", data);
       return res.data;
     },
-
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       navigate("/login");
     },
   });
 
-  const loginUserMutation = useMutation({
-    mutationFn: async ({ username, password }: LoginPayload) => {
-      const res = await api.post("/users/login", {
-        username,
-        password,
-      });
-      return res.data;
+  const loginMutation = useMutation<User, Error, LoginDto>({
+    mutationFn: async (data) => {
+      const res = await api.post("/auth/login", data);
+      return res.data.user; // backend returns { user }, cookie is set automatically
     },
-    onSuccess: (data) => {
-      if (data?.token) {
-        localStorage.setItem("token", data.token);
-      }
-      if (data?.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
-      // Seeds/updates TanStack cache for immediate global access
-      queryClient.setQueryData(["auth-user"], data?.user);
+    onSuccess: (user) => {
+      queryClient.setQueryData(["auth-user"], user);
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      navigate("/");
     },
   });
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    queryClient.setQueryData(["auth-user"], null);
-    window.location.href = "/login";
-  };
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await api.post("/auth/logout"); // backend clears cookie
+    },
+    onSuccess: () => {
+      // Clear cached auth state
+      queryClient.removeQueries({ queryKey: ["auth-user"] });
+      queryClient.removeQueries({ queryKey: ["users"] });
+
+      // Redirect to login
+      navigate("/login");
+    },
+  });
 
   return {
-    registerUser: registerUserMutation.mutateAsync,
-    registerUserMutation,
-    isRegisteringUser: registerUserMutation.isPending,
-    registerError: registerUserMutation.error,
-    isRegisterError: registerUserMutation.isError,
+    register: registerMutation.mutateAsync,
+    isRegistering: registerMutation.isPending,
+    registerError: registerMutation.error,
 
-    loginUser: loginUserMutation.mutateAsync,
-    loginUserMutation,
-    isLoggingIn: loginUserMutation.isPending,
-    loginError: loginUserMutation.error,
-    isLoginError: loginUserMutation.isError,
+    login: loginMutation.mutateAsync,
+    isLoggingIn: loginMutation.isPending,
+    loginError: loginMutation.error,
 
-    logout,
+    logout: logoutMutation.mutateAsync,
+    isLoggingOut: logoutMutation.isPending,
+    logoutError: logoutMutation.error,
+    isLogoutError: logoutMutation.isError,
   };
 }
