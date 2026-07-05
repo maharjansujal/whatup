@@ -14,10 +14,10 @@ const createConversation = asyncHandler(async (req, res) => {
 
 const createGroupConversation = asyncHandler(async (req, res) => {
   const currentUserId = req.user.id;
-  const otherUserIds = req.body.id;
+  const { member_ids } = req.body;
   const result = await conversationService.createGroupConversation({
     currentUserId: currentUserId.toString(),
-    otherUserIds: otherUserIds,
+    otherUserIds: member_ids,
   });
   return res.status(201).json(result);
 });
