@@ -7,9 +7,7 @@ import { updateTable } from "../../shared/utils/updateTable";
 import { UpdateUserDto, User } from "./types";
 
 export const getAllUsers = async (): Promise<User[]> => {
-  const result = await db.query(
-    `SELECT ${USER_PUBLIC_COLUMNS.join(", ")} FROM users`,
-  );
+  const result = await db.query(`SELECT * FROM users`);
   return result.rows;
 };
 
@@ -32,10 +30,7 @@ const findByUsername = async (username: string) => {
 };
 
 export const findById = async (id: string): Promise<User> => {
-  const result = await db.query(
-    `SELECT ${USER_PUBLIC_COLUMNS.join(", ")} FROM users WHERE id = $1`,
-    [id],
-  );
+  const result = await db.query(`SELECT * FROM users WHERE id = $1`, [id]);
   return result.rows[0];
 };
 

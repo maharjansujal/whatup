@@ -8,8 +8,8 @@ export function useGetAuth() {
     queryKey: ["auth-user"],
     queryFn: async () => {
       try {
-        const res = await api.get("/users/me"); // backend reads cookie
-        return res.data;
+        const res = await api.get("/users/me");
+        return res.data.data;
       } catch (err) {
         if (axios.isAxiosError(err) && err.response?.status === 401) {
           return null;

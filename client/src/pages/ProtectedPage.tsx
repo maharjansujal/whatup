@@ -1,4 +1,5 @@
 import { Button } from "../components/shared/button";
+import { Sidebar } from "../components/sidebar/Sidebar";
 import { useAuth } from "../context/AuthContext";
 
 export function ProtectedPage() {
@@ -7,7 +8,7 @@ export function ProtectedPage() {
   return (
     <div className="flex h-screen">
       <div className="flex flex-col justify-between border-r w-1/4">
-        {/* <Sidebar /> */}
+        <Sidebar />
         <div className="p-4">
           <Button variant="outline" onClick={logout}>
             Logout

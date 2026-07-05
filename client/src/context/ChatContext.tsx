@@ -41,7 +41,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const { authUser } = useAuth();
 
   // Queries
-  const { data: conversations = [] } = useGetConversations(authUser!.id);
+  const { data: conversations = [] } = useGetConversations(authUser?.id);
+
   const { data: messages = [] } = useGetMessages(activeConversationId ?? "");
 
   // Mutations
@@ -54,23 +55,23 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     [conversations, activeConversationId],
   );
 
-  // 📨 Send message
+  // Send message
   const sendMessage = (content: string) => {
     if (!activeConversationId || !content.trim()) return;
     postMessage.mutate({ conversationId: activeConversationId, content });
   };
 
-  // 👥 Create group
+  // Create group
   const createGroupConversation = (name: string, memberIds: string[]) => {
     postGroupConversation.mutate({ name, memberIds });
   };
 
-  // 👤 Start direct
+  // Start direct
   const startDirectConversation = (userId: string) => {
     postDirectConversation.mutate({ userId });
   };
 
-  // 📎 Preview helper
+  // Preview helper
   const getConversationPreview = (conversationId: string): string => {
     const list = conversationId
       ? conversationId === activeConversationId

@@ -5,6 +5,7 @@ import { RegisterPage } from "./pages/RegisterPage";
 import { ProtectedPage } from "./pages/ProtectedPage";
 import { ProtectedRoute } from "./components/routing/ProtectedRoutes";
 import { AuthProvider } from "./context/AuthContext";
+import { ChatProvider } from "./context/ChatContext";
 
 const queryClient = new QueryClient();
 
@@ -13,14 +14,16 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+          <ChatProvider>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
 
-            <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<ProtectedPage />} />
-            </Route>
-          </Routes>
+              <Route element={<ProtectedRoute />}>
+                <Route path="/" element={<ProtectedPage />} />
+              </Route>
+            </Routes>
+          </ChatProvider>
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
