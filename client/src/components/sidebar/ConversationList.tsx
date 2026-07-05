@@ -15,10 +15,6 @@ export function ConversationList() {
   const { getUserById } = useGetUsers();
   const { authUser: currentUser } = useAuth();
 
-  useEffect(() => {
-    console.log("Conversations", conversations);
-  }, [conversations]);
-
   const filtered = useMemo(() => {
     if (!currentUser) return [];
 

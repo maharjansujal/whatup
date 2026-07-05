@@ -2,7 +2,6 @@ import { asyncHandler } from "../../shared/utils/asyncHandler";
 import { conversationService } from "./service";
 
 const createConversation = asyncHandler(async (req, res) => {
-  console.log(req);
   const currentUserId = req.user.id;
   const userId = req.body.id;
 

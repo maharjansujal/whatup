@@ -1,18 +1,20 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../api/api";
-import type { Message } from "../../types/message";
+import type { Message, MessageType } from "../../types/message";
 
 interface Payload {
   conversationId: string;
   content: string;
+  type?: MessageType;
 }
 
 export function usePostMessage() {
   const queryClient = useQueryClient();
 
   return useMutation<Message, Error, Payload>({
-    mutationFn: async ({ conversationId, content }) => {
+    mutationFn: async ({ conversationId, type = "text", content }) => {
       const res = await api.post(`/conversations/${conversationId}/messages`, {
+        type,
         content,
       });
       return res.data;

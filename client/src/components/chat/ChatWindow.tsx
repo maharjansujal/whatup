@@ -3,14 +3,9 @@ import { ChatHeader } from "./ChatHeader";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
 import { useChat } from "../../context/ChatContext";
-import { useEffect } from "react";
 
 export function ChatWindow() {
   const { activeConversation } = useChat();
-
-  useEffect(() => {
-    console.log(activeConversation);
-  }, [activeConversation]);
 
   if (!activeConversation) {
     return (

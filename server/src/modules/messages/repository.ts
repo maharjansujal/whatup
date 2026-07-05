@@ -63,14 +63,14 @@ const getConversationMessages = async (
 ): Promise<Message[]> => {
   const result = await db.query(
     `
-    SELECT *
-    FROM messages
-    WHERE conversation_id = $1
-      AND deleted_at IS NULL
-      ${cursor ? "AND created_at < $2" : ""}
-    ORDER BY created_at DESC
-    LIMIT $${cursor ? 3 : 2}
-    `,
+  SELECT *
+  FROM messages
+  WHERE conversation_id = $1
+    AND deleted_at IS NULL
+    ${cursor ? "AND created_at < $2" : ""}
+  ORDER BY created_at ASC
+  LIMIT $${cursor ? 3 : 2}
+  `,
     cursor ? [convoId, cursor, limit] : [convoId, limit],
   );
   return result.rows;

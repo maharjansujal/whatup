@@ -33,7 +33,6 @@ export function ConversationItem({
 }: ConversationItemProps) {
   const { getUserById } = useGetUsers();
   const { authUser: currentUser } = useAuth();
-  console.log(conversation);
   const otherUserId =
     conversation.type === "direct"
       ? conversation.member_ids.find((id) => id !== currentUser?.id)
