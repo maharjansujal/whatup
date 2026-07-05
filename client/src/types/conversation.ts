@@ -8,7 +8,7 @@ export interface Conversation {
   description: string;
   image_url: string;
   created_by_user_id: string;
-  memberIds: string[];
+  member_ids: string[];
   last_message_id: string;
   last_message_at?: string;
   created_at?: string;

@@ -41,7 +41,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const { authUser } = useAuth();
 
   // Queries
-  const { data: conversations = [] } = useGetConversations(authUser?.id);
+  const { conversations = [] } = useGetConversations(authUser?.id);
 
   const { data: messages = [] } = useGetMessages(activeConversationId ?? "");
 

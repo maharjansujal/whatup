@@ -65,20 +65,21 @@ const findDirectConversation = async ({
 }): Promise<Conversation | null> => {
   const result = await executor.query(
     `
-    SELECT c.*
+    SELECT
+    c.*,
+    ARRAY_AGG(cm.user_id ORDER BY cm.user_id) AS member_ids
     FROM conversations c
     JOIN conversation_members cm1
-      ON cm1.conversation_id = c.id
+        ON cm1.conversation_id = c.id
     JOIN conversation_members cm2
-      ON cm2.conversation_id = c.id
+        ON cm2.conversation_id = c.id
+    JOIN conversation_members cm
+        ON cm.conversation_id = c.id
     WHERE c.type = 'direct'
       AND cm1.user_id = $1
       AND cm2.user_id = $2
-      AND (
-        SELECT COUNT(*)
-        FROM conversation_members cm
-        WHERE cm.conversation_id = c.id
-      ) = 2
+    GROUP BY c.id
+    HAVING COUNT(cm.user_id) = 2;
     `,
     [userId1, userId2],
   );

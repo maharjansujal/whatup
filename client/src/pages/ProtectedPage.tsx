@@ -1,3 +1,4 @@
+import { ChatWindow } from "../components/chat/ChatWindow";
 import { Button } from "../components/shared/button";
 import { Sidebar } from "../components/sidebar/Sidebar";
 import { useAuth } from "../context/AuthContext";
@@ -6,20 +7,21 @@ export function ProtectedPage() {
   const { authUser, logout } = useAuth();
 
   return (
-    <div className="flex h-screen">
-      <div className="flex flex-col justify-between border-r w-1/4">
+    <div className="flex h-screen w-full bg-[#FAFAF8]">
+      {/* LEFT SIDEBAR */}
+      <div className="flex w-[320px] flex-col">
         <Sidebar />
-        <div className="p-4">
-          <Button variant="outline" onClick={logout}>
+
+        <div className="mt-auto border-t p-4">
+          <Button variant="outline" onClick={logout} className="w-full">
             Logout
           </Button>
         </div>
       </div>
-      <div className="flex-1 p-4">
-        <h2 className="text-lg font-semibold">
-          Welcome, {authUser?.display_name ?? authUser?.username}
-        </h2>
-        <p className="text-gray-500">Chat area placeholder</p>
+
+      {/* CHAT AREA */}
+      <div className="flex flex-1 flex-col">
+        <ChatWindow />
       </div>
     </div>
   );

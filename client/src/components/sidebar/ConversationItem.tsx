@@ -33,10 +33,10 @@ export function ConversationItem({
 }: ConversationItemProps) {
   const { getUserById } = useGetUsers();
   const { authUser: currentUser } = useAuth();
-
+  console.log(conversation);
   const otherUserId =
     conversation.type === "direct"
-      ? conversation.memberIds.find((id) => id !== currentUser?.id)
+      ? conversation.member_ids.find((id) => id !== currentUser?.id)
       : undefined;
   const otherUser = otherUserId ? getUserById(otherUserId) : undefined;
 
@@ -55,7 +55,7 @@ export function ConversationItem({
       }`}
     >
       {conversation.type === "group" ? (
-        <GroupAvatarStack memberIds={conversation.memberIds} />
+        <GroupAvatarStack memberIds={conversation.member_ids} />
       ) : (
         <Avatar src={otherUser?.avatar_url} name={title} isOnline={true} />
       )}

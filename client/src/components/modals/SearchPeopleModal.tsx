@@ -24,10 +24,6 @@ export function SearchPeopleModal({ onClose }: { onClose: () => void }) {
     );
   }, [users, query, currentUser?.id]);
 
-  useEffect(() => {
-    console.log(results);
-  }, [results]);
-
   const handleSelect = (userId: string) => {
     startDirectConversation(userId);
     onClose();

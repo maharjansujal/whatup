@@ -3,7 +3,7 @@ import { api } from "../../api/api";
 import type { Conversation } from "../../types/conversation";
 
 export function useGetConversations(userId?: string) {
-  return useQuery<Conversation[]>({
+  const conversationsQuery = useQuery<Conversation[]>({
     queryKey: ["conversations", userId],
     enabled: !!userId,
     queryFn: async () => {
@@ -12,4 +12,5 @@ export function useGetConversations(userId?: string) {
     },
     staleTime: 1000 * 60 * 2,
   });
+  return { conversations: conversationsQuery.data };
 }

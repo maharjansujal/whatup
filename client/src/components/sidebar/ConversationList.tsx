@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { ConversationItem } from "./ConversationItem";
 import { useChat } from "../../context/ChatContext";
 import { useGetUsers } from "../../hooks/get/useGetUsers";
@@ -15,6 +15,10 @@ export function ConversationList() {
   const { getUserById } = useGetUsers();
   const { authUser: currentUser } = useAuth();
 
+  useEffect(() => {
+    console.log("Conversations", conversations);
+  }, [conversations]);
+
   const filtered = useMemo(() => {
     if (!currentUser) return [];
 
@@ -26,7 +30,7 @@ export function ConversationList() {
         return (c.name ?? "").toLowerCase().includes(q);
       }
 
-      const otherId = c.memberIds.find((id) => id !== currentUser.id);
+      const otherId = c.member_ids.find((id) => id !== currentUser.id);
       if (!otherId) return false;
 
       const otherUser = getUserById(otherId);

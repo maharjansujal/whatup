@@ -99,7 +99,7 @@ export function CreateGroupModal({ onClose }: { onClose: () => void }) {
                   onClick={() => toggleUser(id)}
                   className="text-[#8A6A1E]/70 hover:text-[#8A6A1E]"
                 >
-                  ×
+                  x
                 </button>
               </span>
             );
