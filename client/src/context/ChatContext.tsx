@@ -62,8 +62,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   };
 
   // Create group
-  const createGroupConversation = (name: string, memberIds: string[]) => {
-    postGroupConversation.mutate({ name, memberIds });
+  const createGroupConversation = (name: string, member_ids: string[]) => {
+    postGroupConversation.mutate({ name, member_ids });
   };
 
   // Start direct

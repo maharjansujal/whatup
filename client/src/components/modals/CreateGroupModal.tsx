@@ -1,19 +1,21 @@
 import { useMemo, useState } from "react";
 import { useGetUsers } from "../../hooks/get/useGetUsers";
 import { useAuth } from "../../context/AuthContext";
-import { useChat } from "../../context/ChatContext";
+// import { useChat } from "../../context/ChatContext";
 import { Modal } from "../common/Modal";
 import { Check, Search, Users } from "lucide-react";
 import { Avatar } from "../common/Avatar";
+import { usePostGroupConversation } from "../../hooks/post/usePostGroupConversation";
 
 export function CreateGroupModal({ onClose }: { onClose: () => void }) {
   const [groupName, setGroupName] = useState("");
   const [query, setQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const { mutate: postGroup } = usePostGroupConversation();
 
   const { users } = useGetUsers();
   const { authUser: currentUser } = useAuth();
-  const { createGroupConversation } = useChat();
+  // const { createGroupConversation } = useChat();
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -39,8 +41,14 @@ export function CreateGroupModal({ onClose }: { onClose: () => void }) {
 
   const handleCreate = () => {
     if (!canCreate) return;
-    createGroupConversation(groupName.trim(), selectedIds);
-    onClose();
+    postGroup(
+      { name: groupName.trim(), member_ids: selectedIds },
+      {
+        onSuccess: () => {
+          onClose();
+        },
+      },
+    );
   };
 
   return (

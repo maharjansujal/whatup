@@ -4,22 +4,21 @@ import type { Conversation } from "../../types/conversation";
 
 interface Payload {
   name: string;
-  memberIds: string[];
+  member_ids: string[];
 }
 
 export function usePostGroupConversation() {
   const queryClient = useQueryClient();
 
   return useMutation<Conversation, Error, Payload>({
-    mutationFn: async ({ name, memberIds }) => {
+    mutationFn: async ({ name, member_ids }) => {
       const res = await api.post("/conversations/group", {
-        name,
-        memberIds,
+        groupName: name,
+        member_ids,
       });
       return res.data;
     },
     onSuccess: (newConversation) => {
-      // prepend new group to conversations list
       queryClient.setQueryData<Conversation[]>(
         ["conversations"],
         (old = []) => [newConversation, ...old],

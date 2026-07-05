@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { ConversationItem } from "./ConversationItem";
 import { useChat } from "../../context/ChatContext";
 import { useGetUsers } from "../../hooks/get/useGetUsers";

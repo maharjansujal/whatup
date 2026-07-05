@@ -66,9 +66,11 @@ const createDirectConversation = async ({
 };
 
 const createGroupConversation = async ({
+  groupName,
   currentUserId,
   otherUserIds,
 }: {
+  groupName: string;
   currentUserId: string;
   otherUserIds: string[];
 }) => {
@@ -85,7 +87,7 @@ const createGroupConversation = async ({
       {
         type: "group",
         createdByUserId: currentUserId,
-        name: "New Group Chat",
+        name: groupName,
       },
       txClient,
     );
