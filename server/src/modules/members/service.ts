@@ -144,6 +144,26 @@ const archiveConversation = ({
   });
 };
 
+const unarchiveConversation = async ({
+  id,
+  userId,
+}: {
+  id: string;
+  userId: string;
+}) => {
+  return memberRepository.unarchiveConversation({ id, userId });
+};
+
+export const unmuteConversation = async ({
+  id,
+  userId,
+}: {
+  id: string;
+  userId: string;
+}) => {
+  return memberRepository.unmuteConversation({ id, userId });
+};
+
 const listArchivedChats = (userId: string) => {
   return memberRepository.listArchivedChats(userId);
 };
@@ -230,7 +250,9 @@ export const memberService = {
   updateLastRead,
   updateNickname,
   muteConversation,
+  unmuteConversation,
   archiveConversation,
+  unarchiveConversation,
   listArchivedChats,
   listMuted,
   getUserConversationIds,

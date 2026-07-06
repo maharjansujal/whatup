@@ -109,6 +109,21 @@ const muteConversation = asyncHandler(async function (req, res) {
   return res.status(200).json(result);
 });
 
+export const unmuteConversation = asyncHandler(async (req, res) => {
+  const conversationId = req.params.id;
+  const userId = req.user.id;
+
+  const result = await memberService.unmuteConversation({
+    id: conversationId.toString(),
+    userId,
+  });
+
+  return res.status(200).json({
+    message: "Conversation unmuted successfully",
+    data: result,
+  });
+});
+
 const archiveConversation = asyncHandler(async function (req, res) {
   const { id } = req.params;
   const result = await memberService.archiveConversation({
@@ -116,6 +131,21 @@ const archiveConversation = asyncHandler(async function (req, res) {
     user_id: req.user.id,
   });
   return res.status(200).json(result);
+});
+
+const unarchiveConversation = asyncHandler(async (req, res) => {
+  const conversationId = req.params.id;
+  const userId = req.user.id;
+
+  const result = await memberService.unarchiveConversation({
+    id: conversationId.toString(),
+    userId,
+  });
+
+  return res.status(200).json({
+    message: "Conversation unarchived successfully",
+    data: result,
+  });
 });
 
 const countMembers = asyncHandler(async (req, res) => {
@@ -173,7 +203,9 @@ export const memberController = {
   updateLastRead,
   updateNickname,
   muteConversation,
+  unmuteConversation,
   archiveConversation,
+  unarchiveConversation,
 
   countMembers,
   getMemberIds,

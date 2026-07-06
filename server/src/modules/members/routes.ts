@@ -21,6 +21,13 @@ router.patch("/:id/members/me/nickname", memberController.updateNickname);
 router.patch("/:id/members/me/mute", memberController.muteConversation);
 router.patch("/:id/members/me/archive", memberController.archiveConversation);
 
+router.patch(
+  "/:id/members/me/unarchive",
+  memberController.unarchiveConversation,
+);
+
+router.patch("/:id/members/me/unmute", memberController.unmuteConversation);
+
 router.get("/:id/members/count", memberController.countMembers);
 router.get("/:id/members/ids", memberController.getMemberIds);
 

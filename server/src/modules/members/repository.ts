@@ -155,6 +155,29 @@ const muteConversation = async ({
   return result.rows[0];
 };
 
+const unmuteConversation = async ({
+  id,
+  userId,
+  executor = db,
+}: {
+  id: string; // conversation_id
+  userId: string; // current user
+  executor?: DBExecutor;
+}) => {
+  const result = await executor.query(
+    `
+    UPDATE conversation_members
+    SET muted_until = NULL
+    WHERE conversation_id = $1
+      AND user_id = $2
+    RETURNING *;
+    `,
+    [id, userId],
+  );
+
+  return result.rows[0];
+};
+
 const archiveConversation = async ({
   conversation_id,
   user_id,
@@ -166,6 +189,29 @@ const archiveConversation = async ({
     "UPDATE conversation_members SET is_archived = TRUE WHERE conversation_id = $1 AND user_id = $2 RETURNING *",
     [conversation_id, user_id],
   );
+  return result.rows[0];
+};
+
+const unarchiveConversation = async ({
+  id,
+  userId,
+  executor = db,
+}: {
+  id: string;
+  userId: string;
+  executor?: DBExecutor;
+}) => {
+  const result = await executor.query(
+    `
+    UPDATE conversation_members
+    SET is_archived = FALSE
+    WHERE conversation_id = $1
+      AND user_id = $2
+    RETURNING *;
+    `,
+    [id, userId],
+  );
+
   return result.rows[0];
 };
 
@@ -260,7 +306,9 @@ export const memberRepository = {
   updateLastRead,
   updateNickname,
   muteConversation,
+  unmuteConversation,
   archiveConversation,
+  unarchiveConversation,
   countMembers,
   getMemberIds,
   listArchivedChats,
