@@ -20,7 +20,19 @@ const create = async (data: {
       data.replyToMessageId || null,
     ],
   );
-  return result.rows[0];
+
+  const message = result.rows[0];
+
+  await db.query(
+    `UPDATE conversations
+     SET last_message_id = $1,
+         last_message_at = $2,
+         updated_at = NOW()
+     WHERE id = $3`,
+    [message.id, message.created_at, data.conversationId],
+  );
+
+  return message;
 };
 
 const findById = async (messageId: string): Promise<Message | null> => {

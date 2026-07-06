@@ -100,6 +100,7 @@ const findUserConversations = async ({
            c.type,
            c.name,
            c.last_message_at,
+           c.last_message_id,
            ARRAY_AGG(cm.user_id) AS member_ids
     FROM conversations c
     JOIN conversation_members cm
