@@ -36,20 +36,20 @@ export function UserForm<T extends UserFormFields>({
 }: UserFormProps<T>) {
   return (
     <Form methods={methods} onSubmit={onSubmit}>
-      <FormField name="username" label="Username">
+      <FormField name="username" label="Username" required>
         <Input placeholder="Enter username" />
       </FormField>
 
-      <FormField name="display_name" label="Display Name">
+      <FormField name="display_name" label="Display Name" required>
         <Input placeholder="Enter display name" />
       </FormField>
 
-      <FormField name="email" label="Email">
+      <FormField name="email" label="Email" required>
         <Input type="email" placeholder="you@example.com" />
       </FormField>
 
       {mode === "create" && (
-        <FormField name="password" label="Password">
+        <FormField name="password" label="Password" required>
           <Input type="password" placeholder="Enter password" />
         </FormField>
       )}

@@ -7,9 +7,15 @@ interface FormFieldProps {
   name: string;
   label?: string;
   children: React.ReactNode;
+  required?: boolean;
 }
 
-export function FormField({ name, label, children }: FormFieldProps) {
+export function FormField({
+  name,
+  label,
+  children,
+  required = false,
+}: FormFieldProps) {
   const { control } = useFormContext();
 
   return (
@@ -17,7 +23,7 @@ export function FormField({ name, label, children }: FormFieldProps) {
       name={name}
       control={control}
       render={({ field, fieldState }) => (
-        <FormItem label={label}>
+        <FormItem label={label} required={required}>
           {React.cloneElement(children as React.ReactElement, {
             ...field,
           })}

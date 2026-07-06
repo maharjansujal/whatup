@@ -36,7 +36,7 @@ export function LoginForm() {
         <Input type="email" placeholder="you@example.com" />
       </FormField>
 
-      <FormField name="password" label="Password">
+      <FormField name="password" label="Password" required>
         <Input type="password" placeholder="Enter your password" />
       </FormField>
 
