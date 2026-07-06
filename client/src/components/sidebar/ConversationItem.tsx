@@ -1,6 +1,6 @@
 import { useAuth } from "../../context/AuthContext";
 import { useGetUsers } from "../../hooks/get/useGetUsers";
-import type { Conversation } from "../../types/conversation";
+import type { Conversation, LastMessage } from "../../types/conversation";
 import { Avatar } from "../common/Avatar";
 import { GroupAvatarStack } from "./GroupAvatarStack";
 
@@ -8,7 +8,7 @@ interface ConversationItemProps {
   conversation: Conversation;
   isActive: boolean;
   onSelect: () => void;
-  lastMessagePreview?: string;
+  lastMessage: LastMessage | null;
 }
 
 function formatTimestamp(iso?: string): string {
@@ -29,7 +29,7 @@ export function ConversationItem({
   conversation,
   isActive,
   onSelect,
-  lastMessagePreview,
+  lastMessage,
 }: ConversationItemProps) {
   const { users } = useGetUsers();
   const { authUser: currentUser } = useAuth();
@@ -37,7 +37,18 @@ export function ConversationItem({
     conversation.type === "direct"
       ? conversation.member_ids.find((id) => id !== currentUser?.id)
       : undefined;
-  const otherUser = otherUserId ? users?.find((u) => u.id === otherUserId) : undefined;
+  const otherUser = otherUserId
+    ? users?.find((u) => u.id === otherUserId)
+    : undefined;
+
+  let preview = lastMessage?.content;
+
+  if (lastMessage?.deleted_at) {
+    preview =
+      lastMessage.sender_id === currentUser?.id
+        ? "You deleted a message"
+        : "This message was deleted";
+  }
 
   const title =
     conversation.type === "group"
@@ -63,11 +74,11 @@ export function ConversationItem({
             {title}
           </span>
           <span className="shrink-0 font-['IBM_Plex_Mono'] text-[10.5px] text-[#6D7089]">
-            {formatTimestamp(conversation.last_message_at)}
+            {formatTimestamp(lastMessage?.created_at)}
           </span>
         </div>
         <p className="mt-0.5 truncate text-[12.5px] text-[#8A8DA3]">
-          {lastMessagePreview ?? "No messages yet"}
+          {preview ?? "No messages yet"}
         </p>
       </div>
     </button>

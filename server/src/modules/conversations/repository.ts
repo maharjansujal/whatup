@@ -96,36 +96,70 @@ const findUserConversations = async ({
 }) => {
   const result = await executor.query(
     `
-    SELECT c.id,
-       c.type,
-       c.name,
-       m.id AS last_message_id,
-       m.created_at AS last_message_at,
-       m.content AS last_message_content,
-       ARRAY_AGG(cm.user_id) AS member_ids
-        FROM conversations c
-        JOIN conversation_members cm
-          ON cm.conversation_id = c.id
-        LEFT JOIN LATERAL (
-          SELECT id, created_at, content
-          FROM messages
-          WHERE conversation_id = c.id
-          ORDER BY created_at DESC
-          LIMIT 1
-        ) m ON TRUE
-        WHERE c.deleted_at IS NULL
-          AND c.id IN (
-            SELECT conversation_id
-            FROM conversation_members
-            WHERE user_id = $1
-          )
-        GROUP BY c.id, c.type, c.name, m.id, m.created_at, m.content
-        ORDER BY m.created_at DESC NULLS LAST;
+    SELECT
+    c.id,
+    c.type,
+    c.name,
+    m.id AS last_message_id,
+    m.sender_id AS last_message_sender_id,
+    m.created_at AS last_message_at,
+    m.content AS last_message_content,
+    m.deleted_at AS last_message_deleted_at,
+    ARRAY_AGG(cm.user_id) AS member_ids
+    FROM conversations c
+    JOIN conversation_members cm
+        ON cm.conversation_id = c.id
+    LEFT JOIN LATERAL (
+        SELECT
+            id,
+            sender_id,
+            created_at,
+            content,
+            deleted_at
+        FROM messages
+        WHERE conversation_id = c.id
+        ORDER BY created_at DESC
+        LIMIT 1
+    ) m ON TRUE
+
+    WHERE c.deleted_at IS NULL
+      AND c.id IN (
+          SELECT conversation_id
+          FROM conversation_members
+          WHERE user_id = $1
+      )
+
+    GROUP BY
+        c.id,
+        c.type,
+        c.name,
+        m.id,
+        m.sender_id,
+        m.created_at,
+        m.content,
+        m.deleted_at
+
+    ORDER BY m.created_at DESC NULLS LAST;
     `,
     [userId],
   );
 
-  return result.rows;
+  return result.rows.map((row) => ({
+    id: row.id,
+    type: row.type,
+    name: row.name,
+    member_ids: row.member_ids,
+
+    last_message: row.last_message_id
+      ? {
+          id: row.last_message_id,
+          sender_id: row.last_message_sender_id,
+          content: row.last_message_content,
+          created_at: row.last_message_at,
+          deleted_at: row.last_message_deleted_at,
+        }
+      : null,
+  }));
 };
 
 const updateConversation = async ({

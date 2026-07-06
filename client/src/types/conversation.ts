@@ -9,12 +9,20 @@ export interface Conversation {
   image_url: string;
   created_by_user_id: string;
   member_ids: string[];
-  last_message_id: string;
-  last_message_content?: string;
-  last_message_at?: string;
+
+  last_message: LastMessage | null;
+
   created_at?: string;
   updated_at?: string;
   deleted_at?: string;
+}
+
+export interface LastMessage {
+  id: string;
+  sender_id: string;
+  content: string | null;
+  created_at: string;
+  deleted_at: string | null;
 }
 
 export interface CreateConversationInput {

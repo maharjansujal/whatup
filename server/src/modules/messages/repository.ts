@@ -36,10 +36,9 @@ const create = async (data: {
 };
 
 const findById = async (messageId: string): Promise<Message | null> => {
-  const result = await db.query(
-    `SELECT * FROM messages WHERE id = $1 AND deleted_at IS NULL`,
-    [messageId],
-  );
+  const result = await db.query(`SELECT * FROM messages WHERE id = $1`, [
+    messageId,
+  ]);
   return result.rows[0] || null;
 };
 
@@ -78,7 +77,6 @@ const getConversationMessages = async (
   SELECT *
   FROM messages
   WHERE conversation_id = $1
-    AND deleted_at IS NULL
     ${cursor ? "AND created_at < $2" : ""}
   ORDER BY created_at ASC
   LIMIT $${cursor ? 3 : 2}

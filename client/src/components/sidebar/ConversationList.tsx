@@ -51,7 +51,7 @@ export function ConversationList() {
           conversation={conversation}
           isActive={conversation.id === activeConversationId}
           onSelect={() => selectConversation(conversation.id)}
-          lastMessagePreview={conversation.last_message_content}
+          lastMessage={conversation.last_message}
         />
       ))}
     </div>
