@@ -20,7 +20,6 @@ export function ModalProvider({ children }: { children: ReactNode }) {
 
   const closeModal = () => {
     setIsOpen(false);
-    // Optional: clear content after transition
     setTimeout(() => setContent(null), 200);
   };
 

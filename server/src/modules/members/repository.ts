@@ -63,7 +63,7 @@ const demoteMember = async ({
 
 const getAllMembers = async (conversationId: string) => {
   const result = await db.query(
-    `SELECT u.username, u.display_name, cm.nickname, u.avatar_url, cm."role", u.bio 
+    `SELECT u.id, u.username, u.display_name, cm.nickname, u.avatar_url, cm."role", u.bio 
     FROM users u
     JOIN conversation_members cm ON u.id = cm.user_id
     WHERE cm.conversation_id = $1`,

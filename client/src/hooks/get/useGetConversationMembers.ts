@@ -6,7 +6,7 @@ export function useGetConversationMembers(conversationId: string) {
   return useQuery<Member[]>({
     queryKey: ["conversationMembers", conversationId],
     queryFn: async () => {
-      const res = await api.get(`/api/conversations/${conversationId}/members`);
+      const res = await api.get(`/conversations/${conversationId}/members`);
       return res.data;
     },
   });

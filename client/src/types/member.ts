@@ -5,6 +5,9 @@ export interface Member {
   conversation_id: string;
   user_id: string;
   role: Role;
+  avatar_url?: string;
+  display_name: string;
+  username: string;
   joined_at: string;
   last_read_message_id: string;
   last_read_at?: string;

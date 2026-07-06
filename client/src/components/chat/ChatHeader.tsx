@@ -4,10 +4,13 @@ import type { Conversation } from "../../types/conversation";
 import { useAuth } from "../../context/AuthContext";
 import { useGetUsers } from "../../hooks/get/useGetUsers";
 import { GroupAvatarStack } from "../sidebar/GroupAvatarStack";
+import { useModal } from "../../context/ModalContext";
+import { MembersModal } from "../modals/MembersModal";
 
 export function ChatHeader({ conversation }: { conversation: Conversation }) {
   const { authUser: currentUser } = useAuth();
   const { users } = useGetUsers();
+  const { openModal, closeModal } = useModal();
 
   if (currentUser === undefined) {
     return <div className="px-6 py-3 text-sm text-gray-400">Loading...</div>;
@@ -18,7 +21,9 @@ export function ChatHeader({ conversation }: { conversation: Conversation }) {
     conversation.type === "direct"
       ? conversation.member_ids.find((id) => id !== currentUser.id)
       : undefined;
-  const otherUser = otherUserId ? users?.find((u) => u.id === otherUserId) : undefined;
+  const otherUser = otherUserId
+    ? users?.find((u) => u.id === otherUserId)
+    : undefined;
 
   const title =
     conversation.type === "group"
@@ -59,6 +64,14 @@ export function ChatHeader({ conversation }: { conversation: Conversation }) {
           <button
             title="Members"
             className="rounded-lg p-2 text-[#9A9CA8] transition-colors hover:bg-[#F2F2EF] hover:text-[#1A1B23]"
+            onClick={() =>
+              openModal(
+                <MembersModal
+                  conversationId={conversation.id}
+                  onClose={closeModal}
+                />,
+              )
+            }
           >
             <Users size={17} />
           </button>

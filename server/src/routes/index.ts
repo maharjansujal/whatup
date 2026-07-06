@@ -15,7 +15,7 @@ const router = Router();
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/conversations", conversationRoutes);
-router.use("/members", requireAuth, memberRoutes);
+router.use("/conversations", requireAuth, memberRoutes);
 router.use("/conversations", requireAuth, messagesRoutes);
 router.use("/receipt", requireAuth, receiptRoutes);
 router.use("/invite", requireAuth, inviteRoutes);
