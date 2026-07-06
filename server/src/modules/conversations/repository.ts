@@ -97,22 +97,30 @@ const findUserConversations = async ({
   const result = await executor.query(
     `
     SELECT c.id,
-           c.type,
-           c.name,
-           c.last_message_at,
-           c.last_message_id,
-           ARRAY_AGG(cm.user_id) AS member_ids
-    FROM conversations c
-    JOIN conversation_members cm
-      ON cm.conversation_id = c.id
-    WHERE c.deleted_at IS NULL
-      AND c.id IN (
-        SELECT conversation_id
-        FROM conversation_members
-        WHERE user_id = $1
-      )
-    GROUP BY c.id, c.type, c.name, c.last_message_at
-    ORDER BY c.last_message_at DESC NULLS LAST;
+       c.type,
+       c.name,
+       m.id AS last_message_id,
+       m.created_at AS last_message_at,
+       m.content AS last_message_content,
+       ARRAY_AGG(cm.user_id) AS member_ids
+        FROM conversations c
+        JOIN conversation_members cm
+          ON cm.conversation_id = c.id
+        LEFT JOIN LATERAL (
+          SELECT id, created_at, content
+          FROM messages
+          WHERE conversation_id = c.id
+          ORDER BY created_at DESC
+          LIMIT 1
+        ) m ON TRUE
+        WHERE c.deleted_at IS NULL
+          AND c.id IN (
+            SELECT conversation_id
+            FROM conversation_members
+            WHERE user_id = $1
+          )
+        GROUP BY c.id, c.type, c.name, m.id, m.created_at, m.content
+        ORDER BY m.created_at DESC NULLS LAST;
     `,
     [userId],
   );

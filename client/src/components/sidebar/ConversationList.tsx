@@ -10,7 +10,6 @@ export function ConversationList() {
     activeConversationId,
     selectConversation,
     conversationQuery,
-    getConversationPreview,
   } = useChat();
   const { users } = useGetUsers();
   const { authUser: currentUser } = useAuth();
@@ -52,7 +51,7 @@ export function ConversationList() {
           conversation={conversation}
           isActive={conversation.id === activeConversationId}
           onSelect={() => selectConversation(conversation.id)}
-          lastMessagePreview={getConversationPreview(conversation.id)}
+          lastMessagePreview={conversation.last_message_content}
         />
       ))}
     </div>
