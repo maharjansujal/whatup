@@ -9,9 +9,19 @@ export function useUpdateMember(conversationId: string) {
       }),
   });
 
+  const unmute = useMutation({
+    mutationFn: async () =>
+      api.patch(`/conversations/${conversationId}/members/me/unmute`),
+  });
+
   const archive = useMutation({
     mutationFn: async () =>
       api.patch(`/conversations/${conversationId}/members/me/archive`),
+  });
+
+  const unarchive = useMutation({
+    mutationFn: async () =>
+      api.patch(`/conversations/${conversationId}/members/me/unarchive`),
   });
 
   const nickname = useMutation({
@@ -21,5 +31,5 @@ export function useUpdateMember(conversationId: string) {
       }),
   });
 
-  return { mute, archive, nickname };
+  return { mute, unmute, archive, unarchive, nickname };
 }

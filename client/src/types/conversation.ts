@@ -9,9 +9,9 @@ export interface Conversation {
   image_url: string;
   created_by_user_id: string;
   member_ids: string[];
-
   last_message: LastMessage | null;
-
+  is_archived: boolean;
+  muted_until?: string | null;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string;

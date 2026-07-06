@@ -65,10 +65,10 @@ export function ConversationInfoModal({
   const isGroup = conversation.type === "group";
   const { authUser } = useAuth();
   if (!authUser) return null;
-  const { archive } = useUpdateMember(conversation.id);
+  const { archive, unmute } = useUpdateMember(conversation.id);
   const { openModal, closeModal } = useModal();
   const leaveGroup = useDeleteMember(conversation.id, authUser.id);
-
+  console.log(conversation.muted_until);
   return (
     <Modal title="Conversation info" onClose={onClose}>
       <div>
@@ -110,14 +110,22 @@ export function ConversationInfoModal({
           )}
           <ActionRow
             icon={<BellOff size={16} />}
-            label="Mute notifications"
-            onClick={() =>
-              openModal(
-                <Modal title="Mute notifications" onClose={onClose}>
-                  <MuteDurationMenu conversationId={conversation.id} />
-                </Modal>,
-              )
+            label={
+              conversation.muted_until
+                ? "Unmute notifications"
+                : "Mute notifications"
             }
+            onClick={() => {
+              if (conversation.muted_until) {
+                unmute.mutate();
+              } else {
+                openModal(
+                  <Modal title="Mute notifications" onClose={onClose}>
+                    <MuteDurationMenu conversationId={conversation.id} />
+                  </Modal>,
+                );
+              }
+            }}
           />
           <ActionRow
             icon={<Archive size={16} />}

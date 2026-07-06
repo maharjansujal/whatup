@@ -106,10 +106,15 @@ const findUserConversations = async ({
     m.created_at AS last_message_at,
     m.content AS last_message_content,
     m.deleted_at AS last_message_deleted_at,
-    ARRAY_AGG(cm.user_id) AS member_ids
+    ARRAY_AGG(cm.user_id) AS member_ids,
+    cm_self.is_archived,
+    cm_self.muted_until
     FROM conversations c
     JOIN conversation_members cm
         ON cm.conversation_id = c.id
+    JOIN conversation_members cm_self
+        ON cm_self.conversation_id = c.id
+      AND cm_self.user_id = $1
     LEFT JOIN LATERAL (
         SELECT
             id,
@@ -122,15 +127,8 @@ const findUserConversations = async ({
         ORDER BY created_at DESC
         LIMIT 1
     ) m ON TRUE
-
     WHERE c.deleted_at IS NULL
-      AND c.id IN (
-          SELECT conversation_id
-          FROM conversation_members
-          WHERE user_id = $1
-          AND is_archived = FALSE
-      )
-
+      AND cm_self.is_archived = FALSE
     GROUP BY
         c.id,
         c.type,
@@ -139,8 +137,9 @@ const findUserConversations = async ({
         m.sender_id,
         m.created_at,
         m.content,
-        m.deleted_at
-
+        m.deleted_at,
+        cm_self.is_archived,
+        cm_self.muted_until
     ORDER BY m.created_at DESC NULLS LAST;
     `,
     [userId],
@@ -151,7 +150,8 @@ const findUserConversations = async ({
     type: row.type,
     name: row.name,
     member_ids: row.member_ids,
-
+    is_archived: row.is_archived,
+    muted_until: row.muted_until,
     last_message: row.last_message_id
       ? {
           id: row.last_message_id,
