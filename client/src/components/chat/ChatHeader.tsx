@@ -6,6 +6,7 @@ import { useGetUsers } from "../../hooks/get/useGetUsers";
 import { GroupAvatarStack } from "../sidebar/GroupAvatarStack";
 import { useModal } from "../../context/ModalContext";
 import { MembersModal } from "../modals/MembersModal";
+import { ConversationInfoModal } from "../modals/ConversationInfoModal";
 
 export function ChatHeader({ conversation }: { conversation: Conversation }) {
   const { authUser: currentUser } = useAuth();
@@ -29,13 +30,6 @@ export function ChatHeader({ conversation }: { conversation: Conversation }) {
     conversation.type === "group"
       ? (conversation.name ?? "Unnamed group")
       : (otherUser?.display_name ?? "Unknown");
-  //   const subtitle =
-  //     conversation.type === "group"
-  //       ? `${conversation.memberIds.length} members`
-  //       : otherUser?.isOnline
-  //         ? "Online"
-  //         : "Offline";
-
   const subtitle =
     conversation.type === "group"
       ? `${conversation.member_ids.length} members`
@@ -79,6 +73,14 @@ export function ChatHeader({ conversation }: { conversation: Conversation }) {
         <button
           title="Conversation info"
           className="rounded-lg p-2 text-[#9A9CA8] transition-colors hover:bg-[#F2F2EF] hover:text-[#1A1B23]"
+          onClick={() =>
+            openModal(
+              <ConversationInfoModal
+                conversation={conversation}
+                onClose={closeModal}
+              />,
+            )
+          }
         >
           <Info size={17} />
         </button>
