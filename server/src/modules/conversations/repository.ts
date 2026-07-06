@@ -78,6 +78,7 @@ const findDirectConversation = async ({
     WHERE c.type = 'direct'
       AND cm1.user_id = $1
       AND cm2.user_id = $2
+      AND cm1.is_archived = FALSE
     GROUP BY c.id
     HAVING COUNT(cm.user_id) = 2;
     `,
@@ -127,6 +128,7 @@ const findUserConversations = async ({
           SELECT conversation_id
           FROM conversation_members
           WHERE user_id = $1
+          AND is_archived = FALSE
       )
 
     GROUP BY

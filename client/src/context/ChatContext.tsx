@@ -79,7 +79,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       { userId },
       {
         onSuccess: (newConversation) => {
-          console.log(newConversation);
           setActiveConversationId(newConversation.id);
         },
       },
