@@ -100,9 +100,11 @@ const updateNickname = asyncHandler(async (req, res) => {
 
 const muteConversation = asyncHandler(async function (req, res) {
   const { id } = req.params;
+  const { muted_until } = req.body;
   const result = await memberService.muteConversation({
     conversation_id: id.toString(),
     user_id: req.user.id,
+    muted_until,
   });
   return res.status(200).json(result);
 });

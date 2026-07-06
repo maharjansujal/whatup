@@ -9,6 +9,12 @@ import {
 } from "lucide-react";
 import { Modal } from "../common/Modal";
 import type { Conversation } from "../../types/conversation";
+import { useUpdateMember } from "../../hooks/update/useUpdateMember";
+import { useDeleteMember } from "../../hooks/delete/useDeleteMember";
+import { useAuth } from "../../context/AuthContext";
+import { MuteDurationMenu } from "./MuteDurationMenu";
+import { useModal } from "../../context/ModalContext";
+import { NicknameModal } from "./NicknameModal";
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
@@ -32,7 +38,10 @@ function ActionRow({
 }) {
   return (
     <button
-      onClick={onClick}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick?.();
+      }}
       className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[13px] font-medium transition-colors ${
         danger
           ? "text-red-500 hover:bg-red-50"
@@ -54,6 +63,11 @@ export function ConversationInfoModal({
   onClose: () => void;
 }) {
   const isGroup = conversation.type === "group";
+  const { authUser } = useAuth();
+  if (!authUser) return null;
+  const { archive } = useUpdateMember(conversation.id);
+  const { openModal, closeModal } = useModal();
+  const leaveGroup = useDeleteMember(conversation.id, authUser.id);
 
   return (
     <Modal title="Conversation info" onClose={onClose}>
@@ -79,22 +93,52 @@ export function ConversationInfoModal({
 
         <div className="mt-2 flex flex-col gap-0.5">
           {isGroup && (
-            <ActionRow icon={<Pencil size={16} />} label="Change nickname" />
+            <ActionRow
+              icon={<Pencil size={16} />}
+              label="Change nickname"
+              onClick={() =>
+                openModal(
+                  <Modal title="Change nickname" onClose={closeModal}>
+                    <NicknameModal
+                      conversationId={conversation.id}
+                      onClose={closeModal}
+                    />
+                  </Modal>,
+                )
+              }
+            />
           )}
-          <ActionRow icon={<BellOff size={16} />} label="Mute notifications" />
+          <ActionRow
+            icon={<BellOff size={16} />}
+            label="Mute notifications"
+            onClick={() =>
+              openModal(
+                <Modal title="Mute notifications" onClose={onClose}>
+                  <MuteDurationMenu conversationId={conversation.id} />
+                </Modal>,
+              )
+            }
+          />
           <ActionRow
             icon={<Archive size={16} />}
             label="Archive conversation"
+            onClick={() => archive.mutate()}
           />
         </div>
 
         <div className="mt-3 flex flex-col gap-0.5 border-t border-[#EEEEEB] pt-2">
           {isGroup ? (
-            <ActionRow icon={<LogOut size={16} />} label="Leave group" danger />
+            <ActionRow
+              icon={<LogOut size={16} />}
+              label="Leave group"
+              danger
+              onClick={() => leaveGroup.mutate()}
+            />
           ) : (
             <ActionRow
               icon={<Trash2 size={16} />}
               label="Delete conversation"
+              onClick={() => leaveGroup.mutate()}
               danger
             />
           )}

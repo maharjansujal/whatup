@@ -1,8 +1,7 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 
 interface ModalContextValue {
-  isOpen: boolean;
-  content: ReactNode | null;
+  stack: ReactNode[];
   openModal: (content: ReactNode) => void;
   closeModal: () => void;
 }
@@ -10,23 +9,20 @@ interface ModalContextValue {
 const ModalContext = createContext<ModalContextValue | null>(null);
 
 export function ModalProvider({ children }: { children: ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [content, setContent] = useState<ReactNode | null>(null);
+  const [stack, setStack] = useState<ReactNode[]>([]);
 
   const openModal = (m: ReactNode) => {
-    setContent(m);
-    setIsOpen(true);
+    setStack((prev) => [...prev, m]); // push new modal
   };
 
   const closeModal = () => {
-    setIsOpen(false);
-    setTimeout(() => setContent(null), 200);
+    setStack((prev) => prev.slice(0, -1)); // pop top modal
   };
 
   return (
-    <ModalContext.Provider value={{ isOpen, openModal, content, closeModal }}>
+    <ModalContext.Provider value={{ stack, openModal, closeModal }}>
       {children}
-      {isOpen && content}
+      {stack.length > 0 && stack[stack.length - 1]} {/* render top modal */}
     </ModalContext.Provider>
   );
 }

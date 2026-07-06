@@ -118,13 +118,16 @@ const updateNickname = ({
 const muteConversation = ({
   conversation_id,
   user_id,
+  muted_until,
 }: {
   conversation_id: string;
   user_id: string;
+  muted_until: string;
 }) => {
   return memberRepository.muteConversation({
     conversation_id,
     user_id,
+    muted_until,
   });
 };
 

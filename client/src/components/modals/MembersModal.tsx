@@ -57,7 +57,7 @@ export function MembersModal({
           </p>
         )}
 
-        <ul className="flex max-h-80 flex-col gap-0.5 overflow-y-auto">
+        <ul className="flex max-h-80 h-auto flex-col gap-0.5 overflow-y-auto">
           {filtered?.map((m) => (
             <li
               key={m.id}
