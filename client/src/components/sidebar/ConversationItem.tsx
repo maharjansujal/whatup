@@ -31,13 +31,13 @@ export function ConversationItem({
   onSelect,
   lastMessagePreview,
 }: ConversationItemProps) {
-  const { getUserById } = useGetUsers();
+  const { users } = useGetUsers();
   const { authUser: currentUser } = useAuth();
   const otherUserId =
     conversation.type === "direct"
       ? conversation.member_ids.find((id) => id !== currentUser?.id)
       : undefined;
-  const otherUser = otherUserId ? getUserById(otherUserId) : undefined;
+  const otherUser = otherUserId ? users?.find((u) => u.id === otherUserId) : undefined;
 
   const title =
     conversation.type === "group"

@@ -36,13 +36,13 @@ export function usePostAuth() {
       const res = await api.post("/auth/login", data);
       return res.data.user;
     },
-    onSuccess: (user) => {
+    onSuccess: async (user) => {
+      await queryClient.cancelQueries({ queryKey: ["auth-user"] });
       queryClient.setQueryData(["auth-user"], user);
       queryClient.invalidateQueries({ queryKey: ["users"] });
-      navigate("/"); // redirect to home/dashboard
+      navigate("/");
     },
   });
-
   return {
     register: registerMutation.mutateAsync,
     isRegistering: registerMutation.isPending,

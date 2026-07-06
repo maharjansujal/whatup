@@ -7,14 +7,18 @@ import { GroupAvatarStack } from "../sidebar/GroupAvatarStack";
 
 export function ChatHeader({ conversation }: { conversation: Conversation }) {
   const { authUser: currentUser } = useAuth();
-  const { getUserById } = useGetUsers();
+  const { users } = useGetUsers();
 
-  if (!currentUser) return;
+  if (currentUser === undefined) {
+    return <div className="px-6 py-3 text-sm text-gray-400">Loading...</div>;
+  }
+
+  if (currentUser === null) return null;
   const otherUserId =
     conversation.type === "direct"
       ? conversation.member_ids.find((id) => id !== currentUser.id)
       : undefined;
-  const otherUser = otherUserId ? getUserById(otherUserId) : undefined;
+  const otherUser = otherUserId ? users?.find((u) => u.id === otherUserId) : undefined;
 
   const title =
     conversation.type === "group"

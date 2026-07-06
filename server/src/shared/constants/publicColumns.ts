@@ -15,4 +15,6 @@ export const USER_AUTH_COLUMNS = [
   "username",
   "email",
   "password_hash",
+  "display_name",
+  "avatar_url",
 ].join(", ");

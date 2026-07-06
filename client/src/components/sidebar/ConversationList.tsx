@@ -12,7 +12,7 @@ export function ConversationList() {
     conversationQuery,
     getConversationPreview,
   } = useChat();
-  const { getUserById } = useGetUsers();
+  const { users } = useGetUsers();
   const { authUser: currentUser } = useAuth();
 
   const filtered = useMemo(() => {
@@ -29,12 +29,12 @@ export function ConversationList() {
       const otherId = c.member_ids.find((id) => id !== currentUser.id);
       if (!otherId) return false;
 
-      const otherUser = getUserById(otherId);
+      const otherUser = users?.find((u) => u.id === otherId);
       if (!otherUser?.display_name) return false;
 
       return otherUser.display_name.toLowerCase().includes(q);
     });
-  }, [conversations, conversationQuery, currentUser, getUserById]);
+  }, [conversations, conversationQuery, currentUser, users]);
 
   if (filtered.length === 0) {
     return (

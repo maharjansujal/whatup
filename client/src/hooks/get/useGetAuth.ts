@@ -6,9 +6,9 @@ import axios from "axios";
 export function useGetAuth() {
   return useQuery<User | null>({
     queryKey: ["auth-user"],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       try {
-        const res = await api.get("/users/me");
+        const res = await api.get("/users/me", { signal });
         return res.data.data;
       } catch (err) {
         if (axios.isAxiosError(err) && err.response?.status === 401) {
