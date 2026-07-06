@@ -11,7 +11,7 @@ export interface Member {
   joined_at: string;
   last_read_message_id: string;
   last_read_at?: string;
-  is_muted: boolean;
+  muted_until?: boolean;
   is_archived: boolean;
   nickname?: string;
 }

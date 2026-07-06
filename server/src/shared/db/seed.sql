@@ -58,6 +58,7 @@ DECLARE
     v_code          TEXT;
     v_status        conversation_request_status;
     v_req_created   TIMESTAMPTZ;
+    v_muted_until   TIMESTAMPTZ;
 
     v_first_names TEXT[] := ARRAY['Alex','Jordan','Sam','Taylor','Morgan','Casey','Riley','Jamie','Avery','Quinn',
                                    'Dakota','Reese','Skyler','Rowan','Emerson','Finley','Hayden','Kendall','Peyton','Sawyer',
@@ -113,10 +114,26 @@ BEGIN
         VALUES ('direct', NULL, NULL, NULL, v_creator_id, v_convo_start, v_convo_start)
         RETURNING id INTO v_conv_id;
 
-        INSERT INTO conversation_members (conversation_id, user_id, role, joined_at, is_muted, is_archived)
+        -- muted_until: NULL = not muted. Otherwise a mix of active mutes
+        -- (future timestamp) and expired mutes (past timestamp) so app
+        -- logic that checks `muted_until > now()` has real edge cases to
+        -- exercise, rather than every seeded mute being trivially active.
+        INSERT INTO conversation_members (conversation_id, user_id, role, joined_at, muted_until, is_archived)
         VALUES
-            (v_conv_id, v_a, 'member', v_convo_start, (random() < 0.1), (random() < 0.05)),
-            (v_conv_id, v_b, 'member', v_convo_start, (random() < 0.1), (random() < 0.05));
+            (v_conv_id, v_a, 'member', v_convo_start,
+            CASE
+                WHEN random() < 0.07 THEN now() + (random() * interval '7 days')      -- actively muted
+                WHEN random() < 0.03 THEN now() - (random() * interval '14 days')     -- mute expired
+                ELSE NULL
+            END,
+            (random() < 0.05)),
+            (v_conv_id, v_b, 'member', v_convo_start,
+            CASE
+                WHEN random() < 0.07 THEN now() + (random() * interval '7 days')
+                WHEN random() < 0.03 THEN now() - (random() * interval '14 days')
+                ELSE NULL
+            END,
+            (random() < 0.05));
 
         v_member_ids := ARRAY[v_a, v_b];
         v_num_messages := v_min_messages_per_convo + floor(random() * (v_max_messages_per_convo - v_min_messages_per_convo))::int;
@@ -187,8 +204,9 @@ BEGIN
         )
         RETURNING id INTO v_conv_id;
 
-        INSERT INTO conversation_members (conversation_id, user_id, role, joined_at, is_muted, is_archived, nickname)
-        VALUES (v_conv_id, v_creator_id, 'owner', v_convo_start, FALSE, FALSE, NULL);
+        -- Owner is never muted at creation time.
+        INSERT INTO conversation_members (conversation_id, user_id, role, joined_at, muted_until, is_archived, nickname)
+        VALUES (v_conv_id, v_creator_id, 'owner', v_convo_start, NULL, FALSE, NULL);
 
         v_member_ids := ARRAY[v_creator_id];
         v_member_count := v_min_group_members + floor(random() * (v_max_group_members - v_min_group_members))::int;
@@ -199,9 +217,16 @@ BEGIN
                 EXIT;
             END IF;
             v_role := (ARRAY['member','member','member','admin']::conversation_role[])[1 + floor(random()*4)::int];
-            INSERT INTO conversation_members (conversation_id, user_id, role, joined_at, is_muted, is_archived, nickname)
+
+            v_muted_until := CASE
+                WHEN random() < 0.12 THEN now() + (random() * interval '14 days')   -- actively muted
+                WHEN random() < 0.05 THEN now() - (random() * interval '30 days')  -- mute expired
+                ELSE NULL
+            END;
+
+            INSERT INTO conversation_members (conversation_id, user_id, role, joined_at, muted_until, is_archived, nickname)
             VALUES (v_conv_id, v_a, v_role, v_convo_start + (random() * interval '5 days'),
-                    (random() < 0.15), (random() < 0.05),
+                    v_muted_until, (random() < 0.05),
                     CASE WHEN random() < 0.2 THEN 'buddy' || v_a::text ELSE NULL END);
             v_member_ids := array_append(v_member_ids, v_a);
         END LOOP;
@@ -312,16 +337,3 @@ BEGIN
 END $$;
 
 COMMIT;
-
--- =========================================================================
--- Quick sanity check counts (safe to remove if you don't want this output)
--- =========================================================================
--- SELECT 'users' AS table_name, count(*) FROM users
--- UNION ALL SELECT 'conversations', count(*) FROM conversations
--- UNION ALL SELECT 'conversation_invites', count(*) FROM conversation_invites
--- UNION ALL SELECT 'conversation_members', count(*) FROM conversation_members
--- UNION ALL SELECT 'messages', count(*) FROM messages
--- UNION ALL SELECT 'message_receipts', count(*) FROM message_receipts
--- UNION ALL SELECT 'message_attachments', count(*) FROM message_attachments
--- UNION ALL SELECT 'conversation_requests', count(*) FROM conversation_requests
--- UNION ALL SELECT 'user_blocks', count(*) FROM user_blocks;

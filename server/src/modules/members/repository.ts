@@ -142,13 +142,15 @@ const updateNickname = async ({
 const muteConversation = async ({
   conversation_id,
   user_id,
+  muted_until,
 }: {
   conversation_id: string;
   user_id: string;
+  muted_until: string;
 }) => {
   const result = await db.query(
-    "UPDATE conversation_members SET is_muted = TRUE WHERE conversation_id = $1 AND user_id = $2 RETURNING *",
-    [conversation_id, user_id],
+    "UPDATE conversation_members SET muted_until = $3 WHERE conversation_id = $1 AND user_id = $2 RETURNING *",
+    [conversation_id, user_id, muted_until],
   );
   return result.rows[0];
 };
@@ -203,7 +205,8 @@ const listMuted = async (
 ): Promise<Member[]> => {
   const result = await executor.query(
     `SELECT * FROM conversation_members
-     WHERE user_id = $1 AND is_muted = TRUE`,
+     WHERE user_id = $1 AND muted_until IS NOT NULL
+      AND muted_until > now()`,
     [userId],
   );
   return result.rows;
@@ -239,7 +242,8 @@ const countMuted = async (
 ): Promise<number> => {
   const result = await executor.query(
     `SELECT COUNT(*) FROM conversation_members
-     WHERE user_id = $1 AND is_muted = TRUE`,
+     WHERE user_id = $1 AND muted_until IS NOT NULL
+      AND muted_until > now()`,
     [userId],
   );
   return parseInt(result.rows[0].count, 10);

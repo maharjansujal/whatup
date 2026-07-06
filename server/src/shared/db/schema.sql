@@ -74,7 +74,7 @@ CREATE TABLE
         joined_at TIMESTAMPTZ NOT NULL DEFAULT now (),
         last_read_message_id BIGINT,
         last_read_at TIMESTAMPTZ,
-        is_muted BOOLEAN NOT NULL DEFAULT FALSE,
+        muted_until TIMESTAMPTZ,
         is_archived BOOLEAN NOT NULL DEFAULT FALSE,
         nickname TEXT,
         UNIQUE (conversation_id, user_id)

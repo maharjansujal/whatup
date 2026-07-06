@@ -43,7 +43,7 @@ interface Database {
     joined_at: Date;
     last_read_message_id: number | null;
     last_read_at: Date | null;
-    is_muted: boolean;
+    muted_until: boolean;
     is_archived: boolean;
     nickname: string | null;
   };

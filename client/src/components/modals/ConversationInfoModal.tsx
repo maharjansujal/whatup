@@ -58,12 +58,14 @@ export function ConversationInfoModal({
   return (
     <Modal title="Conversation info" onClose={onClose}>
       <div>
-        <div className="mb-1 flex items-center gap-2 border-b border-[#EEEEEB] pb-3">
-          <Users size={14} className="text-[#00C2A8]" />
-          <p className="font-['Space_Grotesk'] text-[14.5px] font-semibold text-[#1A1B23]">
-            {conversation.name ?? "Unnamed"}
-          </p>
-        </div>
+        {conversation.name && (
+          <div className="mb-1 flex items-center gap-2 border-b border-[#EEEEEB] pb-3">
+            <Users size={14} className="text-[#00C2A8]" />
+            <p className="font-['Space_Grotesk'] text-[14.5px] font-semibold text-[#1A1B23]">
+              {conversation.name}
+            </p>
+          </div>
+        )}
 
         <div className="divide-y divide-[#F2F2EF] border-b border-[#EEEEEB] py-1">
           <InfoRow label="Type" value={isGroup ? "Group" : "Direct message"} />
