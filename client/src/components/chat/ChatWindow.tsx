@@ -25,7 +25,7 @@ export function ChatWindow() {
   }
 
   return (
-    <div className="flex flex-1 flex-col bg-[#FAFAF8]">
+    <div className="flex flex-1 flex-col overflow-hidden bg-[#FAFAF8]">
       <ChatHeader conversation={activeConversation} />
       <MessageList />
       <MessageInput />

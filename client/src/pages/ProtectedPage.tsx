@@ -10,7 +10,7 @@ export function ProtectedPage() {
       </div>
 
       {/* CHAT AREA */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
         <ChatWindow />
       </div>
     </div>
