@@ -8,7 +8,6 @@ import {
   Users,
 } from "lucide-react";
 import { Modal } from "../common/Modal";
-import type { Conversation } from "../../types/conversation";
 import { useUpdateMember } from "../../hooks/update/useUpdateMember";
 import { useDeleteMember } from "../../hooks/delete/useDeleteMember";
 import { useAuth } from "../../context/AuthContext";
@@ -76,7 +75,6 @@ export function ConversationInfoModal({
   if (!conversation) return null;
 
   const isGroup = conversation.type === "group";
-  
   return (
     <Modal title="Conversation info" onClose={onClose}>
       <div>
@@ -96,6 +94,12 @@ export function ConversationInfoModal({
               label="Members"
               value={String(conversation.member_ids.length)}
             />
+          )}
+        </div>
+
+        <div className="divide-y divide-[#F2F2EF] border-b border-[#EEEEEB] py-1">
+          {isGroup && conversation.nickname && (
+            <InfoRow label="Your Nickname" value={conversation.nickname} />
           )}
         </div>
 

@@ -11,7 +11,8 @@ export function NicknameModal({
 }) {
   const { authUser } = useAuth();
   const [nicknameValue, setNicknameValue] = useState("");
-  const { nickname } = useUpdateMember(conversationId, authUser?.id);
+  if (!authUser) return null;
+  const { nickname } = useUpdateMember(conversationId, authUser.id);
 
   const handleSubmit = () => {
     if (!nicknameValue.trim()) return;

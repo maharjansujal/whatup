@@ -108,39 +108,35 @@ const findUserConversations = async ({
     m.deleted_at AS last_message_deleted_at,
     ARRAY_AGG(cm.user_id) AS member_ids,
     cm_self.is_archived,
-    cm_self.muted_until
-    FROM conversations c
-    JOIN conversation_members cm
-        ON cm.conversation_id = c.id
-    JOIN conversation_members cm_self
-        ON cm_self.conversation_id = c.id
-      AND cm_self.user_id = $1
-    LEFT JOIN LATERAL (
-        SELECT
-            id,
-            sender_id,
-            created_at,
-            content,
-            deleted_at
-        FROM messages
-        WHERE conversation_id = c.id
-        ORDER BY created_at DESC
-        LIMIT 1
-    ) m ON TRUE
-    WHERE c.deleted_at IS NULL
-      AND cm_self.is_archived = FALSE
-    GROUP BY
-        c.id,
-        c.type,
-        c.name,
-        m.id,
-        m.sender_id,
-        m.created_at,
-        m.content,
-        m.deleted_at,
-        cm_self.is_archived,
-        cm_self.muted_until
-    ORDER BY m.created_at DESC NULLS LAST;
+    cm_self.muted_until,
+    cm_self.nickname
+FROM conversations c
+JOIN conversation_members cm
+    ON cm.conversation_id = c.id
+JOIN conversation_members cm_self
+    ON cm_self.conversation_id = c.id
+   AND cm_self.user_id = $1
+LEFT JOIN LATERAL (
+    SELECT id, sender_id, created_at, content, deleted_at
+    FROM messages
+    WHERE conversation_id = c.id
+    ORDER BY created_at DESC
+    LIMIT 1
+) m ON TRUE
+WHERE c.deleted_at IS NULL
+  AND cm_self.is_archived = FALSE
+GROUP BY
+    c.id,
+    c.type,
+    c.name,
+    m.id,
+    m.sender_id,
+    m.created_at,
+    m.content,
+    m.deleted_at,
+    cm_self.is_archived,
+    cm_self.muted_until,
+    cm_self.nickname
     `,
     [userId],
   );
@@ -152,14 +148,15 @@ const findUserConversations = async ({
     member_ids: row.member_ids,
     is_archived: row.is_archived,
     muted_until: row.muted_until,
+    nickname: row.nickname,
     last_message: row.last_message_id
       ? {
-          id: row.last_message_id,
-          sender_id: row.last_message_sender_id,
-          content: row.last_message_content,
-          created_at: row.last_message_at,
-          deleted_at: row.last_message_deleted_at,
-        }
+        id: row.last_message_id,
+        sender_id: row.last_message_sender_id,
+        content: row.last_message_content,
+        created_at: row.last_message_at,
+        deleted_at: row.last_message_deleted_at,
+      }
       : null,
   }));
 };

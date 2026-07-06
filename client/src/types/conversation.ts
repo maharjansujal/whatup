@@ -11,6 +11,7 @@ export interface Conversation {
   member_ids: string[];
   last_message: LastMessage | null;
   is_archived: boolean;
+  nickname?: string;
   muted_until?: string | null;
   created_at?: string;
   updated_at?: string;
