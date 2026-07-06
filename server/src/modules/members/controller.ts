@@ -137,8 +137,8 @@ const getUserConversationIds = asyncHandler(async (req, res) => {
 });
 
 const listArchivedChats = asyncHandler(async (req, res) => {
-  const { userId } = req.params;
-  const result = await memberService.listArchivedChats(userId.toString());
+  const id = req.user.id;
+  const result = await memberService.listArchivedChats(id.toString());
   return res.status(200).json(result);
 });
 

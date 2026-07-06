@@ -11,6 +11,7 @@ router.delete("/:id/members/:userId", memberController.deleteMember);
 
 router.get("/:id/members", memberController.getAllMembers);
 router.get("/:id/members/:userId", memberController.getMemberById);
+router.get("/members/archived-chats", memberController.listArchivedChats);
 
 router.patch("/:id/members/:userId/promote", memberController.promoteUser);
 router.patch("/:id/members/:userId/demote", memberController.demoteUser);
