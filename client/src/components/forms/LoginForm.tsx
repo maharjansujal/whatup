@@ -11,6 +11,7 @@ import { AxiosError } from "axios";
 export function LoginForm() {
   const methods = useForm<LoginDto>({
     defaultValues: {
+      username: "",
       email: "",
       password: "",
     },
@@ -20,7 +21,19 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginDto) => {
     try {
-      await login(data);
+      const payload: LoginDto = {
+        password: data.password,
+      };
+
+      if (data.username?.trim()) {
+        payload.username = data.username.trim();
+      }
+
+      if (data.email?.trim()) {
+        payload.email = data.email.trim();
+      }
+
+      await login(payload);
     } catch (error) {
       if (error instanceof AxiosError) {
         methods.setError("root", {
@@ -32,9 +45,14 @@ export function LoginForm() {
 
   return (
     <Form methods={methods} onSubmit={onSubmit}>
-      <FormField name="email" label="Email">
-        <Input type="email" placeholder="you@example.com" />
-      </FormField>
+      <div className="flex w-full gap-x-4">
+        <FormField name="email" label="Email">
+          <Input type="email" placeholder="you@example.com" />
+        </FormField>
+        <FormField name="username" label="Username">
+          <Input type="username" placeholder="yourusername" />
+        </FormField>
+      </div>
 
       <FormField name="password" label="Password" required>
         <Input type="password" placeholder="Enter your password" />
