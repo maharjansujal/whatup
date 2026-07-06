@@ -33,8 +33,8 @@ export function UserSearchList({
   }, [users, query, currentUserId]);
 
   return (
-    <>
-      <div className="relative mb-3">
+    <div className="flex h-full flex-col">
+      <div className="relative mb-3 shrink-0">
         <Search
           size={15}
           className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#B7B9C4]"
@@ -47,9 +47,10 @@ export function UserSearchList({
         />
       </div>
 
-      <ul className="flex flex-col gap-1">
+      <ul className="flex-1 overflow-y-auto flex flex-col gap-1">
         {results.map((user) => {
           const isSelected = selectedIds.includes(user.id);
+
           return (
             <li key={user.id}>
               <button
@@ -61,6 +62,7 @@ export function UserSearchList({
                   name={user.display_name}
                   isOnline={true}
                 />
+
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-[#1A1B23]">
                     {user.display_name}
@@ -69,6 +71,7 @@ export function UserSearchList({
                     @{user.username}
                   </p>
                 </div>
+
                 {selectedIds.length > 0 && (
                   <div
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
@@ -85,6 +88,6 @@ export function UserSearchList({
           );
         })}
       </ul>
-    </>
+    </div>
   );
 }

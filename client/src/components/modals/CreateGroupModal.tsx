@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useGetUsers } from "../../hooks/get/useGetUsers";
 import { useAuth } from "../../context/AuthContext";
-import { usePostGroupConversation } from "../../hooks/post/usePostGroupConversation";
 import { Modal } from "../common/Modal";
 import { UserSearchList } from "../common/UserList";
 import { Users } from "lucide-react";
 import { useModal } from "../../context/ModalContext";
+import { useChat } from "../../context/ChatContext";
 
 export function CreateGroupModal({ onClose }: { onClose?: () => void }) {
   const [groupName, setGroupName] = useState("");
@@ -14,8 +14,8 @@ export function CreateGroupModal({ onClose }: { onClose?: () => void }) {
 
   const { users } = useGetUsers();
   const { authUser: currentUser } = useAuth();
-  const { mutate: postGroup } = usePostGroupConversation();
   const { closeModal } = useModal();
+  const { createGroupConversation } = useChat();
 
   const handleClose = () => {
     if (onClose) onClose();
@@ -35,53 +35,48 @@ export function CreateGroupModal({ onClose }: { onClose?: () => void }) {
   const handleCreate = () => {
     if (!canCreate) return;
 
-    postGroup(
-      {
-        name: groupName.trim(),
-        member_ids: selectedIds,
-      },
-      {
-        onSuccess: () => {
-          handleClose();
-        },
-      },
-    );
+    createGroupConversation(groupName.trim(), selectedIds);
+    handleClose();
   };
 
   return (
     <Modal title="Create a group" onClose={handleClose}>
-      <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-[#9A9CA8]">
-        Group name
-      </label>
+      <div className="flex h-full flex-col">
+        <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-[#9A9CA8]">
+          Group name
+        </label>
 
-      <input
-        value={groupName}
-        onChange={(e) => setGroupName(e.target.value)}
-        placeholder="e.g. Weekend Trip"
-        className="mb-4 w-full rounded-lg border border-[#E5E5E1] bg-[#FAFAF8] px-3 py-2.5 text-sm"
-      />
+        <input
+          value={groupName}
+          onChange={(e) => setGroupName(e.target.value)}
+          placeholder="e.g. Weekend Trip"
+          className="mb-4 w-full rounded-lg border border-[#E5E5E1] bg-[#FAFAF8] px-3 py-2.5 text-sm"
+        />
 
-      <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-[#9A9CA8]">
-        Add members
-      </label>
+        <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-[#9A9CA8]">
+          Add members
+        </label>
 
-      <UserSearchList
-        users={users}
-        currentUserId={currentUser?.id}
-        query={query}
-        setQuery={setQuery}
-        onSelect={toggleUser}
-        selectedIds={selectedIds}
-      />
+        <div className="min-h-0 flex-1">
+          <UserSearchList
+            users={users}
+            currentUserId={currentUser?.id}
+            query={query}
+            setQuery={setQuery}
+            onSelect={toggleUser}
+            selectedIds={selectedIds}
+          />
+        </div>
 
-      <button
-        onClick={handleCreate}
-        disabled={!canCreate}
-        className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-[#00C2A8] py-2.5 text-sm font-medium text-white disabled:opacity-40"
-      >
-        <Users size={16} />
-        Create group ({selectedIds.length})
-      </button>
+        <button
+          onClick={handleCreate}
+          disabled={!canCreate}
+          className="mt-4 flex w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-[#00C2A8] py-2.5 text-sm font-medium text-white disabled:opacity-40"
+        >
+          <Users size={16} />
+          Create group ({selectedIds.length})
+        </button>
+      </div>
     </Modal>
   );
 }
