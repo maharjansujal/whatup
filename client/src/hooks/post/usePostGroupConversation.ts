@@ -19,8 +19,8 @@ export function usePostGroupConversation() {
       return res.data;
     },
     onSuccess: (newConversation) => {
-      queryClient.setQueryData<Conversation[]>(
-        ["conversations"],
+      queryClient.setQueriesData<Conversation[]>(
+        { queryKey: ["conversations"] },
         (old = []) => [newConversation, ...old],
       );
     },

@@ -56,7 +56,7 @@ const createDirectConversation = async ({
     );
 
     await txClient.query("COMMIT");
-    return conversation;
+    return { ...conversation, member_ids: [currentUserId, otherUserId] };
   } catch (error) {
     await txClient.query("ROLLBACK");
     throw error;
@@ -113,7 +113,7 @@ const createGroupConversation = async ({
     }
 
     await txClient.query("COMMIT");
-    return conversation;
+    return { ...conversation, member_ids: [currentUserId, ...otherUserIds] };
   } catch (error) {
     await txClient.query("ROLLBACK");
     throw error;

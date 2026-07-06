@@ -19,6 +19,7 @@ export function SearchPeopleModal({ onClose }: { onClose: () => void }) {
         query={query}
         setQuery={setQuery}
         onSelect={(id) => {
+          console.log(id);
           startDirectConversation(id);
           onClose();
         }}

@@ -15,8 +15,8 @@ export function usePostDirectConversation() {
       return res.data;
     },
     onSuccess: (newConversation) => {
-      queryClient.setQueryData<Conversation[]>(
-        ["conversations"],
+      queryClient.setQueriesData<Conversation[]>(
+        { queryKey: ["conversations"] },
         (old = []) => {
           // avoid duplicates
           const exists = old.find((c) => c.id === newConversation.id);

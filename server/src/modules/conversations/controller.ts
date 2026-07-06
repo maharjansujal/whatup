@@ -3,7 +3,7 @@ import { conversationService } from "./service";
 
 const createConversation = asyncHandler(async (req, res) => {
   const currentUserId = req.user.id;
-  const userId = req.body.id;
+  const userId = req.body.userId;
 
   const result = await conversationService.createDirectConversation({
     currentUserId: String(currentUserId),

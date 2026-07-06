@@ -63,12 +63,27 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   // Create group
   const createGroupConversation = (name: string, member_ids: string[]) => {
-    postGroupConversation.mutate({ name, member_ids });
+    postGroupConversation.mutate(
+      { name, member_ids },
+      {
+        onSuccess: (newConversation) => {
+          setActiveConversationId(newConversation.id);
+        },
+      },
+    );
   };
 
   // Start direct
   const startDirectConversation = (userId: string) => {
-    postDirectConversation.mutate({ userId });
+    postDirectConversation.mutate(
+      { userId },
+      {
+        onSuccess: (newConversation) => {
+          console.log(newConversation);
+          setActiveConversationId(newConversation.id);
+        },
+      },
+    );
   };
 
   // Preview helper
