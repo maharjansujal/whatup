@@ -1,11 +1,24 @@
 import { useForm } from "react-hook-form";
-import { UserForm } from "../components/forms/UserForm";
 import { usePostAuth } from "../hooks/post/usePostAuth";
 import type { RegisterDto } from "../types/user";
+import { AxiosError } from "axios";
+import { UserForm } from "../components/forms/UserForm";
 
 export function RegisterPage() {
   const { register } = usePostAuth();
   const methods = useForm<RegisterDto>();
+
+  const onSubmit = async (data: RegisterDto) => {
+    try {
+      await register(data);
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        methods.setError("root", {
+          message: error.response?.data.message ?? "Registration failed",
+        });
+      }
+    }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -14,7 +27,7 @@ export function RegisterPage() {
         <UserForm<RegisterDto>
           mode="create"
           methods={methods}
-          onSubmit={(data) => register(data)}
+          onSubmit={onSubmit}
         />
       </div>
     </div>

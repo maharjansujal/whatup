@@ -9,6 +9,7 @@ import { Form } from "../form/form";
 import { FormField } from "../form/formField";
 import { Input } from "../shared/input";
 import { Button } from "../shared/button";
+import { Link } from "react-router-dom";
 
 type Mode = "create" | "edit";
 
@@ -64,6 +65,18 @@ export function UserForm<T extends UserFormFields>({
       <Button type="submit">
         {mode === "create" ? "Register" : "Update Profile"}
       </Button>
+
+      {mode === "create" && (
+        <p className="mt-4 text-center text-sm text-gray-600">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="font-medium text-blue-600 hover:underline"
+          >
+            Login
+          </Link>
+        </p>
+      )}
     </Form>
   );
 }
