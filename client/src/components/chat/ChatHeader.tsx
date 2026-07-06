@@ -76,7 +76,7 @@ export function ChatHeader({ conversation }: { conversation: Conversation }) {
           onClick={() =>
             openModal(
               <ConversationInfoModal
-                conversation={conversation}
+                conversationId={conversation.id}
                 onClose={closeModal}
               />,
             )

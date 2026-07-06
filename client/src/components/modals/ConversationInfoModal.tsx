@@ -15,6 +15,7 @@ import { useAuth } from "../../context/AuthContext";
 import { MuteDurationMenu } from "./MuteDurationMenu";
 import { useModal } from "../../context/ModalContext";
 import { NicknameModal } from "./NicknameModal";
+import { useGetConversations } from "../../hooks/get/useGetConversations";
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
@@ -56,19 +57,26 @@ function ActionRow({
 }
 
 export function ConversationInfoModal({
-  conversation,
+  conversationId,
   onClose,
 }: {
-  conversation: Conversation;
+  conversationId: string;
   onClose: () => void;
 }) {
-  const isGroup = conversation.type === "group";
   const { authUser } = useAuth();
-  if (!authUser) return null;
-  const { archive, unmute } = useUpdateMember(conversation.id);
+  const { conversations } = useGetConversations(authUser?.id);
   const { openModal, closeModal } = useModal();
-  const leaveGroup = useDeleteMember(conversation.id, authUser.id);
-  console.log(conversation.muted_until);
+
+  if (!authUser) return null;
+
+  const conversation = conversations?.find((c) => c.id === conversationId);
+  const { archive, unmute } = useUpdateMember(conversationId, authUser.id);
+  const leaveGroup = useDeleteMember(conversationId, authUser.id);
+
+  if (!conversation) return null;
+
+  const isGroup = conversation.type === "group";
+  
   return (
     <Modal title="Conversation info" onClose={onClose}>
       <div>

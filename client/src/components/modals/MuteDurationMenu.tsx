@@ -9,12 +9,15 @@ const DURATIONS = [
   { label: "Forever", ms: null }, // special case
 ];
 
+import { useAuth } from "../../context/AuthContext";
+
 export function MuteDurationMenu({
   conversationId,
 }: {
   conversationId: string;
 }) {
-  const { mute } = useUpdateMember(conversationId);
+  const { authUser } = useAuth();
+  const { mute } = useUpdateMember(conversationId, authUser?.id);
   const { closeModal } = useModal();
 
   const handleClick = (ms: number | null) => {

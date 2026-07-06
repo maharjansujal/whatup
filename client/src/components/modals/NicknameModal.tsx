@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useUpdateMember } from "../../hooks/update/useUpdateMember";
+import { useAuth } from "../../context/AuthContext";
 
 export function NicknameModal({
   conversationId,
@@ -8,8 +9,9 @@ export function NicknameModal({
   conversationId: string;
   onClose: () => void;
 }) {
+  const { authUser } = useAuth();
   const [nicknameValue, setNicknameValue] = useState("");
-  const { nickname } = useUpdateMember(conversationId);
+  const { nickname } = useUpdateMember(conversationId, authUser?.id);
 
   const handleSubmit = () => {
     if (!nicknameValue.trim()) return;
