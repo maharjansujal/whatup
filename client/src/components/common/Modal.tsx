@@ -16,7 +16,7 @@ export function Modal({
       onClick={onClose}
     >
       <div
-        className="w-100 max-h-3/5 h-auto rounded-lg bg-white p-4 shadow-lg flex flex-col"
+        className="flex h-[70vh] w-[400px] flex-col overflow-hidden rounded-lg bg-white p-4 shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b pb-2">
@@ -31,7 +31,7 @@ export function Modal({
           </button>
         </div>
 
-        <div className="mt-3 flex-1 min-h-0">{children}</div>
+        <div className="mt-3 flex flex-1 min-h-0 flex-col">{children}</div>
       </div>
     </div>
   );

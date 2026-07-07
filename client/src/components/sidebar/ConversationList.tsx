@@ -4,11 +4,9 @@ import { useChat } from "../../context/ChatContext";
 import { useGetUsers } from "../../hooks/get/useGetUsers";
 import { useAuth } from "../../context/AuthContext";
 
-export function ConversationList({
-  filter,
-}: {
-  filter: "All" | "Archived" | "Muted";
-}) {
+type ListFilter = "all" | "groups" | "muted" | "archived";
+
+export function ConversationList({ filter }: { filter: ListFilter }) {
   const {
     conversations,
     activeConversationId,
@@ -21,14 +19,26 @@ export function ConversationList({
   const filtered = useMemo(() => {
     if (!currentUser) return [];
 
-    let base = conversations;
-    if (filter === "All") {
-      base = conversations.filter((c) => !c.is_archived);
-    }
-    if (filter === "Archived") {
-      base = conversations.filter((c) => c.is_archived);
-    } else if (filter === "Muted") {
-      base = conversations.filter((c) => c.muted_until);
+    let base: typeof conversations;
+    switch (filter) {
+      case "archived":
+        base = conversations.filter((c) => c.is_archived);
+        break;
+      case "groups":
+        base = conversations.filter(
+          (c) => !c.is_archived && c.type === "group",
+        );
+        break;
+      case "muted":
+        base = conversations.filter(
+          (c) =>
+            !c.is_archived &&
+            c.muted_until &&
+            new Date(c.muted_until) > new Date(),
+        );
+        break;
+      default:
+        base = conversations.filter((c) => !c.is_archived);
     }
 
     const q = conversationQuery.trim().toLowerCase();

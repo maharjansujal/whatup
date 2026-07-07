@@ -47,7 +47,7 @@ export function UserSearchList({
         />
       </div>
 
-      <ul className="flex-1 overflow-y-auto flex flex-col gap-1">
+      <ul className="flex-1 h-full overflow-y-auto flex flex-col gap-1">
         {results.map((user) => {
           const isSelected = selectedIds.includes(user.id);
 
