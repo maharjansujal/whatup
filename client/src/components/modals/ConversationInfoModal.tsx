@@ -69,7 +69,10 @@ export function ConversationInfoModal({
   if (!authUser) return null;
 
   const conversation = conversations?.find((c) => c.id === conversationId);
-  const { archive, unmute } = useUpdateMember(conversationId, authUser.id);
+  const { archive, unmute, unarchive } = useUpdateMember(
+    conversationId,
+    authUser.id,
+  );
   const leaveGroup = useDeleteMember(conversationId, authUser.id);
 
   if (!conversation) return null;
@@ -141,8 +144,18 @@ export function ConversationInfoModal({
           />
           <ActionRow
             icon={<Archive size={16} />}
-            label="Archive conversation"
-            onClick={() => archive.mutate()}
+            label={
+              conversation.is_archived
+                ? "Unarchive conversation"
+                : "Archived conversation"
+            }
+            onClick={() => {
+              if (conversation.is_archived) {
+                unarchive.mutate();
+              } else {
+                archive.mutate();
+              }
+            }}
           />
         </div>
 

@@ -124,7 +124,6 @@ LEFT JOIN LATERAL (
     LIMIT 1
 ) m ON TRUE
 WHERE c.deleted_at IS NULL
-  AND cm_self.is_archived = FALSE
 GROUP BY
     c.id,
     c.type,
@@ -151,12 +150,12 @@ GROUP BY
     nickname: row.nickname,
     last_message: row.last_message_id
       ? {
-        id: row.last_message_id,
-        sender_id: row.last_message_sender_id,
-        content: row.last_message_content,
-        created_at: row.last_message_at,
-        deleted_at: row.last_message_deleted_at,
-      }
+          id: row.last_message_id,
+          sender_id: row.last_message_sender_id,
+          content: row.last_message_content,
+          created_at: row.last_message_at,
+          deleted_at: row.last_message_deleted_at,
+        }
       : null,
   }));
 };

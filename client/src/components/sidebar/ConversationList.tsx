@@ -4,7 +4,11 @@ import { useChat } from "../../context/ChatContext";
 import { useGetUsers } from "../../hooks/get/useGetUsers";
 import { useAuth } from "../../context/AuthContext";
 
-export function ConversationList() {
+export function ConversationList({
+  filter,
+}: {
+  filter: "All" | "Archived" | "Muted";
+}) {
   const {
     conversations,
     activeConversationId,
@@ -17,10 +21,20 @@ export function ConversationList() {
   const filtered = useMemo(() => {
     if (!currentUser) return [];
 
-    const q = conversationQuery.trim().toLowerCase();
-    if (!q) return conversations;
+    let base = conversations;
+    if (filter === "All") {
+      base = conversations.filter((c) => !c.is_archived);
+    }
+    if (filter === "Archived") {
+      base = conversations.filter((c) => c.is_archived);
+    } else if (filter === "Muted") {
+      base = conversations.filter((c) => c.muted_until);
+    }
 
-    return conversations.filter((c) => {
+    const q = conversationQuery.trim().toLowerCase();
+    if (!q) return base;
+
+    return base.filter((c) => {
       if (c.type === "group") {
         return (c.name ?? "").toLowerCase().includes(q);
       }
@@ -33,7 +47,7 @@ export function ConversationList() {
 
       return otherUser.display_name.toLowerCase().includes(q);
     });
-  }, [conversations, conversationQuery, currentUser, users]);
+  }, [conversations, conversationQuery, currentUser, users, filter]);
 
   if (filtered.length === 0) {
     return (
