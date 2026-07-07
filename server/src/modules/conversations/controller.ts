@@ -58,36 +58,6 @@ const listUserConversations = asyncHandler(async (req, res) => {
   return res.status(200).json(result);
 });
 
-const updateLastMessage = asyncHandler(async (req, res) => {
-  const { conversationId, messageId, createdAt } = req.body;
-  const result = await conversationService.updateLastMessage({
-    conversationId,
-    messageId,
-    createdAt,
-  });
-  return res.status(200).json(result);
-});
-
-const exists = asyncHandler(async (req, res) => {
-  const conversationId = req.params.id;
-  const result = await conversationService.exists(conversationId.toString());
-  return res.status(200).json({ exists: result });
-});
-
-const isGroup = asyncHandler(async (req, res) => {
-  const conversationId = req.params.id;
-  const result = await conversationService.isGroup(conversationId.toString());
-  return res.status(200).json({ isGroup: result });
-});
-
-const getCreator = asyncHandler(async (req, res) => {
-  const conversationId = req.params.id;
-  const result = await conversationService.getCreator(
-    conversationId.toString(),
-  );
-  return res.status(200).json({ creatorId: result });
-});
-
 export const conversationController = {
   createConversation,
   createGroupConversation,
@@ -95,8 +65,4 @@ export const conversationController = {
   deleteConversation,
   getConversationById,
   listUserConversations,
-  updateLastMessage,
-  exists,
-  isGroup,
-  getCreator,
 };

@@ -171,38 +171,6 @@ const listUserConversations = async (userId: string) => {
   return conversationRepository.findUserConversations({ userId });
 };
 
-const updateLastMessage = async ({
-  conversationId,
-  messageId,
-  createdAt,
-}: {
-  conversationId: string;
-  messageId: string;
-  createdAt: Date;
-}) => {
-  return conversationRepository.updateLastMessage({
-    conversationId,
-    messageId,
-    createdAt,
-  });
-};
-
-const exists = async (conversationId: string): Promise<boolean> => {
-  return conversationRepository.exists({ conversationId });
-};
-
-const isGroup = async (conversationId: string): Promise<boolean> => {
-  const convo = await conversationRepository.findById(conversationId);
-  if (!convo) throw createAppError("Conversation does not exist", 404);
-  return convo.type === "group";
-};
-
-const getCreator = async (conversationId: string): Promise<string> => {
-  const convo = await conversationRepository.findById(conversationId);
-  if (!convo) throw createAppError("Conversation does not exist", 404);
-  return convo.created_by_user_id;
-};
-
 export const conversationService = {
   createDirectConversation,
   createGroupConversation,
@@ -210,8 +178,4 @@ export const conversationService = {
   deleteConversation,
   getConversationById,
   listUserConversations,
-  updateLastMessage,
-  exists,
-  isGroup,
-  getCreator,
 };

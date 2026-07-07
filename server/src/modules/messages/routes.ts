@@ -9,11 +9,7 @@ router.patch("/messages/:messageId", messageController.updateMessageContent);
 router.delete("/messages/:messageId", messageController.deleteMessage);
 
 router.get("/:id/messages", messageController.getConversationMessages);
-router.get("/:id/messages/last", messageController.getLastMessage);
-router.get("/:id/messages/count", messageController.countMessages);
 router.get("/:id/messages/search", messageController.searchMessages);
-
-router.get("/messages/:messageId/replies", messageController.findReplyMessages);
 
 router.post(
   "/messages/:messageId/attachments",
