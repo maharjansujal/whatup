@@ -1,4 +1,5 @@
 import { useAuth } from "../../context/AuthContext";
+import { useSocket } from "../../context/SocketContext";
 import { useGetUsers } from "../../hooks/get/useGetUsers";
 import type { Conversation, LastMessage } from "../../types/conversation";
 import { Avatar } from "../common/Avatar";
@@ -55,6 +56,9 @@ export function ConversationItem({
       ? (conversation.name ?? "Unnamed group")
       : (otherUser?.display_name ?? "Unknown");
 
+  const { onlineUsers } = useSocket();
+  const isOnline = onlineUsers.has(otherUserId ?? "");
+
   return (
     <button
       onClick={onSelect}
@@ -65,7 +69,7 @@ export function ConversationItem({
       {conversation.type === "group" ? (
         <GroupAvatarStack memberIds={conversation.member_ids} />
       ) : (
-        <Avatar src={otherUser?.avatar_url} name={title} isOnline={true} />
+        <Avatar src={otherUser?.avatar_url} name={title} isOnline={isOnline} />
       )}
 
       <div className="min-w-0 flex-1">

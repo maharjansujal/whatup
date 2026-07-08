@@ -10,6 +10,7 @@ const DURATIONS = [
 ];
 
 import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export function MuteDurationMenu({
   conversationId,
@@ -17,7 +18,12 @@ export function MuteDurationMenu({
   conversationId: string;
 }) {
   const { authUser } = useAuth();
-  const { mute } = useUpdateMember(conversationId, authUser?.id);
+  const navigate = useNavigate();
+  if (!authUser) {
+    navigate("/login");
+    return null;
+  }
+  const { mute } = useUpdateMember(conversationId, authUser.id);
   const { closeModal } = useModal();
 
   const handleClick = (ms: number | null) => {

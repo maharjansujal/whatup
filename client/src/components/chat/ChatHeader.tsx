@@ -7,11 +7,14 @@ import { GroupAvatarStack } from "../sidebar/GroupAvatarStack";
 import { useModal } from "../../context/ModalContext";
 import { MembersModal } from "../modals/MembersModal";
 import { ConversationInfoModal } from "../modals/ConversationInfoModal";
+import { useSocket } from "../../context/SocketContext";
 
 export function ChatHeader({ conversation }: { conversation: Conversation }) {
   const { authUser: currentUser } = useAuth();
   const { users } = useGetUsers();
   const { openModal, closeModal } = useModal();
+
+  const { onlineUsers } = useSocket();
 
   if (currentUser === undefined) {
     return <div className="px-6 py-3 text-sm text-gray-400">Loading...</div>;
@@ -22,6 +25,8 @@ export function ChatHeader({ conversation }: { conversation: Conversation }) {
     conversation.type === "direct"
       ? conversation.member_ids.find((id) => id !== currentUser.id)
       : undefined;
+  const isOnline = onlineUsers.has(otherUserId ?? "");
+
   const otherUser = otherUserId
     ? users?.find((u) => u.id === otherUserId)
     : undefined;
@@ -33,7 +38,9 @@ export function ChatHeader({ conversation }: { conversation: Conversation }) {
   const subtitle =
     conversation.type === "group"
       ? `${conversation.member_ids.length} members`
-      : "Online";
+      : isOnline
+        ? "Online"
+        : "Offline";
 
   return (
     <div className="flex items-center justify-between border-b border-[#EEEEEB] bg-white px-6 py-3.5">
@@ -43,7 +50,11 @@ export function ChatHeader({ conversation }: { conversation: Conversation }) {
             <GroupAvatarStack memberIds={conversation.member_ids} />
           </div>
         ) : (
-          <Avatar src={otherUser?.avatar_url} name={title} isOnline={true} />
+          <Avatar
+            src={otherUser?.avatar_url}
+            name={title}
+            isOnline={isOnline}
+          />
         )}
         <div className="leading-tight">
           <p className="font-['Space_Grotesk'] text-[14.5px] font-semibold text-[#1A1B23]">

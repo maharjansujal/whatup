@@ -2,6 +2,7 @@ import { Check, Search } from "lucide-react";
 import type { User } from "../../types/user";
 import { useMemo } from "react";
 import { Avatar } from "./Avatar";
+import { useSocket } from "../../context/SocketContext";
 
 interface UserSearchListProps {
   users: User[];
@@ -32,6 +33,8 @@ export function UserSearchList({
     );
   }, [users, query, currentUserId]);
 
+  const { onlineUsers } = useSocket();
+
   return (
     <div className="flex h-full flex-col">
       <div className="relative mb-3 shrink-0">
@@ -50,7 +53,7 @@ export function UserSearchList({
       <ul className="flex-1 h-full overflow-y-auto flex flex-col gap-1">
         {results.map((user) => {
           const isSelected = selectedIds.includes(user.id);
-
+          const isOnline = onlineUsers.has(user.id);
           return (
             <li key={user.id}>
               <button
@@ -60,7 +63,7 @@ export function UserSearchList({
                 <Avatar
                   src={user.avatar_url}
                   name={user.display_name}
-                  isOnline={true}
+                  isOnline={isOnline}
                 />
 
                 <div className="min-w-0 flex-1">

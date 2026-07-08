@@ -11,7 +11,6 @@ import { SidebarHeader } from "./SidebarHeader";
 import { ConversationList } from "./ConversationList";
 import { SearchPeopleModal } from "../modals/SearchPeopleModal";
 import { CreateGroupModal } from "../modals/CreateGroupModal";
-import { Button } from "../shared/button";
 import { useAuth } from "../../context/AuthContext";
 
 const FILTERS = ["all", "groups", "muted"] as const;
@@ -127,17 +126,6 @@ export function Sidebar() {
             </div>
           </>
         )}
-
-        {/* footer pinned */}
-        <div className="border-t p-4 shrink-0">
-          <Button
-            variant="outline"
-            onClick={logout}
-            className="w-full text-gray-200 border-gray-700 hover:bg-gray-800"
-          >
-            Logout
-          </Button>
-        </div>
       </aside>
 
       {isSearchOpen && (
