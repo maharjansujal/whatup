@@ -7,16 +7,19 @@ import {
 } from "react";
 import type { Socket } from "socket.io-client";
 import socket from "../socket/socket";
+import { SOCKET_EVENTS } from "../socket/socket_events";
 
 interface SocketContextType {
   socket: Socket;
   isConnected: boolean;
+  onlineUsers: Set<string>;
 }
 
 const SocketContext = createContext<SocketContextType | null>(null);
 
 export function SocketProvider({ children }: { children: ReactNode }) {
   const [isConnected, setIsConnected] = useState(socket.connected);
+  const [onlineUsers, setOnlineUsers] = useState(new Set<string>());
 
   useEffect(() => {
     const handleConnect = () => {
@@ -29,26 +32,59 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       setIsConnected(false);
     };
 
+    const handleUserOnline = (userId: string) => {
+      console.log("ONLINE EVENT RECEIVED", userId);
+      setOnlineUsers((prev) => {
+        const next = new Set(prev);
+        next.add(userId);
+        return next;
+      });
+    };
+
+    const handleUserOffline = (userId: string) => {
+      console.log("OFFLINE EVENT RECEIVED", userId);
+      setOnlineUsers((prev) => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
+    };
+
     const handleConnectError = (err: Error) => {
       console.error("Socket connection error:", err.message);
     };
 
-    socket.on("connect", handleConnect);
-    socket.on("disconnect", handleDisconnect);
-    socket.on("connect_error", handleConnectError);
+    const handleOnlineUsers = (users: string[]) => {
+      setOnlineUsers(new Set(users));
+    };
+
+    socket.on(SOCKET_EVENTS.CONNECTION, handleConnect);
+    socket.on(SOCKET_EVENTS.DISCONNECT, handleDisconnect);
+    socket.on(SOCKET_EVENTS.ERROR, handleConnectError);
+    socket.on(SOCKET_EVENTS.ONLINE_USERS, handleOnlineUsers);
+    socket.on(SOCKET_EVENTS.USER_ONLINE, handleUserOnline);
+    socket.on(SOCKET_EVENTS.USER_OFFLINE, handleUserOffline);
 
     return () => {
-      socket.off("connect", handleConnect);
-      socket.off("disconnect", handleDisconnect);
-      socket.off("connect_error", handleConnectError);
+      socket.off(SOCKET_EVENTS.CONNECTION, handleConnect);
+      socket.off(SOCKET_EVENTS.DISCONNECT, handleDisconnect);
+      socket.off(SOCKET_EVENTS.ERROR, handleConnectError);
+      socket.off(SOCKET_EVENTS.ONLINE_USERS, handleOnlineUsers);
+      socket.off(SOCKET_EVENTS.USER_ONLINE, handleUserOnline);
+      socket.off(SOCKET_EVENTS.USER_OFFLINE, handleUserOffline);
     };
-  }, []);
+  }, [socket]);
+
+  useEffect(() => {
+    console.log(...onlineUsers);
+  }, [onlineUsers]);
 
   return (
     <SocketContext.Provider
       value={{
         socket,
         isConnected,
+        onlineUsers,
       }}
     >
       {children}

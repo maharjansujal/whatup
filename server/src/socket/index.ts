@@ -1,5 +1,5 @@
 import http from "http";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
 import { SOCKET_EVENTS } from "./socket_events";
 import { messageService } from "../modules/messages/service";
@@ -13,6 +13,8 @@ function verifyToken(token: string): AuthUser {
   }
   return payload as AuthUser;
 }
+
+const onlineUsers = new Map<string, Set<string>>();
 
 export function initSocket(server: http.Server) {
   const CLIENT_URL = process.env.CLIENT_URL ?? "http://localhost:5173";
@@ -40,9 +42,27 @@ export function initSocket(server: http.Server) {
     }
   });
 
-  io.on(SOCKET_EVENTS.CONNECTION, (socket) => {
-    console.log(`User connected: ${socket.data.user.id}`);
+  io.on(SOCKET_EVENTS.CONNECTION, (socket: Socket) => {
+    // console.log(`User connected: ${socket.data.user.id}`);
+    const userId = socket.data.user.id;
 
+    // Track all sockets for this user
+    if (!onlineUsers.has(userId)) {
+      onlineUsers.set(userId, new Set());
+      socket.broadcast.emit(SOCKET_EVENTS.USER_ONLINE, userId);
+    }
+
+    onlineUsers.get(userId)!.add(socket.id);
+    socket.emit(SOCKET_EVENTS.ONLINE_USERS, [...onlineUsers.keys()]);
+
+    // console.log(onlineUsers);
+    console.log(
+      "Connected users in socket",
+      [...onlineUsers.entries()].map(([userId, sockets]) => ({
+        userId,
+        sockets: [...sockets],
+      })),
+    );
     // Join conversation room
     socket.on(
       SOCKET_EVENTS.CONVERSATION_JOIN,
@@ -101,11 +121,24 @@ export function initSocket(server: http.Server) {
     );
 
     // Presence events
-    socket.broadcast.emit(SOCKET_EVENTS.USER_ONLINE, socket.data.user.id);
+    // socket.broadcast.emit(SOCKET_EVENTS.USER_ONLINE, socket.data.user.id);
 
     socket.on(SOCKET_EVENTS.DISCONNECT, () => {
-      console.log(`User disconnected: ${socket.data.user.id}`);
-      socket.broadcast.emit(SOCKET_EVENTS.USER_OFFLINE, socket.data.user.id);
+      const userId = socket.data.user.id;
+
+      // console.log(`User disconnected: ${userId}`);
+
+      const sockets = onlineUsers.get(userId);
+
+      if (!sockets) return;
+
+      sockets.delete(socket.id);
+
+      if (sockets.size === 0) {
+        onlineUsers.delete(userId);
+        // console.log("Broadcasting USER_OFFLINE", userId);
+        socket.broadcast.emit(SOCKET_EVENTS.USER_OFFLINE, userId);
+      }
     });
   });
 

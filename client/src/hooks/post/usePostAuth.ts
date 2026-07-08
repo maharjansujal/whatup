@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../api/api";
 import type { LoginDto, RegisterDto, User } from "../../types/user";
+import socket from "../../socket/socket";
 
 export function usePostAuth() {
   const queryClient = useQueryClient();
@@ -23,6 +24,7 @@ export function usePostAuth() {
       await api.post("/auth/logout"); // backend clears cookie
     },
     onSuccess: () => {
+      socket.disconnect();
       queryClient.removeQueries({ queryKey: ["auth-user"] });
       queryClient.removeQueries({ queryKey: ["users"] });
 
@@ -37,6 +39,7 @@ export function usePostAuth() {
       return res.data.user;
     },
     onSuccess: async (user) => {
+      socket.connect();
       await queryClient.cancelQueries({ queryKey: ["auth-user"] });
       queryClient.setQueryData(["auth-user"], user);
       queryClient.invalidateQueries({ queryKey: ["users"] });

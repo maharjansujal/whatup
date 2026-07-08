@@ -1,6 +1,8 @@
 export const SOCKET_EVENTS = {
   CONNECTION: "connection",
   DISCONNECT: "disconnect",
+  ONLINE_USERS: "users:online",
+  ERROR: "error",
 
   CONVERSATION_JOIN: "conversation:join",
   CONVERSATION_LEAVE: "conversation:leave",

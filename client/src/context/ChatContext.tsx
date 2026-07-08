@@ -9,7 +9,6 @@ import {
 
 import { useGetConversations } from "../hooks/get/useGetConversations";
 import { useGetMessages } from "../hooks/get/useGetMessages";
-import { usePostMessage } from "../hooks/post/usePostMessage";
 import { usePostGroupConversation } from "../hooks/post/usePostGroupConversation";
 import { usePostDirectConversation } from "../hooks/post/usePostDirectConversation";
 import type { Conversation } from "../types/conversation";
@@ -68,7 +67,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const [messages, setMessages] = useState<Message[]>([]);
   // Mutations
-  const postMessage = usePostMessage();
   const postGroupConversation = usePostGroupConversation();
   const postDirectConversation = usePostDirectConversation();
 
