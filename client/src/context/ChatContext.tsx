@@ -17,6 +17,7 @@ import { useAuth } from "./AuthContext";
 import { SOCKET_EVENTS } from "../socket/socket_events";
 import { useSocket } from "./SocketContext";
 import { useQueryClient } from "@tanstack/react-query";
+import type { User } from "../types/user";
 
 interface ChatContextValue {
   conversations: Conversation[];
@@ -30,6 +31,7 @@ interface ChatContextValue {
   createGroupConversation: (name: string, memberIds: string[]) => void;
   startDirectConversation: (userId: string) => void;
   getConversationPreview: (conversationId: string) => string;
+  draftRecipientId: string | null;
 }
 
 const ChatContext = createContext<ChatContextValue | undefined>(undefined);
@@ -39,6 +41,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [activeConversationId, setActiveConversationId] = useState<
     string | null
   >(null);
+  const [draftRecipientId, setDraftRecipientId] = useState<string | null>(null);
   const [conversationQuery, setConversationQuery] = useState("");
 
   const { authUser } = useAuth();
@@ -125,10 +128,26 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   // Send message
   const sendMessage = (content: string) => {
-    console.log({ activeConversationId, content });
+    if (!content.trim()) return;
+    if (draftRecipientId) {
+      postDirectConversation.mutate(
+        { userId: draftRecipientId },
+        {
+          onSuccess: (conversation) => {
+            setDraftRecipientId(null);
+            setActiveConversationId(conversation.id);
 
-    if (!activeConversationId || !content.trim()) return;
-    // postMessage.mutate({ conversationId: activeConversationId, content });
+            socket.emit(SOCKET_EVENTS.MESSAGE_SEND, {
+              conversationId: conversation.id,
+              type: "text",
+              content,
+            });
+          },
+        },
+      );
+      return;
+    }
+    if (!activeConversationId) return;
     socket.emit(SOCKET_EVENTS.MESSAGE_SEND, {
       conversationId: activeConversationId,
       type: "text",
@@ -150,14 +169,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   // Start direct
   const startDirectConversation = (userId: string) => {
-    postDirectConversation.mutate(
-      { userId },
-      {
-        onSuccess: (newConversation) => {
-          setActiveConversationId(newConversation.id);
-        },
-      },
-    );
+    setDraftRecipientId(userId);
+    setActiveConversationId(null);
+    setMessages([]);
   };
 
   const handleConversationCreated = (conversation: Conversation) => {
@@ -206,11 +220,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     messages,
     conversationQuery,
     setConversationQuery,
-    selectConversation: setActiveConversationId,
+    selectConversation: (id: string) => {
+      setDraftRecipientId(null);
+      setActiveConversationId(id);
+    },
     sendMessage,
     createGroupConversation,
     startDirectConversation,
     getConversationPreview,
+    draftRecipientId,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

@@ -5,9 +5,8 @@ import { MessageInput } from "./MessageInput";
 import { useChat } from "../../context/ChatContext";
 
 export function ChatWindow() {
-  const { activeConversation } = useChat();
-
-  if (!activeConversation) {
+  const { activeConversation, draftRecipientId } = useChat();
+  if (!activeConversation && !draftRecipientId) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 bg-[#FAFAF8]">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F2F2EF]">
@@ -23,11 +22,13 @@ export function ChatWindow() {
       </div>
     );
   }
-  console.log(activeConversation.id);
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-[#FAFAF8]">
-      <ChatHeader conversation={activeConversation} />
+      <ChatHeader
+        conversation={activeConversation}
+        draftRecipientId={draftRecipientId}
+      />
       <MessageList />
       <MessageInput />
     </div>
