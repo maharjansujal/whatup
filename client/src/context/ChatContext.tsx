@@ -15,8 +15,8 @@ import { usePostDirectConversation } from "../hooks/post/usePostDirectConversati
 import type { Conversation } from "../types/conversation";
 import type { Message } from "../types/message";
 import { useAuth } from "./AuthContext";
-import socket from "../socket/socket";
 import { SOCKET_EVENTS } from "../socket/socket_events";
+import { useSocket } from "./SocketContext";
 
 interface ChatContextValue {
   conversations: Conversation[];
@@ -46,8 +46,27 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   // Queries
   const { conversations = [] } = useGetConversations(authUser?.id);
 
-  const { data: messages = [] } = useGetMessages(activeConversationId ?? "");
+  const { data: fetchedMessages } = useGetMessages(activeConversationId ?? "");
 
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    const handleMessage = (message: Message) => {
+      if (message.conversation_id !== activeConversationId) {
+        return;
+      }
+
+      setMessages((prev) => [...prev, message]);
+    };
+
+    socket.on(SOCKET_EVENTS.MESSAGE_RECEIVE, handleMessage);
+
+    return () => {
+      socket.off(SOCKET_EVENTS.MESSAGE_RECEIVE, handleMessage);
+    };
+  }, [socket, activeConversationId]);
+
+  const [messages, setMessages] = useState<Message[]>([]);
   // Mutations
   const postMessage = usePostMessage();
   const postGroupConversation = usePostGroupConversation();
@@ -67,6 +86,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       socket.emit(SOCKET_EVENTS.CONVERSATION_LEAVE, activeConversationId);
     };
   }, [activeConversationId]);
+
+  useEffect(() => {
+    if (!fetchedMessages) return;
+
+    setMessages(fetchedMessages);
+  }, [fetchedMessages]);
 
   // Send message
   const sendMessage = (content: string) => {

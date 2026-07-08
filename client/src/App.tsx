@@ -15,8 +15,8 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <SocketProvider>
-          <AuthProvider>
+        <AuthProvider>
+          <SocketProvider>
             <ChatProvider>
               <ModalProvider>
                 <Routes>
@@ -29,8 +29,8 @@ export default function App() {
                 </Routes>
               </ModalProvider>
             </ChatProvider>
-          </AuthProvider>
-        </SocketProvider>
+          </SocketProvider>
+        </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
   );

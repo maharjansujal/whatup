@@ -1,35 +1,67 @@
-import { createContext, useEffect, useState } from "react";
-import socket from "../socket/socket";
 import {
-  registerSocketListeners,
-  cleanupSocketListeners,
-} from "../socket/listeners";
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import type { Socket } from "socket.io-client";
-import type { Message } from "../types/message";
+import socket from "../socket/socket";
 
 interface SocketContextType {
   socket: Socket;
-  messages: Message[];
+  isConnected: boolean;
 }
 
-export const SocketContext = createContext<SocketContextType | null>(null);
+const SocketContext = createContext<SocketContextType | null>(null);
 
-export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+export function SocketProvider({ children }: { children: ReactNode }) {
+  const [isConnected, setIsConnected] = useState(socket.connected);
 
   useEffect(() => {
-    registerSocketListeners((msg) => {
-      setMessages((prev) => [...prev, msg]);
-    });
+    const handleConnect = () => {
+      console.log("Socket connected:", socket.id);
+      setIsConnected(true);
+    };
+
+    const handleDisconnect = (reason: string) => {
+      console.log("Socket disconnected:", reason);
+      setIsConnected(false);
+    };
+
+    const handleConnectError = (err: Error) => {
+      console.error("Socket connection error:", err.message);
+    };
+
+    socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
+    socket.on("connect_error", handleConnectError);
 
     return () => {
-      cleanupSocketListeners();
+      socket.off("connect", handleConnect);
+      socket.off("disconnect", handleDisconnect);
+      socket.off("connect_error", handleConnectError);
     };
   }, []);
 
   return (
-    <SocketContext.Provider value={{ socket, messages }}>
+    <SocketContext.Provider
+      value={{
+        socket,
+        isConnected,
+      }}
+    >
       {children}
     </SocketContext.Provider>
   );
-};
+}
+
+export function useSocket() {
+  const context = useContext(SocketContext);
+
+  if (!context) {
+    throw new Error("useSocket must be used within a SocketProvider");
+  }
+
+  return context;
+}
