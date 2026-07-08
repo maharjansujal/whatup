@@ -1,6 +1,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -14,6 +15,8 @@ import { usePostDirectConversation } from "../hooks/post/usePostDirectConversati
 import type { Conversation } from "../types/conversation";
 import type { Message } from "../types/message";
 import { useAuth } from "./AuthContext";
+import socket from "../socket/socket";
+import { SOCKET_EVENTS } from "../socket/socket_events";
 
 interface ChatContextValue {
   conversations: Conversation[];
@@ -55,10 +58,25 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     [conversations, activeConversationId],
   );
 
+  useEffect(() => {
+    if (!activeConversationId) return;
+
+    socket.emit(SOCKET_EVENTS.CONVERSATION_JOIN, activeConversationId);
+
+    return () => {
+      socket.emit(SOCKET_EVENTS.CONVERSATION_LEAVE, activeConversationId);
+    };
+  }, [activeConversationId]);
+
   // Send message
   const sendMessage = (content: string) => {
     if (!activeConversationId || !content.trim()) return;
-    postMessage.mutate({ conversationId: activeConversationId, content });
+    // postMessage.mutate({ conversationId: activeConversationId, content });
+    socket.emit(SOCKET_EVENTS.MESSAGE_SEND, {
+      conversationId: activeConversationId,
+      type: "text",
+      content,
+    });
   };
 
   // Create group

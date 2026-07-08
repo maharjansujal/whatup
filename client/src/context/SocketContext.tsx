@@ -1,86 +1,35 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { io, Socket } from "socket.io-client";
-import type { UserMessage } from "../types/user";
+import { createContext, useEffect, useState } from "react";
+import socket from "../socket/socket";
+import {
+  registerSocketListeners,
+  cleanupSocketListeners,
+} from "../socket/listeners";
+import type { Socket } from "socket.io-client";
+import type { Message } from "../types/message";
 
 interface SocketContextType {
-  socket: Socket | null;
-  activeUser: UserMessage | null;
-  setActiveUser: (user: UserMessage | null) => void;
-  isOnline: boolean;
-  isTyping: boolean;
-  onlineUsers: number[];
-  setIsTyping: React.Dispatch<React.SetStateAction<boolean>>;
+  socket: Socket;
+  messages: Message[];
 }
 
-const SocketContext = createContext<SocketContextType | undefined>(undefined);
+export const SocketContext = createContext<SocketContextType | null>(null);
 
-const VITE_API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
-export function SocketProvider({ children }: { children: React.ReactNode }) {
-  const [socket, setSocket] = useState<Socket | null>(null);
-  const [isOnline, setIsOnline] = useState(false);
-  const [activeUser, setActiveUser] = useState<UserMessage | null>(null);
-  const [onlineUsers, setOnlineUsers] = useState<number[]>([]);
-  const [isTyping, setIsTyping] = useState(false);
-
-  const token = localStorage.getItem("token");
+export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
+  const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
-    if (!token) return;
-
-    const newSocket = io(VITE_API_URL, {
-      auth: { token },
-      transports: ["websocket"],
-    });
-
-    setSocket(newSocket);
-
-    newSocket.on("connect", () => setIsOnline(true));
-    newSocket.on("disconnect", () => {
-      setIsOnline(false);
-      setOnlineUsers([]);
-    });
-
-    newSocket.on("getOnlineUsers", (users: number[]) => {
-      setOnlineUsers(users);
+    registerSocketListeners((msg) => {
+      setMessages((prev) => [...prev, msg]);
     });
 
     return () => {
-      newSocket.close();
+      cleanupSocketListeners();
     };
-  }, [token]);
-
-  useEffect(() => {
-    if (!socket) return;
-
-    const interval = setInterval(() => {
-      socket.emit("heartbeat");
-    }, 30000); // 30 seconds
-
-    return () => clearInterval(interval);
-  }, [socket]);
+  }, []);
 
   return (
-    <SocketContext.Provider
-      value={{
-        socket,
-        activeUser,
-        setActiveUser,
-        isOnline,
-        isTyping,
-        onlineUsers,
-        setIsTyping,
-      }}
-    >
+    <SocketContext.Provider value={{ socket, messages }}>
       {children}
     </SocketContext.Provider>
   );
-}
-
-export function useChatSocket() {
-  const context = useContext(SocketContext);
-  if (!context) {
-    throw new Error("useChatSocket must be used within a SocketProvider");
-  }
-  return context;
-}
+};
