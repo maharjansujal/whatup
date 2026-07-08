@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Modal } from "../common/Modal";
 import { Avatar } from "../common/Avatar";
 import { useGetConversationMembers } from "../../hooks/get/useGetConversationMembers";
+import { useSocket } from "../../context/SocketContext";
 
 export function MembersModal({
   conversationId,
@@ -20,6 +21,7 @@ export function MembersModal({
       .toLowerCase()
       .includes(query.toLowerCase()),
   );
+  const { onlineUsers } = useSocket();
 
   return (
     <Modal title="Members" onClose={onClose}>
@@ -58,38 +60,41 @@ export function MembersModal({
         )}
 
         <ul className="flex max-h-80 h-auto flex-col gap-0.5 overflow-y-auto">
-          {filtered?.map((m) => (
-            <li
-              key={m.id}
-              className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-[#F9F9F7]"
-            >
-              <Avatar
-                src={m.avatar_url}
-                name={m.display_name}
-                isOnline={false}
-              />
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-['Space_Grotesk'] text-[13.5px] font-medium text-[#1A1B23]">
-                  {m.display_name}
-                </p>
-                <p className="truncate font-['IBM_Plex_Mono'] text-[11px] text-[#9A9CA8]">
-                  @{m.username}
-                </p>
-              </div>
-              {m.role === "owner" && (
-                <span className="flex items-center gap-1 rounded-full bg-[#00C2A8]/10 px-2 py-0.5 text-[10.5px] font-medium text-[#00A891]">
-                  <Crown size={11} />
-                  Owner
-                </span>
-              )}{" "}
-              {m.role === "admin" && (
-                <span className="flex items-center gap-1 rounded-full bg-[#00C2A8]/10 px-2 py-0.5 text-[10.5px] font-medium text-[#00A891]">
-                  <ShieldCheck size={11} />
-                  Owner
-                </span>
-              )}
-            </li>
-          ))}
+          {filtered?.map((m) => {
+            const isOnline = onlineUsers.has(m.id);
+            return (
+              <li
+                key={m.id}
+                className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-[#F9F9F7]"
+              >
+                <Avatar
+                  src={m.avatar_url}
+                  name={m.display_name}
+                  isOnline={isOnline}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-['Space_Grotesk'] text-[13.5px] font-medium text-[#1A1B23]">
+                    {m.display_name}
+                  </p>
+                  <p className="truncate font-['IBM_Plex_Mono'] text-[11px] text-[#9A9CA8]">
+                    @{m.username}
+                  </p>
+                </div>
+                {m.role === "owner" && (
+                  <span className="flex items-center gap-1 rounded-full bg-[#00C2A8]/10 px-2 py-0.5 text-[10.5px] font-medium text-[#00A891]">
+                    <Crown size={11} />
+                    Owner
+                  </span>
+                )}{" "}
+                {m.role === "admin" && (
+                  <span className="flex items-center gap-1 rounded-full bg-[#00C2A8]/10 px-2 py-0.5 text-[10.5px] font-medium text-[#00A891]">
+                    <ShieldCheck size={11} />
+                    Owner
+                  </span>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
     </Modal>
