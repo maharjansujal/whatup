@@ -4,7 +4,7 @@ import { useChat } from "../../context/ChatContext";
 import { useGetUsers } from "../../hooks/get/useGetUsers";
 import { useAuth } from "../../context/AuthContext";
 
-type ListFilter = "all" | "groups" | "muted" | "archived";
+type ListFilter = "all" | "groups" | "muted" | "archived" | "dms";
 
 export function ConversationList({ filter }: { filter: ListFilter }) {
   const {

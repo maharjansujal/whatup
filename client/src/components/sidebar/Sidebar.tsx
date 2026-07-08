@@ -13,12 +13,13 @@ import { SearchPeopleModal } from "../modals/SearchPeopleModal";
 import { CreateGroupModal } from "../modals/CreateGroupModal";
 import { useAuth } from "../../context/AuthContext";
 
-const FILTERS = ["all", "groups", "muted"] as const;
+const FILTERS = ["all", "groups", "dms", "muted"] as const;
 type Filter = (typeof FILTERS)[number];
 const FILTER_LABELS: Record<Filter, string> = {
   all: "All",
   groups: "Groups",
   muted: "Muted",
+  dms: "DMs",
 };
 
 export function Sidebar() {

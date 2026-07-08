@@ -16,6 +16,7 @@ import type { Message } from "../types/message";
 import { useAuth } from "./AuthContext";
 import { SOCKET_EVENTS } from "../socket/socket_events";
 import { useSocket } from "./SocketContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ChatContextValue {
   conversations: Conversation[];
@@ -49,13 +50,42 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const { socket } = useSocket();
 
+  const queryClient = useQueryClient();
+
   useEffect(() => {
     const handleMessage = (message: Message) => {
-      if (message.conversation_id !== activeConversationId) {
-        return;
-      }
+      // setMessages((prev) => [...prev, message]);
 
-      setMessages((prev) => [...prev, message]);
+      queryClient.setQueryData(
+        ["conversations", authUser?.id],
+        (old: Conversation[]) => {
+          if (!old) return old;
+
+          const updated = old.map((c) =>
+            c.id === message.conversation_id
+              ? { ...c, last_message: message }
+              : c,
+          );
+
+          updated.sort((a, b) => {
+            const aTime = a.last_message
+              ? new Date(a.last_message.created_at).getTime()
+              : 0;
+
+            const bTime = b.last_message
+              ? new Date(b.last_message.created_at).getTime()
+              : 0;
+
+            return bTime - aTime;
+          });
+          console.log(updated);
+          return updated;
+        },
+      );
+
+      if (message.conversation_id === activeConversationId) {
+        setMessages((prev) => [...prev, message]);
+      }
     };
 
     socket.on(SOCKET_EVENTS.MESSAGE_RECEIVE, handleMessage);
@@ -75,15 +105,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     [conversations, activeConversationId],
   );
 
-  useEffect(() => {
-    if (!activeConversationId) return;
+  // useEffect(() => {
+  //   if (!activeConversationId) return;
 
-    socket.emit(SOCKET_EVENTS.CONVERSATION_JOIN, activeConversationId);
+  //   socket.emit(SOCKET_EVENTS.CONVERSATION_JOIN, activeConversationId);
 
-    return () => {
-      socket.emit(SOCKET_EVENTS.CONVERSATION_LEAVE, activeConversationId);
-    };
-  }, [activeConversationId]);
+  //   return () => {
+  //     socket.emit(SOCKET_EVENTS.CONVERSATION_LEAVE, activeConversationId);
+  //   };
+  // }, [activeConversationId]);
 
   useEffect(() => {
     if (!fetchedMessages) return;

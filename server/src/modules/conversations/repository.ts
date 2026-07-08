@@ -308,6 +308,26 @@ const isAdmin = async ({
   return (result.rowCount ?? 0) > 0;
 };
 
+const findConversationIdsByUser = async ({
+  userId,
+  executor = db,
+}: {
+  userId: string;
+  executor?: DBExecutor;
+}) => {
+  const result = await executor.query(
+    `
+    SELECT conversation_id
+    FROM conversation_members
+    WHERE user_id = $1
+    `,
+    [userId],
+  );
+
+  // Return as a simple string array of IDs
+  return result.rows.map((row) => row.conversation_id);
+};
+
 export const conversationRepository = {
   create,
   findById,
@@ -322,4 +342,5 @@ export const conversationRepository = {
   getCreator,
   isAdmin,
   isOwner,
+  findConversationIdsByUser,
 };

@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { SOCKET_EVENTS } from "./socket_events";
 import { messageService } from "../modules/messages/service";
 import { AuthUser } from "../types/express";
+import { conversationRepository } from "../modules/conversations/repository";
 
 // Utility: verifyToken (reusable for sockets)
 function verifyToken(token: string): AuthUser {
@@ -42,7 +43,7 @@ export function initSocket(server: http.Server) {
     }
   });
 
-  io.on(SOCKET_EVENTS.CONNECTION, (socket: Socket) => {
+  io.on(SOCKET_EVENTS.CONNECTION, async (socket: Socket) => {
     // console.log(`User connected: ${socket.data.user.id}`);
     const userId = socket.data.user.id;
 
@@ -55,6 +56,15 @@ export function initSocket(server: http.Server) {
     onlineUsers.get(userId)!.add(socket.id);
     socket.emit(SOCKET_EVENTS.ONLINE_USERS, [...onlineUsers.keys()]);
 
+    const conversationIds =
+      await conversationRepository.findConversationIdsByUser({ userId });
+
+    console.log("Conversation IDs:", conversationIds);
+
+    for (const conversationId of conversationIds) {
+      socket.join(conversationId);
+    }
+
     // console.log(onlineUsers);
     console.log(
       "Connected users in socket",
@@ -64,26 +74,26 @@ export function initSocket(server: http.Server) {
       })),
     );
     // Join conversation room
-    socket.on(
-      SOCKET_EVENTS.CONVERSATION_JOIN,
-      async (conversationId: string) => {
-        try {
-          socket.join(conversationId);
-          console.log(`${socket.id} joined ${conversationId}`);
-        } catch (error) {
-          console.error("Failed to join conversation:", error);
-          socket.emit(SOCKET_EVENTS.ERROR, {
-            message: "Failed to join conversation.",
-          });
-        }
-      },
-    );
+    // socket.on(
+    //   SOCKET_EVENTS.CONVERSATION_JOIN,
+    //   async (conversationId: string) => {
+    //     try {
+    //       socket.join(conversationId);
+    //       console.log(`${socket.id} joined ${conversationId}`);
+    //     } catch (error) {
+    //       console.error("Failed to join conversation:", error);
+    //       socket.emit(SOCKET_EVENTS.ERROR, {
+    //         message: "Failed to join conversation.",
+    //       });
+    //     }
+    //   },
+    // );
 
-    // Leave conversation room
-    socket.on(SOCKET_EVENTS.CONVERSATION_LEAVE, (conversationId: string) => {
-      socket.leave(conversationId);
-      console.log(`${socket.id} left ${conversationId}`);
-    });
+    // // Leave conversation room
+    // socket.on(SOCKET_EVENTS.CONVERSATION_LEAVE, (conversationId: string) => {
+    //   socket.leave(conversationId);
+    //   console.log(`${socket.id} left ${conversationId}`);
+    // });
 
     // Send message
     socket.on(
