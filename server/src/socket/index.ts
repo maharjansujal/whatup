@@ -15,12 +15,13 @@ function verifyToken(token: string): AuthUser {
   return payload as AuthUser;
 }
 
-const onlineUsers = new Map<string, Set<string>>();
+export const onlineUsers = new Map<string, Set<string>>();
+let io: Server;
 
 export function initSocket(server: http.Server) {
   const CLIENT_URL = process.env.CLIENT_URL ?? "http://localhost:5173";
 
-  const io = new Server(server, {
+  io = new Server(server, {
     cors: {
       origin: CLIENT_URL,
       credentials: true,
@@ -47,6 +48,10 @@ export function initSocket(server: http.Server) {
     // console.log(`User connected: ${socket.data.user.id}`);
     const userId = socket.data.user.id;
 
+    socket.join(`user:${userId}`); // Join a user room
+
+    console.log("Joined user room:", `user:${userId}`, socket.rooms);
+
     // Track all sockets for this user
     if (!onlineUsers.has(userId)) {
       onlineUsers.set(userId, new Set());
@@ -58,9 +63,6 @@ export function initSocket(server: http.Server) {
 
     const conversationIds =
       await conversationRepository.findConversationIdsByUser({ userId });
-
-    console.log("Conversation IDs:", conversationIds);
-
     for (const conversationId of conversationIds) {
       socket.join(conversationId);
     }
@@ -73,27 +75,6 @@ export function initSocket(server: http.Server) {
         sockets: [...sockets],
       })),
     );
-    // Join conversation room
-    // socket.on(
-    //   SOCKET_EVENTS.CONVERSATION_JOIN,
-    //   async (conversationId: string) => {
-    //     try {
-    //       socket.join(conversationId);
-    //       console.log(`${socket.id} joined ${conversationId}`);
-    //     } catch (error) {
-    //       console.error("Failed to join conversation:", error);
-    //       socket.emit(SOCKET_EVENTS.ERROR, {
-    //         message: "Failed to join conversation.",
-    //       });
-    //     }
-    //   },
-    // );
-
-    // // Leave conversation room
-    // socket.on(SOCKET_EVENTS.CONVERSATION_LEAVE, (conversationId: string) => {
-    //   socket.leave(conversationId);
-    //   console.log(`${socket.id} left ${conversationId}`);
-    // });
 
     // Send message
     socket.on(
@@ -152,5 +133,9 @@ export function initSocket(server: http.Server) {
     });
   });
 
+  return io;
+}
+
+export function getIO() {
   return io;
 }

@@ -23,6 +23,7 @@ export function ChatWindow() {
       </div>
     );
   }
+  console.log(activeConversation.id);
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-[#FAFAF8]">

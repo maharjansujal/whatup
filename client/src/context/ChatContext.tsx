@@ -89,11 +89,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     };
 
     socket.on(SOCKET_EVENTS.MESSAGE_RECEIVE, handleMessage);
+    socket.on(SOCKET_EVENTS.CONVERSATION_CREATED, handleConversationCreated);
 
     return () => {
       socket.off(SOCKET_EVENTS.MESSAGE_RECEIVE, handleMessage);
+      socket.off(SOCKET_EVENTS.CONVERSATION_CREATED, handleConversationCreated);
     };
-  }, [socket, activeConversationId]);
+  }, [socket, activeConversationId, authUser?.id, queryClient]);
 
   const [messages, setMessages] = useState<Message[]>([]);
   // Mutations
@@ -123,6 +125,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   // Send message
   const sendMessage = (content: string) => {
+    console.log({ activeConversationId, content });
+
     if (!activeConversationId || !content.trim()) return;
     // postMessage.mutate({ conversationId: activeConversationId, content });
     socket.emit(SOCKET_EVENTS.MESSAGE_SEND, {
@@ -152,6 +156,29 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         onSuccess: (newConversation) => {
           setActiveConversationId(newConversation.id);
         },
+      },
+    );
+  };
+
+  const handleConversationCreated = (conversation: Conversation) => {
+    console.log("🔥 CONVERSATION_CREATED received", conversation);
+    console.log("Auth user:", authUser?.id);
+    console.log(
+      "Current cache:",
+      queryClient.getQueryData(["conversations", authUser?.id]),
+    );
+    queryClient.setQueryData(
+      ["conversations", authUser?.id],
+      (old: Conversation[] = []) => {
+        console.log("Updating cache");
+
+        const updated = old.some((c) => c.id === conversation.id)
+          ? old
+          : [conversation, ...old];
+
+        console.log("New conversations:", updated);
+
+        return updated;
       },
     );
   };

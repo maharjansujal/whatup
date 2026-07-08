@@ -1,4 +1,6 @@
 import { asyncHandler } from "../../shared/utils/asyncHandler";
+import { getIO, onlineUsers } from "../../socket";
+import { SOCKET_EVENTS } from "../../socket/socket_events";
 import { conversationService } from "./service";
 
 const createConversation = asyncHandler(async (req, res) => {
@@ -9,7 +11,31 @@ const createConversation = asyncHandler(async (req, res) => {
     currentUserId: String(currentUserId),
     otherUserId: userId,
   });
-  return res.status(201).json(result);
+  const io = getIO();
+
+  console.log("Emitting conversation to:", `user:${userId}`);
+  console.log(result.receiverConversation);
+
+  io.to(`user:${userId}`).emit(
+    SOCKET_EVENTS.CONVERSATION_CREATED,
+    result.receiverConversation,
+  );
+
+  const memberIds = result.memberIds;
+
+  for (const memberId of memberIds) {
+    const sockets = onlineUsers.get(memberId);
+
+    if (!sockets) continue;
+
+    for (const socketId of sockets) {
+      io.sockets.sockets.get(socketId)?.join(result.senderConversation?.id);
+    }
+  }
+
+  console.log("Conversation emitted.");
+
+  return res.status(201).json(result.senderConversation);
 });
 
 const createGroupConversation = asyncHandler(async (req, res) => {

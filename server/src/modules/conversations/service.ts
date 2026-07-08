@@ -24,7 +24,25 @@ const createDirectConversation = async ({
     userId1: currentUserId,
     userId2: otherUserId,
   });
-  if (existing) return existing;
+  if (existing) {
+    const senderConversation =
+      await conversationRepository.findConversationForUser({
+        conversationId: existing.id,
+        userId: currentUserId,
+      });
+
+    const receiverConversation =
+      await conversationRepository.findConversationForUser({
+        conversationId: existing.id,
+        userId: otherUserId,
+      });
+
+    return {
+      senderConversation,
+      receiverConversation,
+      memberIds: [currentUserId, otherUserId],
+    };
+  }
 
   const txClient = await db.connect();
 
@@ -56,7 +74,24 @@ const createDirectConversation = async ({
     );
 
     await txClient.query("COMMIT");
-    return { ...conversation, member_ids: [currentUserId, otherUserId] };
+
+    const senderConversation =
+      await conversationRepository.findConversationForUser({
+        conversationId: conversation.id,
+        userId: currentUserId,
+      });
+
+    const receiverConversation =
+      await conversationRepository.findConversationForUser({
+        conversationId: conversation.id,
+        userId: otherUserId,
+      });
+
+    return {
+      senderConversation,
+      receiverConversation,
+      memberIds: [currentUserId, otherUserId],
+    };
   } catch (error) {
     await txClient.query("ROLLBACK");
     throw error;
@@ -113,7 +148,22 @@ const createGroupConversation = async ({
     }
 
     await txClient.query("COMMIT");
-    return { ...conversation, member_ids: [currentUserId, ...otherUserIds] };
+    const hydratedConversations = await Promise.all(
+      [currentUserId, ...otherUserIds].map((userId) =>
+        conversationRepository.findConversationForUser({
+          conversationId: conversation.id,
+          userId,
+        }),
+      ),
+    );
+
+    return {
+      conversation: {
+        ...conversation,
+        member_ids: [currentUserId, ...otherUserIds],
+      },
+      hydratedConversations,
+    };
   } catch (error) {
     await txClient.query("ROLLBACK");
     throw error;
