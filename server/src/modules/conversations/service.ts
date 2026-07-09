@@ -148,21 +148,26 @@ const createGroupConversation = async ({
     }
 
     await txClient.query("COMMIT");
+    const memberIds = [currentUserId, ...otherUserIds];
     const hydratedConversations = await Promise.all(
-      [currentUserId, ...otherUserIds].map((userId) =>
-        conversationRepository.findConversationForUser({
+      [currentUserId, ...otherUserIds].map(async (userId) => ({
+        userId,
+        conversation: await conversationRepository.findConversationForUser({
           conversationId: conversation.id,
           userId,
         }),
-      ),
+      })),
     );
 
     return {
-      conversation: {
-        ...conversation,
-        member_ids: [currentUserId, ...otherUserIds],
-      },
-      hydratedConversations,
+      senderConversation: hydratedConversations.find(
+        (c) => c.userId === currentUserId,
+      )!.conversation,
+
+      receiverConversations: hydratedConversations.filter(
+        (c) => c.userId !== currentUserId,
+      ),
+      memberIds,
     };
   } catch (error) {
     await txClient.query("ROLLBACK");

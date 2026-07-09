@@ -17,7 +17,6 @@ import { useAuth } from "./AuthContext";
 import { SOCKET_EVENTS } from "../socket/socket_events";
 import { useSocket } from "./SocketContext";
 import { useQueryClient } from "@tanstack/react-query";
-import type { User } from "../types/user";
 
 interface ChatContextValue {
   conversations: Conversation[];
@@ -161,6 +160,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       { name, member_ids },
       {
         onSuccess: (newConversation) => {
+          setMessages([]);
+          queryClient.setQueryData(
+            ["conversations", authUser?.id],
+            (old: Conversation[] = []) => {
+              if (old.some((c) => c.id === newConversation.id)) return old;
+
+              return [newConversation, ...old];
+            },
+          );
           setActiveConversationId(newConversation.id);
         },
       },
@@ -175,22 +183,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   };
 
   const handleConversationCreated = (conversation: Conversation) => {
-    console.log("🔥 CONVERSATION_CREATED received", conversation);
-    console.log("Auth user:", authUser?.id);
-    console.log(
-      "Current cache:",
-      queryClient.getQueryData(["conversations", authUser?.id]),
-    );
     queryClient.setQueryData(
       ["conversations", authUser?.id],
       (old: Conversation[] = []) => {
-        console.log("Updating cache");
+        const updated = old.filter((c) => c.id !== conversation.id);
 
-        const updated = old.some((c) => c.id === conversation.id)
-          ? old
-          : [conversation, ...old];
-
-        console.log("New conversations:", updated);
+        updated.unshift(conversation);
 
         return updated;
       },

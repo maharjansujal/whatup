@@ -46,7 +46,23 @@ const createGroupConversation = asyncHandler(async (req, res) => {
     currentUserId: currentUserId.toString(),
     otherUserIds: member_ids,
   });
-  return res.status(201).json(result);
+  const io = getIO();
+  for (const memberId of result.memberIds) {
+    const sockets = onlineUsers.get(memberId);
+
+    if (!sockets) continue;
+
+    for (const socketId of sockets) {
+      io.sockets.sockets.get(socketId)?.join(result.senderConversation?.id);
+    }
+  }
+  for (const receiver of result.receiverConversations) {
+    io.to(`user:${receiver.userId}`).emit(
+      SOCKET_EVENTS.CONVERSATION_CREATED,
+      receiver.conversation,
+    );
+  }
+  return res.status(201).json(result.senderConversation);
 });
 
 const updateConversation = asyncHandler(async (req, res) => {
