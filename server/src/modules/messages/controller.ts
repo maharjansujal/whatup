@@ -4,13 +4,18 @@ import { messageService } from "./service";
 const createMessage = asyncHandler(async (req, res) => {
   const { id } = req.params; // conversationId
   const { type, content, replyToMessageId } = req.body;
+
+  const files = (req.files as Express.Multer.File[]) ?? [];
+
   const result = await messageService.createMessage({
-    conversationId: id.toString(),
-    senderId: req.user.id,
+    conversation_id: id.toString(),
+    sender_id: req.user.id,
     type,
     content,
-    replyToMessageId,
+    reply_to_message_id: replyToMessageId,
+    files,
   });
+
   return res.status(201).json(result);
 });
 
@@ -75,15 +80,6 @@ const findReplyMessages = asyncHandler(async (req, res) => {
   return res.status(200).json(result);
 });
 
-const addAttachments = asyncHandler(async (req, res) => {
-  const { messageId } = req.params;
-  const attachments = req.body;
-  const result = await messageService.addAttachments(
-    attachments.map((a: any) => ({ ...a, messageId })),
-  );
-  return res.status(201).json(result);
-});
-
 const getAttachments = asyncHandler(async (req, res) => {
   const { messageId } = req.params;
   const result = await messageService.getAttachments(messageId.toString());
@@ -106,7 +102,6 @@ export const messageController = {
   countMessages,
   searchMessages,
   findReplyMessages,
-  addAttachments,
   getAttachments,
   deleteAttachments,
 };

@@ -1,19 +1,85 @@
+import { deleteAsset, uploadStream } from "../../shared/cloudinary/upload";
 import { createAppError } from "../../shared/errors/appError";
 import { messagesRepository } from "./repository";
-import { Message, Attachment, AttachmentInput } from "./types";
+import {
+  Message,
+  Attachment,
+  AttachmentInput,
+  CreateMessageInput,
+} from "./types";
+import { db } from "../../shared/db";
 
-// Create a new message
-const createMessage = async (data: {
-  conversationId: string;
-  senderId: string;
-  type: string;
-  content: string;
-  replyToMessageId?: string;
-}): Promise<Message> => {
-  if (!data.content && data.type === "text") {
-    throw createAppError("Message content cannot be empty", 400);
+const createMessage = async (data: CreateMessageInput): Promise<Message> => {
+  const hasText = data.content.trim().length > 0;
+  const hasFiles = data.files.length > 0;
+
+  if (!hasText && !hasFiles) {
+    throw createAppError(
+      "Message must contain text or at least one attachment",
+      400,
+    );
   }
-  return messagesRepository.create(data);
+
+  const uploadedFiles = await Promise.all(
+    data.files.map(async (file) => {
+      const result = await uploadStream({
+        fileBuffer: file.buffer,
+        folder: "whatup/messages",
+      });
+
+      return {
+        file_url: result.secure_url,
+        cloudinary_public_id: result.public_id,
+        filename: file.originalname,
+        mime_type: file.mimetype,
+        size: file.size,
+        width: result.width,
+        height: result.height,
+        duration: result.duration,
+        thumbnail_url: null,
+      };
+    }),
+  );
+
+  const client = await db.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const message = await messagesRepository.create({
+      executor: client,
+      data,
+    });
+
+    await messagesRepository.createAttachments({
+      executor: client,
+      attachments: uploadedFiles.map((file) => ({
+        message_id: message.id,
+        ...file,
+      })),
+    });
+
+    await messagesRepository.updateConversationLastMessage({
+      executor: client,
+      conversationId: data.conversation_id,
+      messageId: message.id,
+      createdAt: message.created_at,
+    });
+
+    await client.query("COMMIT");
+
+    return message;
+  } catch (error) {
+    await client.query("ROLLBACK");
+
+    await Promise.allSettled(
+      uploadedFiles.map((file) => deleteAsset(file.cloudinary_public_id)),
+    );
+
+    throw error;
+  } finally {
+    client.release();
+  }
 };
 
 // Find a message by ID
@@ -79,22 +145,6 @@ const findReplyMessages = async (messageId: string): Promise<Message[]> => {
   return messagesRepository.findReplyMessages(messageId);
 };
 
-const addAttachments = async (
-  data: {
-    messageId: string;
-    fileUrl: string;
-    filename?: string;
-    mimeType?: string;
-    size?: number;
-    width?: number;
-    height?: number;
-    duration?: number;
-    thumbnailUrl?: string;
-  }[],
-): Promise<Attachment[]> => {
-  return messagesRepository.addAttachments(data);
-};
-
 const getAttachments = async (messageId: string): Promise<Attachment[]> => {
   return messagesRepository.getAttachments(messageId);
 };
@@ -113,7 +163,6 @@ export const messageService = {
   countMessages,
   searchMessages,
   findReplyMessages,
-  addAttachments,
   getAttachments,
   deleteAttachments,
 };

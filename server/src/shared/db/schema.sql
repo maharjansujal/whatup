@@ -120,6 +120,7 @@ CREATE TABLE
     message_attachments (
         id BIGSERIAL PRIMARY KEY,
         message_id BIGINT NOT NULL REFERENCES messages (id) ON DELETE CASCADE,
+        cloudinary_public_id TEXT NOT NULL,
         file_url TEXT NOT NULL,
         filename TEXT,
         mime_type TEXT,

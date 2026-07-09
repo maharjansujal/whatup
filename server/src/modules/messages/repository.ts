@@ -1,38 +1,112 @@
+import { Pool, PoolClient } from "pg";
 import { db } from "../../shared/db";
-import { Attachment, AttachmentInput, type Message } from "./types";
+import {
+  Attachment,
+  AttachmentInput,
+  CreateMessageInput,
+  type Message,
+} from "./types";
 
-const create = async (data: {
-  conversationId: string;
-  senderId: string;
-  type: string;
-  content: string;
-  replyToMessageId?: string;
+type DbExecutor = Pool | PoolClient;
+
+const create = async ({
+  executor = db,
+  data,
+}: {
+  executor?: DbExecutor;
+  data: CreateMessageInput;
 }): Promise<Message> => {
-  const result = await db.query(
-    `INSERT INTO messages (conversation_id, sender_id, type, content, reply_to_message_id)
-     VALUES ($1, $2, $3, $4, $5)
-     RETURNING *`,
+  const result = await executor.query(
+    `INSERT INTO messages (
+      conversation_id,
+      sender_id,
+      type,
+      content,
+      reply_to_message_id
+    )
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING *`,
     [
-      data.conversationId,
-      data.senderId,
+      data.conversation_id,
+      data.sender_id,
       data.type,
       data.content,
-      data.replyToMessageId || null,
+      data.reply_to_message_id ?? null,
     ],
   );
 
-  const message = result.rows[0];
+  return result.rows[0];
+};
 
-  await db.query(
+const createAttachments = async ({
+  executor = db,
+  attachments,
+}: {
+  executor?: DbExecutor;
+  attachments: AttachmentInput[];
+}) => {
+  if (!attachments.length) return;
+
+  const values: unknown[] = [];
+
+  const placeholders = attachments.map((attachment, index) => {
+    values.push(
+      attachment.message_id,
+      attachment.file_url,
+      attachment.cloudinary_public_id,
+      attachment.filename,
+      attachment.mime_type,
+      attachment.size,
+      attachment.width ?? null,
+      attachment.height ?? null,
+      attachment.duration ?? null,
+      attachment.thumbnail_url ?? null,
+    );
+
+    const offset = index * 10;
+
+    return `(
+  ${Array.from({ length: 10 }, (_, i) => `$${offset + i + 1}`).join(", ")}
+    )`;
+  });
+
+  await executor.query(
+    `INSERT INTO message_attachments (
+      message_id,
+      file_url,
+      cloudinary_public_id,
+      filename,
+      mime_type,
+      size,
+      width,
+      height,
+      duration,
+      thumbnail_url
+    )
+    VALUES ${placeholders.join(", ")}`,
+    values,
+  );
+};
+
+const updateConversationLastMessage = async ({
+  executor = db,
+  conversationId,
+  messageId,
+  createdAt,
+}: {
+  executor?: DbExecutor;
+  conversationId: string;
+  messageId: string;
+  createdAt: Date;
+}) => {
+  await executor.query(
     `UPDATE conversations
      SET last_message_id = $1,
          last_message_at = $2,
          updated_at = NOW()
      WHERE id = $3`,
-    [message.id, message.created_at, data.conversationId],
+    [messageId, createdAt, conversationId],
   );
-
-  return message;
 };
 
 const findById = async (messageId: string): Promise<Message | null> => {
@@ -146,43 +220,6 @@ const findReplyMessages = async (messageId: string): Promise<Message[]> => {
   return result.rows;
 };
 
-const addAttachments = async (
-  data: {
-    messageId: string;
-    fileUrl: string;
-    filename?: string;
-    mimeType?: string;
-    size?: number;
-    width?: number;
-    height?: number;
-    duration?: number;
-    thumbnailUrl?: string;
-  }[],
-): Promise<Attachment[]> => {
-  const results: Attachment[] = [];
-  for (const attachment of data) {
-    const result = await db.query(
-      `INSERT INTO message_attachments 
-       (message_id, file_url, filename, mime_type, size, width, height, duration, thumbnail_url)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       RETURNING *`,
-      [
-        attachment.messageId,
-        attachment.fileUrl,
-        attachment.filename || null,
-        attachment.mimeType || null,
-        attachment.size || null,
-        attachment.width || null,
-        attachment.height || null,
-        attachment.duration || null,
-        attachment.thumbnailUrl || null,
-      ],
-    );
-    results.push(result.rows[0]);
-  }
-  return results;
-};
-
 const getAttachments = async (messageId: string): Promise<Attachment[]> => {
   const result = await db.query(
     `SELECT * FROM message_attachments WHERE message_id = $1`,
@@ -201,6 +238,8 @@ const deleteAttachments = async (messageId: string): Promise<Attachment[]> => {
 
 export const messagesRepository = {
   create,
+  createAttachments,
+  updateConversationLastMessage,
   findById,
   updateContent,
   softDelete,
@@ -210,7 +249,6 @@ export const messagesRepository = {
   countMessages,
   searchMessages,
   findReplyMessages,
-  addAttachments,
   getAttachments,
   deleteAttachments,
 };
