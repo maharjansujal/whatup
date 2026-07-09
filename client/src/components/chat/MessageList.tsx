@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { MessageBubble } from "./MessageBubble";
 import { useChat } from "../../context/ChatContext";
 import { useAuth } from "../../context/AuthContext";
+import { TypingBubble } from "./TypingBubble";
 
 function dateLabel(iso: string): string {
   const date = new Date(iso);
@@ -76,6 +77,7 @@ export function MessageList() {
           </div>
         );
       })}
+      <TypingBubble />
       <div ref={bottomRef} />
     </div>
   );

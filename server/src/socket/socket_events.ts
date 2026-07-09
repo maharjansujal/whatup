@@ -11,6 +11,9 @@ export const SOCKET_EVENTS = {
   MESSAGE_SEND: "message:send",
   MESSAGE_RECEIVE: "message:receive",
 
+  TYPING_START: "typing:start",
+  TYPING_STOP: "typing:stop",
+
   USER_ONLINE: "user:online",
   USER_OFFLINE: "user:offline",
 };

@@ -111,8 +111,22 @@ export function initSocket(server: http.Server) {
       },
     );
 
+    socket.on(SOCKET_EVENTS.TYPING_START, ({ conversationId }) => {
+      console.log("Received typing:start", conversationId);
+      socket.to(conversationId).emit(SOCKET_EVENTS.TYPING_START, {
+        conversationId,
+        userId: socket.data.user.id,
+      });
+    });
+
+    socket.on(SOCKET_EVENTS.TYPING_STOP, ({ conversationId }) => {
+      socket.to(conversationId).emit(SOCKET_EVENTS.TYPING_STOP, {
+        conversationId,
+        userId: socket.data.user.id,
+      });
+    });
+
     // Presence events
-    // socket.broadcast.emit(SOCKET_EVENTS.USER_ONLINE, socket.data.user.id);
 
     socket.on(SOCKET_EVENTS.DISCONNECT, () => {
       const userId = socket.data.user.id;

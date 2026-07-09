@@ -1,10 +1,12 @@
-import { useState, type KeyboardEvent } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 import { Paperclip, SendHorizontal, Smile } from "lucide-react";
 import { useChat } from "../../context/ChatContext";
+import socket from "../../socket/socket";
+import { SOCKET_EVENTS } from "../../socket/socket_events";
 
 export function MessageInput() {
   const [value, setValue] = useState("");
-  const { sendMessage } = useChat();
+  const { sendMessage, activeConversationId } = useChat();
 
   const handleSend = () => {
     if (!value.trim()) return;
@@ -19,6 +21,9 @@ export function MessageInput() {
     }
   };
 
+  const typingTimeout = useRef<number | null>(null);
+  const isTyping = useRef(false);
+
   return (
     <div className="border-t border-[#EEEEEB] bg-white px-6 py-3.5">
       <div className="flex items-end gap-2 rounded-2xl border border-[#E5E5E1] bg-[#FAFAF8] px-3 py-2">
@@ -31,7 +36,31 @@ export function MessageInput() {
 
         <textarea
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) => {
+            setValue(e.target.value);
+
+            if (!activeConversationId) return;
+
+            if (!isTyping.current) {
+              socket.emit(SOCKET_EVENTS.TYPING_START, {
+                conversationId: activeConversationId,
+              });
+
+              isTyping.current = true;
+            }
+
+            if (typingTimeout.current) {
+              clearTimeout(typingTimeout.current);
+            }
+
+            typingTimeout.current = window.setTimeout(() => {
+              socket.emit(SOCKET_EVENTS.TYPING_STOP, {
+                conversationId: activeConversationId,
+              });
+
+              isTyping.current = false;
+            }, 1500);
+          }}
           onKeyDown={handleKeyDown}
           placeholder="Write a message..."
           rows={1}

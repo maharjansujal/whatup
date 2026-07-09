@@ -31,6 +31,7 @@ interface ChatContextValue {
   startDirectConversation: (userId: string) => void;
   getConversationPreview: (conversationId: string) => string;
   draftRecipientId: string | null;
+  typingUsers: Record<string, Set<string>>;
 }
 
 const ChatContext = createContext<ChatContextValue | undefined>(undefined);
@@ -42,7 +43,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   >(null);
   const [draftRecipientId, setDraftRecipientId] = useState<string | null>(null);
   const [conversationQuery, setConversationQuery] = useState("");
-
+  const [typingUsers, setTypingUsers] = useState<Record<string, Set<string>>>(
+    {},
+  );
   const { authUser } = useAuth();
 
   // Queries
@@ -92,10 +95,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
     socket.on(SOCKET_EVENTS.MESSAGE_RECEIVE, handleMessage);
     socket.on(SOCKET_EVENTS.CONVERSATION_CREATED, handleConversationCreated);
-
+    socket.on(SOCKET_EVENTS.TYPING_START, handleTypingStart);
+    socket.on(SOCKET_EVENTS.TYPING_STOP, handleTypingStop);
     return () => {
       socket.off(SOCKET_EVENTS.MESSAGE_RECEIVE, handleMessage);
       socket.off(SOCKET_EVENTS.CONVERSATION_CREATED, handleConversationCreated);
+      socket.off(SOCKET_EVENTS.TYPING_START, handleTypingStart);
+      socket.off(SOCKET_EVENTS.TYPING_STOP, handleTypingStop);
     };
   }, [socket, activeConversationId, authUser?.id, queryClient]);
 
@@ -211,6 +217,41 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     return last.content ?? "";
   };
 
+  const handleTypingStart = ({
+    conversationId,
+    userId,
+  }: {
+    conversationId: string;
+    userId: string;
+  }) => {
+    setTypingUsers((prev) => {
+      const users = new Set(prev[conversationId] ?? []);
+      users.add(userId);
+
+      return {
+        ...prev,
+        [conversationId]: users,
+      };
+    });
+  };
+
+  const handleTypingStop = ({
+    conversationId,
+    userId,
+  }: {
+    conversationId: string;
+    userId: string;
+  }) => {
+    setTypingUsers((prev) => {
+      const users = new Set(prev[conversationId] ?? []);
+      users.delete(userId);
+
+      return {
+        ...prev,
+        [conversationId]: users,
+      };
+    });
+  };
   const value: ChatContextValue = {
     conversations,
     activeConversationId,
@@ -227,6 +268,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     startDirectConversation,
     getConversationPreview,
     draftRecipientId,
+    typingUsers,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
