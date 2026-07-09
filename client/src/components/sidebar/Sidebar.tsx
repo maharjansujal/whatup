@@ -93,7 +93,7 @@ export function Sidebar() {
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
-                  className={`rounded-full px-3 py-1 text-sm transition-colors ${
+                  className={`rounded-full px-3 py-1 text-xs transition-colors ${
                     filter === f
                       ? "bg-[#00C2A8] text-black"
                       : "bg-[#1D1F2E] text-gray-300 hover:bg-[#181A26]"
@@ -104,7 +104,7 @@ export function Sidebar() {
               ))}
             </div>
 
-            <div className="flex-1 overflow-y-auto">
+            <div className="sidebar-scroll flex-1 overflow-y-auto">
               <ConversationList filter={filter} />
             </div>
           </>
@@ -122,7 +122,7 @@ export function Sidebar() {
               </p>
             </div>
 
-            <div className="flex-1 overflow-y-auto">
+            <div className="sidebar-scroll flex-1 overflow-y-auto">
               <ConversationList filter="archived" />
             </div>
           </>

@@ -5,7 +5,7 @@ export function ProtectedPage() {
   return (
     <div className="flex h-screen w-full bg-[#FAFAF8]">
       {/* LEFT SIDEBAR */}
-      <div className="flex w-[320px] flex-col">
+      <div className="flex flex-col">
         <Sidebar />
       </div>
 
