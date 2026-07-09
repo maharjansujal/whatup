@@ -6,27 +6,21 @@ interface Payload {
   conversationId: string;
   content: string;
   type?: MessageType;
+  files?: File[];
 }
 
 export function usePostMessage() {
-  const queryClient = useQueryClient();
-
   return useMutation<Message, Error, Payload>({
-    mutationFn: async ({ conversationId, type = "text", content }) => {
-      const res = await api.post(`/conversations/${conversationId}/messages`, {
-        type,
-        content,
-      });
-      return res.data;
-    },
-    onSuccess: (newMessage, { conversationId }) => {
-      // update messages cache
-      queryClient.setQueryData<Message[]>(
-        ["messages", conversationId],
-        (old = []) => [...old, newMessage],
+    mutationFn: async ({ conversationId, type = "text", content, files }) => {
+      const formData = new FormData();
+      formData.append("content", content);
+      formData.append("type", type);
+      files?.forEach((file) => formData.append("files", file));
+      const res = await api.post(
+        `/conversations/${conversationId}/messages`,
+        formData,
       );
-      // update conversations cache (last message preview)
-      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      return res.data;
     },
   });
 }

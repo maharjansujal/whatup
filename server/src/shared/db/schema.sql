@@ -128,7 +128,8 @@ CREATE TABLE
         width INT,
         height INT,
         duration INT,
-        thumbnail_url TEXT
+        thumbnail_url TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now ()
     );
 
 CREATE INDEX idx_attachments_message_id ON message_attachments (message_id);

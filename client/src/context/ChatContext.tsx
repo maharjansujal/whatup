@@ -17,6 +17,7 @@ import { useAuth } from "./AuthContext";
 import { SOCKET_EVENTS } from "../socket/socket_events";
 import { useSocket } from "./SocketContext";
 import { useQueryClient } from "@tanstack/react-query";
+import { usePostMessage } from "../hooks/post/usePostMessage";
 
 interface ChatContextValue {
   conversations: Conversation[];
@@ -26,7 +27,13 @@ interface ChatContextValue {
   conversationQuery: string;
   setConversationQuery: (query: string) => void;
   selectConversation: (id: string) => void;
-  sendMessage: (content: string) => void;
+  sendMessage: ({
+    content,
+    files,
+  }: {
+    content: string;
+    files?: File[];
+  }) => void;
   createGroupConversation: (name: string, memberIds: string[]) => void;
   startDirectConversation: (userId: string) => void;
   getConversationPreview: (conversationId: string) => string;
@@ -89,7 +96,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       );
 
       if (message.conversation_id === activeConversationId) {
-        setMessages((prev) => [...prev, message]);
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === message.id)) {
+            return prev;
+          }
+          return [...prev, message];
+        });
       }
     };
 
@@ -105,6 +117,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     };
   }, [socket, activeConversationId, authUser?.id, queryClient]);
 
+  const postMessage = usePostMessage();
+
   const [messages, setMessages] = useState<Message[]>([]);
   // Mutations
   const postGroupConversation = usePostGroupConversation();
@@ -115,16 +129,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     [conversations, activeConversationId],
   );
 
-  // useEffect(() => {
-  //   if (!activeConversationId) return;
-
-  //   socket.emit(SOCKET_EVENTS.CONVERSATION_JOIN, activeConversationId);
-
-  //   return () => {
-  //     socket.emit(SOCKET_EVENTS.CONVERSATION_LEAVE, activeConversationId);
-  //   };
-  // }, [activeConversationId]);
-
   useEffect(() => {
     if (!fetchedMessages) return;
 
@@ -132,8 +136,21 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [fetchedMessages]);
 
   // Send message
-  const sendMessage = (content: string) => {
-    if (!content.trim()) return;
+  const sendMessage = ({
+    content,
+    files = [],
+  }: {
+    content: string;
+    files?: File[];
+  }) => {
+    const send = (conversationId: string) => {
+      postMessage.mutate({
+        conversationId,
+        type: "text",
+        content,
+        files,
+      });
+    };
     if (draftRecipientId) {
       postDirectConversation.mutate(
         { userId: draftRecipientId },
@@ -142,24 +159,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             setDraftRecipientId(null);
             setActiveConversationId(conversation.id);
 
-            socket.emit(SOCKET_EVENTS.MESSAGE_SEND, {
-              conversationId: conversation.id,
-              type: "text",
-              content,
-            });
+            send(conversation.id);
           },
         },
       );
       return;
     }
     if (!activeConversationId) return;
-    socket.emit(SOCKET_EVENTS.MESSAGE_SEND, {
-      conversationId: activeConversationId,
-      type: "text",
-      content,
-    });
+    send(activeConversationId);
   };
-
   // Create group
   const createGroupConversation = (name: string, member_ids: string[]) => {
     postGroupConversation.mutate(

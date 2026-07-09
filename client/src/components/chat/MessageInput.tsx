@@ -6,13 +6,8 @@ import { SOCKET_EVENTS } from "../../socket/socket_events";
 
 export function MessageInput() {
   const [value, setValue] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
   const { sendMessage, activeConversationId } = useChat();
-
-  const handleSend = () => {
-    if (!value.trim()) return;
-    sendMessage(value);
-    setValue("");
-  };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -24,15 +19,44 @@ export function MessageInput() {
   const typingTimeout = useRef<number | null>(null);
   const isTyping = useRef(false);
 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files ?? []);
+    setFiles((prev) => [...prev, ...selectedFiles]);
+    e.target.value = "";
+  };
+
+  const canSend = value.trim().length > 0 || files.length > 0;
+
+  const handleSend = () => {
+    if (!canSend) return;
+    sendMessage({
+      content: value,
+      files,
+    });
+    setFiles([]);
+    setValue("");
+  };
   return (
     <div className="border-t border-[#EEEEEB] bg-white px-6 py-3.5">
       <div className="flex items-end gap-2 rounded-2xl border border-[#E5E5E1] bg-[#FAFAF8] px-3 py-2">
         <button
+          type="button"
           title="Attach a file"
+          onClick={() => fileInputRef.current?.click()}
           className="shrink-0 rounded-lg p-1.5 text-[#9A9CA8] transition-colors hover:bg-[#F2F2EF] hover:text-[#00C2A8]"
         >
           <Paperclip size={18} />
         </button>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          hidden
+          onChange={handleFileChange}
+        />
 
         <textarea
           value={value}
@@ -76,7 +100,7 @@ export function MessageInput() {
 
         <button
           onClick={handleSend}
-          disabled={!value.trim()}
+          disabled={!canSend}
           title="Send"
           className="shrink-0 rounded-full bg-[#00C2A8] p-2 text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-30"
         >

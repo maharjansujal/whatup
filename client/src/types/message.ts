@@ -21,7 +21,7 @@ export interface AttachmentInput {
   file_url: string;
   filename: string;
   mime_type: string;
-  size: string;
+  size: number;
   width?: number;
   height?: number;
   duration?: number;

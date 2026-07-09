@@ -1,4 +1,5 @@
 export type MessageType = "text" | "image" | "file" | "system";
+import "multer";
 
 export interface CreateMessageInput {
   conversation_id: string;
@@ -6,7 +7,7 @@ export interface CreateMessageInput {
   type: MessageType;
   content: string;
   reply_to_message_id: string;
-  files: Express.Multer.File[];
+  files?: Express.Multer.File[];
   updated_at?: Date;
   deleted_at?: Date;
 }

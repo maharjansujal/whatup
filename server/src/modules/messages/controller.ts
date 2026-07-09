@@ -1,8 +1,10 @@
 import { asyncHandler } from "../../shared/utils/asyncHandler";
+import { getIO } from "../../socket";
+import { SOCKET_EVENTS } from "../../socket/socket_events";
 import { messageService } from "./service";
 
 const createMessage = asyncHandler(async (req, res) => {
-  const { id } = req.params; // conversationId
+  const { id } = req.params;
   const { type, content, replyToMessageId } = req.body;
 
   const files = (req.files as Express.Multer.File[]) ?? [];
@@ -15,6 +17,10 @@ const createMessage = asyncHandler(async (req, res) => {
     reply_to_message_id: replyToMessageId,
     files,
   });
+
+  getIO()
+    .to(result.conversation_id)
+    .emit(SOCKET_EVENTS.MESSAGE_RECEIVE, result);
 
   return res.status(201).json(result);
 });

@@ -142,9 +142,9 @@ export function MessageBubble({
               <p>This message was deleted</p>
             ) : (
               <>
-                {message.type === "image" && message.attachments?.[0] && (
+                {message.attachments?.[0] && (
                   <img
-                    src={message.attachments[0].thumbnail_url}
+                    src={message.attachments[0].file_url}
                     alt={message.attachments[0].filename}
                     className="mb-1 max-w-65 rounded-lg"
                   />

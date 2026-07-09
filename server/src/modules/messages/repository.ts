@@ -8,6 +8,18 @@ import {
 } from "./types";
 
 type DbExecutor = Pool | PoolClient;
+const MESSAGE_WITH_ATTACHMENTS_SELECT = `
+SELECT
+  m.*,
+  COALESCE(
+    json_agg(ma.* ORDER BY ma.created_at)
+      FILTER (WHERE ma.id IS NOT NULL),
+    '[]'
+  ) AS attachments
+FROM messages m
+LEFT JOIN message_attachments ma
+  ON ma.message_id = m.id
+`;
 
 const create = async ({
   executor = db,
@@ -110,9 +122,14 @@ const updateConversationLastMessage = async ({
 };
 
 const findById = async (messageId: string): Promise<Message | null> => {
-  const result = await db.query(`SELECT * FROM messages WHERE id = $1`, [
-    messageId,
-  ]);
+  const result = await db.query(
+    `
+    ${MESSAGE_WITH_ATTACHMENTS_SELECT}
+    WHERE m.id = $1
+    GROUP BY m.id
+    `,
+    [messageId],
+  );
   return result.rows[0] || null;
 };
 
@@ -148,15 +165,16 @@ const getConversationMessages = async (
 ): Promise<Message[]> => {
   const result = await db.query(
     `
-  SELECT *
-  FROM messages
-  WHERE conversation_id = $1
-    ${cursor ? "AND created_at < $2" : ""}
-  ORDER BY created_at ASC
-  LIMIT $${cursor ? 3 : 2}
-  `,
+    ${MESSAGE_WITH_ATTACHMENTS_SELECT}
+    WHERE m.conversation_id = $1
+      ${cursor ? "AND m.created_at < $2" : ""}
+    GROUP BY m.id
+    ORDER BY m.created_at ASC
+    LIMIT $${cursor ? 3 : 2}
+    `,
     cursor ? [convoId, cursor, limit] : [convoId, limit],
   );
+  console.log("Result.rows", result.rows);
   return result.rows;
 };
 

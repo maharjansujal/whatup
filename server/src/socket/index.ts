@@ -5,6 +5,8 @@ import { SOCKET_EVENTS } from "./socket_events";
 import { messageService } from "../modules/messages/service";
 import { AuthUser } from "../types/express";
 import { conversationRepository } from "../modules/conversations/repository";
+import { MessageType } from "../modules/messages/types";
+import "multer";
 
 // Utility: verifyToken (reusable for sockets)
 function verifyToken(token: string): AuthUser {
@@ -76,41 +78,6 @@ export function initSocket(server: http.Server) {
       })),
     );
 
-    // Send message
-    socket.on(
-      SOCKET_EVENTS.MESSAGE_SEND,
-      async (payload: {
-        conversationId: string;
-        type: string;
-        content: string;
-        replyToMessageId?: string;
-      }) => {
-        console.log("MESSAGE_SEND", payload);
-        try {
-          const message = await messageService.createMessage({
-            ...payload,
-            senderId: socket.data.user.id, // enforce authenticated user
-          });
-
-          console.log("Broadcasting to room:", payload.conversationId);
-          console.log("Message:", message);
-          console.log([...io.sockets.adapter.rooms.entries()]);
-
-          io.to(payload.conversationId).emit(
-            SOCKET_EVENTS.MESSAGE_RECEIVE,
-            message,
-          );
-
-          console.log("Broadcast complete");
-        } catch (error) {
-          console.error("Failed to send message:", error);
-          socket.emit(SOCKET_EVENTS.ERROR, {
-            message: "Failed to send message.",
-          });
-        }
-      },
-    );
-
     socket.on(SOCKET_EVENTS.TYPING_START, ({ conversationId }) => {
       console.log("Received typing:start", conversationId);
       socket.to(conversationId).emit(SOCKET_EVENTS.TYPING_START, {
@@ -151,5 +118,8 @@ export function initSocket(server: http.Server) {
 }
 
 export function getIO() {
+  if (!io) {
+    throw new Error("Socket.IO has not been initialized.");
+  }
   return io;
 }

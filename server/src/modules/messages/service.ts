@@ -11,7 +11,9 @@ import { db } from "../../shared/db";
 
 const createMessage = async (data: CreateMessageInput): Promise<Message> => {
   const hasText = data.content.trim().length > 0;
-  const hasFiles = data.files.length > 0;
+  const files = data.files ?? [];
+
+  const hasFiles = files.length > 0;
 
   if (!hasText && !hasFiles) {
     throw createAppError(
@@ -21,7 +23,7 @@ const createMessage = async (data: CreateMessageInput): Promise<Message> => {
   }
 
   const uploadedFiles = await Promise.all(
-    data.files.map(async (file) => {
+    files.map(async (file) => {
       const result = await uploadStream({
         fileBuffer: file.buffer,
         folder: "whatup/messages",
@@ -40,6 +42,8 @@ const createMessage = async (data: CreateMessageInput): Promise<Message> => {
       };
     }),
   );
+
+  console.log("UPLOADED FILES", uploadedFiles);
 
   const client = await db.connect();
 
@@ -68,7 +72,13 @@ const createMessage = async (data: CreateMessageInput): Promise<Message> => {
 
     await client.query("COMMIT");
 
-    return message;
+    const createdMessage = await messagesRepository.findById(message.id);
+
+    if (!createdMessage) {
+      throw createAppError("Failed to retrieve created message", 500);
+    }
+
+    return createdMessage;
   } catch (error) {
     await client.query("ROLLBACK");
 
