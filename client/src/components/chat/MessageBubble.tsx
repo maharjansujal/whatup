@@ -6,6 +6,7 @@ import { useChat } from "../../context/ChatContext";
 import type { Message } from "../../types/message";
 import { useUpdateMessage } from "../../hooks/update/useUpdateMessage";
 import { useDeleteMessage } from "../../hooks/delete/useDeleteMessage";
+import { MessageAttachment } from "./MessageAttachment";
 
 interface MessageBubbleProps {
   message: Message;
@@ -43,6 +44,8 @@ export function MessageBubble({
   const patchMessage = useUpdateMessage();
   const deleteMessage = useDeleteMessage();
 
+  const { type, content, id, attachments } = message;
+
   if (message.type === "system") {
     return (
       <div className="my-2 flex justify-center">
@@ -64,7 +67,7 @@ export function MessageBubble({
     }
     patchMessage.mutate(
       {
-        messageId: message.id,
+        messageId: id,
         conversationId: activeConversationId,
         content: trimmed,
       },
@@ -81,7 +84,7 @@ export function MessageBubble({
     if (!activeConversationId) return;
     if (!window.confirm("Delete this message?")) return;
     deleteMessage.mutate({
-      messageId: message.id,
+      messageId: id,
       conversationId: activeConversationId,
     });
   };
@@ -142,13 +145,14 @@ export function MessageBubble({
               <p>This message was deleted</p>
             ) : (
               <>
-                {message.attachments?.[0] && (
-                  <img
-                    src={message.attachments[0].file_url}
-                    alt={message.attachments[0].filename}
-                    className="mb-1 max-w-65 rounded-lg"
-                  />
-                )}
+                {attachments &&
+                  attachments.map((attachment) => (
+                    <MessageAttachment
+                      key={attachment.id}
+                      attachment={attachment}
+                      isOwn={isOwn}
+                    />
+                  ))}
 
                 {message.type === "file" && message.attachments?.[0] && (
                   <div

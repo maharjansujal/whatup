@@ -6,7 +6,16 @@ import { UserForm } from "../components/forms/UserForm";
 
 export function RegisterPage() {
   const { register } = usePostAuth();
-  const methods = useForm<RegisterDto>();
+  const methods = useForm<RegisterDto>({
+    defaultValues: {
+      username: "",
+      display_name: "",
+      email: "",
+      password: "",
+      avatar_url: "",
+      bio: "",
+    },
+  });
 
   const onSubmit = async (data: RegisterDto) => {
     try {
