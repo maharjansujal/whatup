@@ -22,6 +22,7 @@ import { usePostMessage } from "../hooks/post/usePostMessage";
 interface ChatContextValue {
   conversations: Conversation[];
   activeConversationId: string | null;
+  setActiveConversationId: React.Dispatch<React.SetStateAction<string | null>>;
   activeConversation: Conversation | undefined;
   messages: Message[];
   conversationQuery: string;
@@ -263,6 +264,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const value: ChatContextValue = {
     conversations,
     activeConversationId,
+    setActiveConversationId,
     activeConversation,
     messages,
     conversationQuery,

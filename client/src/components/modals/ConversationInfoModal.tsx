@@ -15,6 +15,8 @@ import { MuteDurationMenu } from "./MuteDurationMenu";
 import { useModal } from "../../context/ModalContext";
 import { NicknameModal } from "./NicknameModal";
 import { useGetConversations } from "../../hooks/get/useGetConversations";
+import { useChat } from "../../context/ChatContext";
+import { useAlert } from "../shared/alert/useAlert";
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
@@ -65,6 +67,8 @@ export function ConversationInfoModal({
   const { authUser } = useAuth();
   const { conversations } = useGetConversations(authUser?.id);
   const { openModal, closeModal } = useModal();
+  const { setActiveConversationId } = useChat();
+  const alert = useAlert();
 
   if (!authUser) return null;
 
@@ -152,8 +156,13 @@ export function ConversationInfoModal({
             onClick={() => {
               if (conversation.is_archived) {
                 unarchive.mutate();
+                alert.success("Conversation restored");
+                closeModal();
               } else {
                 archive.mutate();
+                setActiveConversationId(null);
+                alert.success("Conversation archived");
+                closeModal();
               }
             }}
           />
