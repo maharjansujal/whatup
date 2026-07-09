@@ -37,6 +37,11 @@ export function ConversationList({ filter }: { filter: ListFilter }) {
             new Date(c.muted_until) > new Date(),
         );
         break;
+      case "dms":
+        base = conversations.filter(
+          (c) => !c.is_archived && c.type === "direct",
+        );
+        break;
       default:
         base = conversations.filter((c) => !c.is_archived);
     }
