@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../../api/api";
 import type { LoginDto, RegisterDto, User } from "../../types/user";
 import socket from "../../socket/socket";
+import { useAlert } from "../../components/shared/alert/useAlert";
 
 export function usePostAuth() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const alert = useAlert();
 
   const registerMutation = useMutation<User, Error, RegisterDto>({
     mutationFn: async (data) => {
@@ -14,6 +16,7 @@ export function usePostAuth() {
       return res.data;
     },
     onSuccess: () => {
+      alert.success("User registered successfully!");
       queryClient.invalidateQueries({ queryKey: ["users"] });
       navigate("/login");
     },
@@ -43,6 +46,7 @@ export function usePostAuth() {
       await queryClient.cancelQueries({ queryKey: ["auth-user"] });
       queryClient.setQueryData(["auth-user"], user);
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      alert.success("Logged in successfully");
       navigate("/");
     },
   });

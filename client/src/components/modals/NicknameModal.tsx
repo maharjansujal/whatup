@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useUpdateMember } from "../../hooks/update/useUpdateMember";
 import { useAuth } from "../../context/AuthContext";
+import { useAlert } from "../shared/alert/useAlert";
 
 export function NicknameModal({
   conversationId,
@@ -11,6 +12,7 @@ export function NicknameModal({
 }) {
   const { authUser } = useAuth();
   const [nicknameValue, setNicknameValue] = useState("");
+  const alert = useAlert();
   if (!authUser) return null;
   const { nickname } = useUpdateMember(conversationId, authUser.id);
 
@@ -19,6 +21,7 @@ export function NicknameModal({
     nickname.mutate(nicknameValue, {
       onSuccess: () => {
         onClose(); // close modal after success
+        alert.success("Nickname updated!");
       },
     });
   };

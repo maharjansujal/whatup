@@ -1,24 +1,53 @@
 @import "tailwindcss";
 
 @theme {
-  /* Mentor's Core Colors */
+  /* Layout */
   --color-sidebar: #1b1f31;
   --color-chat: #f7f8fb;
 
-  /* UI Functional States */
-  --color-brand: #6366f1; /* Indigo-500 default for actions */
-  --color-brand-hover: #4f46e5; /* Indigo-600 */
-  --color-brand-muted: #e0e7ff; /* Indigo-100 for light highlights */
+  /* Brand */
+  --color-brand: #6366f1;
+  --color-brand-hover: #4f46e5;
+  --color-brand-muted: #e0e7ff;
 
-  --color-error: #ef4444; /* Red-500 */
-  --color-error-hover: #dc2626; /* Red-600 */
+  /* Success */
+  --color-success: #10b981;
+  --color-success-hover: #059669;
+  --color-success-soft: #ecfdf5;
+  --color-success-border: #a7f3d0;
 
-  --color-success: #10b981; /* Emerald-500 */
+  /* Error / Danger */
+  --color-danger: #ef4444;
+  --color-danger-hover: #dc2626;
+  --color-danger-soft: #fef2f2;
+  --color-danger-border: #fecaca;
 
-  /* Text & Border Modifiers */
-  --color-muted: #64748b; /* Slate-500 for captions/secondary text */
-  --color-border-light: #e2e8f0; /* Slate-200 for panels */
-  --color-border-dark: #2e344e; /* Dark border variant for inside the sidebar */
+  /* Info */
+  --color-info: #3b82f6;
+  --color-info-hover: #2563eb;
+  --color-info-soft: #eff6ff;
+  --color-info-border: #bfdbfe;
+
+  /* Warning (useful for future alerts) */
+  --color-warning: #f59e0b;
+  --color-warning-hover: #d97706;
+  --color-warning-soft: #fffbeb;
+  --color-warning-border: #fde68a;
+
+  /* Neutral */
+  --color-muted: #64748b;
+  --color-border-light: #e2e8f0;
+  --color-border-dark: #2e344e;
+
+  /* Backgrounds */
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fafc;
+  --color-surface-hover: #f1f5f9;
+
+  /* Text */
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --color-text-inverse: #ffffff;
 }
 
 * {

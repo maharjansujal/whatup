@@ -11,6 +11,7 @@ const DURATIONS = [
 
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useAlert } from "../shared/alert/useAlert";
 
 export function MuteDurationMenu({
   conversationId,
@@ -25,6 +26,7 @@ export function MuteDurationMenu({
   }
   const { mute } = useUpdateMember(conversationId, authUser.id);
   const { closeModal } = useModal();
+  const alert = useAlert();
 
   const handleClick = (ms: number | null) => {
     const mutedUntil =
@@ -33,7 +35,10 @@ export function MuteDurationMenu({
         : new Date(Date.now() + ms).toISOString();
 
     mute.mutate(mutedUntil, {
-      onSuccess: () => closeModal(), // close after success
+      onSuccess: () => {
+        closeModal();
+        alert.success("Conversation muted");
+      }, // close after success
     });
   };
 

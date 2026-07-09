@@ -7,6 +7,8 @@ import type { Message } from "../../types/message";
 import { useUpdateMessage } from "../../hooks/update/useUpdateMessage";
 import { useDeleteMessage } from "../../hooks/delete/useDeleteMessage";
 import { MessageAttachment } from "./MessageAttachment";
+import { useAlert } from "../shared/alert/useAlert";
+import { useConfirm } from "../shared/confirm/useConfirm";
 
 interface MessageBubbleProps {
   message: Message;
@@ -37,6 +39,8 @@ export function MessageBubble({
   const { getUserById } = useGetUsers();
   const { activeConversationId } = useChat();
   const sender = getUserById(message.sender_id);
+  const alert = useAlert();
+  const confirm = useConfirm();
 
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(message.content ?? "");
@@ -71,7 +75,12 @@ export function MessageBubble({
         conversationId: activeConversationId,
         content: trimmed,
       },
-      { onSuccess: () => setIsEditing(false) },
+      {
+        onSuccess: () => {
+          setIsEditing(false);
+          alert.success("Message edited");
+        },
+      },
     );
   };
 
@@ -80,9 +89,13 @@ export function MessageBubble({
     setIsEditing(false);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!activeConversationId) return;
-    if (!window.confirm("Delete this message?")) return;
+    const ok = await confirm("Delete this message?", {
+      title: "Delete message",
+    });
+
+    if (!ok) return;
     deleteMessage.mutate({
       messageId: id,
       conversationId: activeConversationId,

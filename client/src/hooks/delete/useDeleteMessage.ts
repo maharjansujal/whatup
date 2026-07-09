@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../api/api";
 import type { Message } from "../../types/message";
+import { useAlert } from "../../components/shared/alert/useAlert";
 
 interface DeleteMessageDto {
   messageId: string;
@@ -9,6 +10,7 @@ interface DeleteMessageDto {
 
 export function useDeleteMessage() {
   const queryClient = useQueryClient();
+  const alert = useAlert();
 
   return useMutation<Message, Error, DeleteMessageDto>({
     mutationFn: async ({ messageId }) => {
@@ -22,6 +24,7 @@ export function useDeleteMessage() {
           old?.map((m) => (m.id === deletedMessage.id ? deletedMessage : m)) ??
           old,
       );
+      alert.success("Message deleted successfully");
     },
   });
 }
