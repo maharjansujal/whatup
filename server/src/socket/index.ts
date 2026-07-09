@@ -2,10 +2,8 @@ import http from "http";
 import { Server, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
 import { SOCKET_EVENTS } from "./socket_events";
-import { messageService } from "../modules/messages/service";
 import { AuthUser } from "../types/express";
 import { conversationRepository } from "../modules/conversations/repository";
-import { MessageType } from "../modules/messages/types";
 import "multer";
 
 // Utility: verifyToken (reusable for sockets)

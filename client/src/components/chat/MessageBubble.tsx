@@ -46,11 +46,11 @@ export function MessageBubble({
 
   const { type, content, id, attachments } = message;
 
-  if (message.type === "system") {
+  if (type === "system") {
     return (
       <div className="my-2 flex justify-center">
         <span className="rounded-full bg-[#F2F2EF] px-3 py-1 font-['IBM_Plex_Mono'] text-[11px] text-[#9A9CA8]">
-          {message.content}
+          {content}
         </span>
       </div>
     );
@@ -60,9 +60,9 @@ export function MessageBubble({
 
   const handleSaveEdit = () => {
     const trimmed = draft.trim();
-    if (!trimmed || trimmed === message.content || !activeConversationId) {
+    if (!trimmed || trimmed === content || !activeConversationId) {
       setIsEditing(false);
-      setDraft(message.content ?? "");
+      setDraft(content ?? "");
       return;
     }
     patchMessage.mutate(

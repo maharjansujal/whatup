@@ -8,29 +8,34 @@ import { usePostAuth } from "../../hooks/post/usePostAuth";
 import { Link } from "react-router-dom";
 import { AxiosError } from "axios";
 
+type LoginFormData = {
+  identifier: string;
+  password: string;
+};
+
 export function LoginForm() {
-  const methods = useForm<LoginDto>({
+  const methods = useForm<LoginFormData>({
     defaultValues: {
-      username: "",
-      email: "",
+      identifier: "",
       password: "",
     },
   });
 
   const { login } = usePostAuth();
 
-  const onSubmit = async (data: LoginDto) => {
+  const onSubmit = async (data: LoginFormData) => {
     try {
+      const identifier = data.identifier.trim();
+
       const payload: LoginDto = {
         password: data.password,
       };
 
-      if (data.username?.trim()) {
-        payload.username = data.username.trim();
-      }
-
-      if (data.email?.trim()) {
-        payload.email = data.email.trim();
+      // Basic email detection
+      if (identifier.includes("@")) {
+        payload.email = identifier;
+      } else {
+        payload.username = identifier;
       }
 
       await login(payload);
@@ -45,14 +50,9 @@ export function LoginForm() {
 
   return (
     <Form methods={methods} onSubmit={onSubmit}>
-      <div className="flex w-full gap-x-4">
-        <FormField name="email" label="Email">
-          <Input type="email" placeholder="you@example.com" />
-        </FormField>
-        <FormField name="username" label="Username">
-          <Input type="username" placeholder="yourusername" />
-        </FormField>
-      </div>
+      <FormField name="identifier" label="Email or Username" required>
+        <Input type="text" placeholder="you@example.com or yourusername" />
+      </FormField>
 
       <FormField name="password" label="Password" required>
         <Input type="password" placeholder="Enter your password" />
