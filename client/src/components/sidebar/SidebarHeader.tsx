@@ -29,13 +29,13 @@ export function SidebarHeader() {
       <div className="relative mt-3.5">
         <Search
           size={15}
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#5B5F73]"
+          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8DA3]"
         />
         <input
           value={conversationQuery}
           onChange={(e) => setConversationQuery(e.target.value)}
           placeholder="Search conversations"
-          className="w-full rounded-lg bg-[#181A26] py-2 pl-9 pr-3 text-[13px] text-[#E7E8F0] placeholder:text-[#5B5F73] focus:outline-none focus:ring-1 focus:ring-[#00C2A8]/60"
+          className="w-full rounded-lg border border-[#2A2D3E] bg-[#1F2232] py-2 pl-9 pr-3 text-[13px] text-[#E7E8F0] placeholder:text-[#7B8098] transition-colors focus:border-[#00C2A8]/60 focus:outline-none focus:ring-1 focus:ring-[#00C2A8]/40"
         />
       </div>
     </div>
