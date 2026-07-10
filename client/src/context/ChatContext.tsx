@@ -70,7 +70,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     userId: string;
     deliveredAt: string;
   }) => {
-    console.log("DELIVERED", payload);
     setMessages((prev) => {
       const msg = prev.find((m) => m.id === payload.messageId);
 
@@ -90,28 +89,68 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           ...message,
           receipts: hasReceipt
             ? currentReceipts.map((receipt) =>
-                String(receipt.user_id) === String(payload.userId)
-                  ? {
-                      ...receipt,
-                      delivered_at: payload.deliveredAt,
-                    }
-                  : receipt,
-              )
-            : [
-                ...currentReceipts,
-                {
-                  user_id: payload.userId,
+              String(receipt.user_id) === String(payload.userId)
+                ? {
+                  ...receipt,
                   delivered_at: payload.deliveredAt,
-                },
-              ],
+                }
+                : receipt,
+            )
+            : [
+              ...currentReceipts,
+              {
+                user_id: payload.userId,
+                delivered_at: payload.deliveredAt,
+              },
+            ],
         };
       });
     });
   };
 
+  const handleMessageSeen = (payload: {
+    messageId: string;
+    userId: string;
+    seenAt: string;
+  }) => {
+    setMessages((prev) =>
+      prev.map((message) => {
+        if (message.id !== payload.messageId) {
+          return message;
+        }
+
+        const currentReceipts = message.receipts || [];
+        const hasReceipt = currentReceipts.some(
+          (r) => String(r.user_id) === String(payload.userId),
+        );
+
+        return {
+          ...message,
+          receipts: hasReceipt
+            ? currentReceipts.map((receipt) =>
+              String(receipt.user_id) === String(payload.userId)
+                ? {
+                  ...receipt,
+                  seen_at: payload.seenAt,
+                }
+                : receipt,
+            )
+            : [
+              ...currentReceipts,
+              {
+                user_id: payload.userId,
+                seen_at: payload.seenAt,
+              },
+            ],
+        };
+      }),
+    );
+  };
+
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    console.log("Fetched messages", fetchedMessages);
     if (fetchedMessages) {
       setMessages(fetchedMessages);
     }
@@ -147,6 +186,16 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           return updated;
         },
       );
+
+      queryClient.setQueryData(
+        ["messages", message.conversation_id],
+        (old: Message[] | undefined) => {
+          if (!old) return old;
+          if (old.some((m) => m.id === message.id)) return old;
+          return [...old, message];
+        }
+      );
+
       if (message.sender_id !== authUser?.id) {
         updateReceipt.mutate({
           messageId: message.id,
@@ -175,12 +224,14 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     socket.on(SOCKET_EVENTS.TYPING_START, handleTypingStart);
     socket.on(SOCKET_EVENTS.TYPING_STOP, handleTypingStop);
     socket.on(SOCKET_EVENTS.MESSAGE_DELIVERED, handleMessageDelivered);
+    socket.on(SOCKET_EVENTS.MESSAGE_SEEN, handleMessageSeen);
     return () => {
       socket.off(SOCKET_EVENTS.MESSAGE_RECEIVE, handleMessage);
       socket.off(SOCKET_EVENTS.CONVERSATION_CREATED, handleConversationCreated);
       socket.off(SOCKET_EVENTS.TYPING_START, handleTypingStart);
       socket.off(SOCKET_EVENTS.TYPING_STOP, handleTypingStop);
       socket.off(SOCKET_EVENTS.MESSAGE_DELIVERED, handleMessageDelivered);
+      socket.off(SOCKET_EVENTS.MESSAGE_SEEN, handleMessageSeen);
     };
   }, [socket, activeConversationId, authUser?.id, queryClient]);
 

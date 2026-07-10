@@ -9,6 +9,7 @@ import { useDeleteMessage } from "../../hooks/delete/useDeleteMessage";
 import { MessageAttachment } from "./MessageAttachment";
 import { useAlert } from "../shared/alert/useAlert";
 import { useConfirm } from "../shared/confirm/useConfirm";
+import { useSeenObserver } from "../../hooks/observers/useSeenObserver";
 
 interface MessageBubbleProps {
   message: Message;
@@ -41,6 +42,11 @@ export function MessageBubble({
   const confirm = useConfirm();
 
   const receipt = message.receipts?.[0];
+  const seenRef = useSeenObserver({
+    messageId: message.id,
+    isOwn,
+    seen: !!receipt?.seen_at,
+  });
 
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(message.content ?? "");
@@ -104,6 +110,7 @@ export function MessageBubble({
 
   return (
     <div
+      ref={seenRef}
       className={`group flex items-end gap-2 ${isOwn ? "flex-row-reverse" : ""}`}
     >
       <div className="w-8 shrink-0">

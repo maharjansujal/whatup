@@ -44,12 +44,23 @@ const markDelivered = asyncHandler(async (req, res) => {
 
 // Mark seen
 const markSeen = asyncHandler(async (req, res) => {
-  const { id } = req.params; // messageId
-  const result = await receiptsService.markSeen({
+  const { id } = req.params;
+  const receiverId = req.user.id;
+
+  const receipt = await receiptsService.markSeen({
     messageId: id.toString(),
-    userId: req.user.id,
+    userId: receiverId,
   });
-  return res.status(200).json(result);
+
+  const message = await messageService.getMessageById(id.toString());
+
+  getIO().to(`user:${message.sender_id}`).emit(SOCKET_EVENTS.MESSAGE_SEEN, {
+    messageId: id.toString(),
+    userId: receiverId,
+    seenAt: receipt.seen_at,
+  });
+
+  return res.status(200).json(receipt);
 });
 
 // Get all receipts for a message

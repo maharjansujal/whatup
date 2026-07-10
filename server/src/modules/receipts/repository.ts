@@ -39,11 +39,6 @@ const markDelivered = async (
     `,
     [messageId, userId],
   );
-  console.log({
-    messageId,
-    userId,
-    rowCount: result.rowCount,
-  });
   return result.rows[0];
 };
 
