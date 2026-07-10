@@ -1,18 +1,20 @@
 interface AvatarProps {
   src?: string;
   name: string;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xs";
   isOnline?: boolean;
   ring?: boolean;
 }
 
 const sizeMap: Record<NonNullable<AvatarProps["size"]>, string> = {
+  xs: "h-4 w-4 text-[0.4rem]",
   sm: "h-8 w-8 text-xs",
   md: "h-10 w-10 text-sm",
   lg: "h-14 w-14 text-base",
 };
 
 const dotSizeMap: Record<NonNullable<AvatarProps["size"]>, string> = {
+  xs: "h-1 w-1",
   sm: "h-2 w-2",
   md: "h-2.5 w-2.5",
   lg: "h-3.5 w-3.5",

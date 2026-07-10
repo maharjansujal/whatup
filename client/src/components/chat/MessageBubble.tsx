@@ -22,11 +22,13 @@ import { useModal } from "../../context/ModalContext";
 import { MessageInfoModal } from "../modals/MessageInfoModal";
 import type { Receipt } from "../../types/receipt";
 import { useAuth } from "../../context/AuthContext";
+import type { User } from "../../types/user";
 
 interface MessageBubbleProps {
   message: Message;
   isOwn: boolean;
   showAvatar: boolean;
+  latestSeenUsers: Map<string, User[]>;
 }
 
 function formatTime(iso: string): string {
@@ -46,13 +48,16 @@ export function MessageBubble({
   message,
   isOwn,
   showAvatar,
+  latestSeenUsers,
 }: MessageBubbleProps) {
   const { getUserById } = useGetUsers();
-  const { activeConversationId } = useChat();
+  const { activeConversationId, activeConversation } = useChat();
   const sender = getUserById(message.sender_id);
   const alert = useAlert();
   const confirm = useConfirm();
   const { authUser } = useAuth();
+
+  const seenUsers = latestSeenUsers.get(message.id) ?? [];
 
   const receipt = message.receipts?.find((r) => r.user_id === authUser?.id);
   const seenRef = useSeenObserver({
@@ -68,6 +73,8 @@ export function MessageBubble({
   const deleteMessage = useDeleteMessage();
 
   const { openModal, closeModal } = useModal();
+
+  const isGroup = activeConversation?.type === "group";
 
   const { type, content, id, attachments } = message;
 
@@ -271,14 +278,25 @@ export function MessageBubble({
               · Edited
             </span>
           )}
-          {isOwn &&
-            (receipt?.seen_at ? (
-              <CheckCheck size={12} className="text-[#00C2A8]" />
-            ) : receipt?.delivered_at ? (
-              <CheckCheck size={12} className="text-black" />
-            ) : (
-              <Check size={12} />
-            ))}
+          {isOwn && seenUsers.length > 0 && (
+            <button
+              onClick={() => handleInfo(message.receipts)}
+              className="flex -space-x-1"
+            >
+              {seenUsers.map((user) => (
+                <div
+                  key={user.id}
+                  className="animate-[avatarDrop_180ms_ease-out]"
+                >
+                  <Avatar
+                    src={user.avatar_url}
+                    name={user.display_name}
+                    size="xs"
+                  />
+                </div>
+              ))}
+            </button>
+          )}
         </div>
       </div>
     </div>

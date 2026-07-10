@@ -28,7 +28,6 @@ export function MessageInfoModal({
   onClose: () => void;
 }) {
   const { getUserById } = useGetUsers();
-  console.log("Receipts", receipts);
 
   const seen = receipts.filter((r) => r.seen_at);
   const deliveredOnly = receipts.filter((r) => r.delivered_at && !r.seen_at);
@@ -47,7 +46,7 @@ export function MessageInfoModal({
       icon: Check,
       iconColor: "text-[#9A9CA8]",
     },
-    { label: "Not yet delivered", items: pending, icon: null, iconColor: "" },
+    { label: "Sent", items: pending, icon: null, iconColor: "" },
   ].filter((g) => g.items.length > 0);
 
   return (

@@ -76,3 +76,15 @@
 .sidebar-scroll::-webkit-scrollbar-thumb:hover {
   background: #6a718a;
 }
+
+@keyframes avatarDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.85);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

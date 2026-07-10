@@ -1,8 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { MessageBubble } from "./MessageBubble";
 import { useChat } from "../../context/ChatContext";
 import { useAuth } from "../../context/AuthContext";
 import { TypingBubble } from "./TypingBubble";
+import type { User } from "../../types/user";
+import { useGetUsers } from "../../hooks/get/useGetUsers";
 
 function dateLabel(iso: string): string {
   const date = new Date(iso);
@@ -21,6 +23,32 @@ export function MessageList() {
   const { messages } = useChat();
   const { authUser: currentUser } = useAuth();
   const bottomRef = useRef<HTMLDivElement>(null);
+  const { getUserById } = useGetUsers();
+
+  const latestSeenUsers = useMemo(() => {
+    const latestMessageByUser = new Map<string, string>();
+
+    for (const message of messages) {
+      for (const receipt of message.receipts ?? []) {
+        if (receipt.seen_at) {
+          latestMessageByUser.set(receipt.user_id, message.id);
+        }
+      }
+    }
+    const result = new Map<string, User[]>();
+
+    latestMessageByUser.forEach((messageId, userId) => {
+      const user = getUserById(userId.toString());
+
+      if (!user) return;
+
+      const users = result.get(messageId) ?? [];
+      users.push(user);
+      result.set(messageId, users);
+    });
+
+    return result;
+  }, [messages, getUserById]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -66,6 +94,7 @@ export function MessageList() {
                 message={message}
                 isOwn={isOwn}
                 showAvatar={showAvatar}
+                latestSeenUsers={latestSeenUsers}
               />
             </div>
           </div>
