@@ -51,11 +51,6 @@ export function MessageList() {
             prevMessage.type === "system");
 
         const isOwn = message.sender_id === currentUser?.id;
-        const isLastOwnMessage =
-          isOwn &&
-          !messages
-            .slice(index + 1)
-            .some((m) => m.sender_id === currentUser.id);
 
         return (
           <div key={message.id}>
@@ -71,7 +66,6 @@ export function MessageList() {
                 message={message}
                 isOwn={isOwn}
                 showAvatar={showAvatar}
-                isRead={isOwn && !isLastOwnMessage}
               />
             </div>
           </div>

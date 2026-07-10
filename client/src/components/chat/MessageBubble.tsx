@@ -14,7 +14,6 @@ interface MessageBubbleProps {
   message: Message;
   isOwn: boolean;
   showAvatar: boolean;
-  isRead?: boolean;
 }
 
 function formatTime(iso: string): string {
@@ -34,13 +33,14 @@ export function MessageBubble({
   message,
   isOwn,
   showAvatar,
-  isRead,
 }: MessageBubbleProps) {
   const { getUserById } = useGetUsers();
   const { activeConversationId } = useChat();
   const sender = getUserById(message.sender_id);
   const alert = useAlert();
   const confirm = useConfirm();
+
+  const receipt = message.receipts?.[0];
 
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(message.content ?? "");
@@ -167,7 +167,7 @@ export function MessageBubble({
                     />
                   ))}
 
-                {message.type === "file" && message.attachments?.[0] && (
+                {message.type === "file" && attachments?.[0] && (
                   <div
                     className={`flex items-center gap-2 rounded-lg px-2.5 py-2 ${isOwn ? "bg-white/15" : "bg-white"}`}
                   >
@@ -177,22 +177,22 @@ export function MessageBubble({
                     />
                     <div className="min-w-0">
                       <p className="truncate text-[12.5px] font-medium">
-                        {message.attachments[0].filename}
+                        {attachments[0].filename}
                       </p>
                       <p
                         className={`text-[10.5px] ${isOwn ? "text-white/70" : "text-[#9A9CA8]"}`}
                       >
-                        {formatFileSize(Number(message.attachments[0].size))}
+                        {formatFileSize(Number(attachments[0].size))}
                       </p>
                     </div>
                   </div>
                 )}
 
-                {message.content && !isEditing && (
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+                {content && !isEditing && (
+                  <p className="whitespace-pre-wrap">{content}</p>
                 )}
 
-                {isEditing && (
+                {isEditing && (!attachments || attachments.length === 0) && (
                   <div className="flex flex-col gap-1.5">
                     <textarea
                       autoFocus
@@ -239,8 +239,10 @@ export function MessageBubble({
             </span>
           )}
           {isOwn &&
-            (isRead ? (
+            (receipt?.seen_at ? (
               <CheckCheck size={12} className="text-[#00C2A8]" />
+            ) : receipt?.delivered_at ? (
+              <CheckCheck size={12} className="text-black" />
             ) : (
               <Check size={12} />
             ))}

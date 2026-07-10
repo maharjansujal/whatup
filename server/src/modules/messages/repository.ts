@@ -9,18 +9,29 @@ import {
 
 type DbExecutor = Pool | PoolClient;
 const MESSAGE_WITH_ATTACHMENTS_SELECT = `
-SELECT
-  m.*,
-  COALESCE(
-    json_agg(ma.* ORDER BY ma.created_at)
-      FILTER (WHERE ma.id IS NOT NULL),
-    '[]'
-  ) AS attachments
-FROM messages m
-LEFT JOIN message_attachments ma
-  ON ma.message_id = m.id
-`;
-
+    SELECT
+    m.*,
+    COALESCE(att.attachments, '[]'::json) AS attachments,
+    COALESCE(rec.receipts, '[]'::json) AS receipts
+  FROM messages m
+  LEFT JOIN LATERAL (
+    SELECT json_agg(ma ORDER BY ma.created_at) AS attachments
+    FROM message_attachments ma
+    WHERE ma.message_id = m.id
+  ) att ON TRUE
+  LEFT JOIN LATERAL (
+    SELECT json_agg(
+      json_build_object(
+        'user_id', mr.user_id,
+        'delivered_at', mr.delivered_at,
+        'seen_at', mr.seen_at
+      )
+      ORDER BY mr.user_id
+    ) AS receipts
+    FROM message_receipts mr
+    WHERE mr.message_id = m.id
+  ) rec ON TRUE
+  `;
 const create = async ({
   executor = db,
   data,
@@ -126,7 +137,6 @@ const findById = async (messageId: string): Promise<Message | null> => {
     `
     ${MESSAGE_WITH_ATTACHMENTS_SELECT}
     WHERE m.id = $1
-    GROUP BY m.id
     `,
     [messageId],
   );
@@ -165,16 +175,18 @@ const getConversationMessages = async (
 ): Promise<Message[]> => {
   const result = await db.query(
     `
-    ${MESSAGE_WITH_ATTACHMENTS_SELECT}
-    WHERE m.conversation_id = $1
-      ${cursor ? "AND m.created_at < $2" : ""}
-    GROUP BY m.id
-    ORDER BY m.created_at ASC
-    LIMIT $${cursor ? 3 : 2}
+    WITH recent_messages AS (
+      ${MESSAGE_WITH_ATTACHMENTS_SELECT}
+      WHERE m.conversation_id = $1
+        ${cursor ? "AND m.created_at < $2" : ""}
+      ORDER BY m.created_at DESC
+      LIMIT $${cursor ? 3 : 2}
+    )
+    SELECT * FROM recent_messages ORDER BY created_at ASC
     `,
     cursor ? [convoId, cursor, limit] : [convoId, limit],
   );
-  console.log("Result.rows", result.rows);
+
   return result.rows;
 };
 

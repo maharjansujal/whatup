@@ -4,11 +4,15 @@ import { Receipt } from "./types";
 
 type DBExecutor = Pool | PoolClient;
 
-const createReceipt = async (
-  messageId: string,
-  userId: string,
-  executor: DBExecutor = db,
-): Promise<Receipt> => {
+const createReceipt = async ({
+  messageId,
+  userId,
+  executor = db,
+}: {
+  messageId: string;
+  userId: string;
+  executor?: DBExecutor;
+}): Promise<Receipt> => {
   const result = await executor.query(
     `
     INSERT INTO message_receipts (message_id, user_id)
@@ -35,7 +39,38 @@ const markDelivered = async (
     `,
     [messageId, userId],
   );
+  console.log({
+    messageId,
+    userId,
+    rowCount: result.rowCount,
+  });
   return result.rows[0];
+};
+
+const markAllDelivered = async ({
+  userId,
+  executor = db,
+}: {
+  userId: string;
+  executor?: DBExecutor;
+}) => {
+  const result = await executor.query(
+    `
+        UPDATE message_receipts mr
+SET delivered_at = NOW()
+FROM messages m
+WHERE mr.message_id = m.id
+  AND mr.user_id = $1
+  AND mr.delivered_at IS NULL
+RETURNING
+  mr.message_id,
+  mr.user_id,
+  mr.delivered_at,
+  m.sender_id;
+    `,
+    [userId],
+  );
+  return result.rows;
 };
 
 const markSeen = async (
@@ -103,6 +138,7 @@ const getDeliveredUsers = async (
 export const receiptsRepository = {
   createReceipt,
   markDelivered,
+  markAllDelivered,
   markSeen,
   getReceipts,
   getSeenUsers,

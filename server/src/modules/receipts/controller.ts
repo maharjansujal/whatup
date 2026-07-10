@@ -1,4 +1,7 @@
 import { asyncHandler } from "../../shared/utils/asyncHandler";
+import { getIO } from "../../socket";
+import { SOCKET_EVENTS } from "../../socket/socket_events";
+import { messageService } from "../messages/service";
 import { receiptsService } from "./service";
 
 // Create a receipt entry
@@ -14,11 +17,29 @@ const createReceipt = asyncHandler(async (req, res) => {
 // Mark delivered
 const markDelivered = asyncHandler(async (req, res) => {
   const { id } = req.params; // messageId
-  const result = await receiptsService.markDelivered({
+  const receiverId = req.user.id;
+
+  const receipt = await receiptsService.markDelivered({
     messageId: id.toString(),
-    userId: req.user.id,
+    userId: receiverId,
   });
-  return res.status(200).json(result);
+
+  console.log({
+    id,
+    receiverId,
+  });
+
+  const message = await messageService.getMessageById(id.toString());
+
+  getIO()
+    .to(`user:${message.sender_id}`)
+    .emit(SOCKET_EVENTS.MESSAGE_DELIVERED, {
+      messageId: id.toString(),
+      userId: receiverId,
+      deliveredAt: receipt.delivered_at,
+    });
+
+  return res.status(200).json(receipt);
 });
 
 // Mark seen

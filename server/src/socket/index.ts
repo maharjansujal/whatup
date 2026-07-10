@@ -5,6 +5,8 @@ import { SOCKET_EVENTS } from "./socket_events";
 import { AuthUser } from "../types/express";
 import { conversationRepository } from "../modules/conversations/repository";
 import "multer";
+import { messageService } from "../modules/messages/service";
+import { receiptsService } from "../modules/receipts/service";
 
 // Utility: verifyToken (reusable for sockets)
 function verifyToken(token: string): AuthUser {
@@ -50,6 +52,19 @@ export function initSocket(server: http.Server) {
 
     socket.join(`user:${userId}`); // Join a user room
 
+    const receipts = await receiptsService.markAllDelivered(userId);
+
+    for (const receipt of receipts) {
+      const message = await messageService.getMessageById(receipt.message_id);
+
+      getIO()
+        .to(`user:${message.sender_id}`)
+        .emit(SOCKET_EVENTS.MESSAGE_DELIVERED, {
+          messageId: receipt.message_id,
+          userId,
+          deliveredAt: receipt.delivered_at,
+        });
+    }
     console.log("Joined user room:", `user:${userId}`, socket.rooms);
 
     // Track all sockets for this user

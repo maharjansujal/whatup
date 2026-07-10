@@ -4,38 +4,22 @@ import { receiptsController } from "./controller";
 
 const router = Router();
 
-router.post(
-  "/messages/:id/receipts",
-  requireAuth,
-  receiptsController.createReceipt,
-);
+router.post("/:id/receipts", requireAuth, receiptsController.createReceipt);
 
 router.patch(
-  "/messages/:id/receipts/delivered",
+  "/:id/receipts/delivered",
   requireAuth,
   receiptsController.markDelivered,
 );
 
-router.patch(
-  "/messages/:id/receipts/seen",
-  requireAuth,
-  receiptsController.markSeen,
-);
+router.patch("/:id/receipts/seen", requireAuth, receiptsController.markSeen);
+
+router.get("/:id/receipts", requireAuth, receiptsController.getReceipts);
+
+router.get("/:id/receipts/seen", requireAuth, receiptsController.getSeenUsers);
 
 router.get(
-  "/messages/:id/receipts",
-  requireAuth,
-  receiptsController.getReceipts,
-);
-
-router.get(
-  "/messages/:id/receipts/seen",
-  requireAuth,
-  receiptsController.getSeenUsers,
-);
-
-router.get(
-  "/messages/:id/receipts/delivered",
+  "/:id/receipts/delivered",
   requireAuth,
   receiptsController.getDeliveredUsers,
 );

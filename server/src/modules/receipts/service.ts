@@ -13,7 +13,7 @@ const createReceipt = async ({
   if (!messageId || !userId) {
     throw createAppError("messageId and userId are required", 400);
   }
-  return receiptsRepository.createReceipt(messageId, userId);
+  return receiptsRepository.createReceipt({ messageId, userId });
 };
 
 // Mark a message as delivered for a user
@@ -28,6 +28,10 @@ const markDelivered = async ({
     throw createAppError("messageId and userId are required", 400);
   }
   return receiptsRepository.markDelivered(messageId, userId);
+};
+
+const markAllDelivered = async (userId: string) => {
+  return receiptsRepository.markAllDelivered({ userId });
 };
 
 // Mark a message as seen for a user
@@ -79,4 +83,5 @@ export const receiptsService = {
   getReceipts,
   getSeenUsers,
   getDeliveredUsers,
+  markAllDelivered,
 };

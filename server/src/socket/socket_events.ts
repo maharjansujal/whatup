@@ -10,6 +10,8 @@ export const SOCKET_EVENTS = {
 
   MESSAGE_SEND: "message:send",
   MESSAGE_RECEIVE: "message:receive",
+  MESSAGE_DELIVERED: "message:delivered",
+  MESSAGE_SEEN: "message:seen",
 
   TYPING_START: "typing:start",
   TYPING_STOP: "typing:stop",

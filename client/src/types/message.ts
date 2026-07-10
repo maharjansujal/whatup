@@ -1,3 +1,5 @@
+import type { Receipt } from "./receipt";
+
 export type MessageType = "text" | "image" | "file" | "system";
 
 export interface CreateMessageInput {
@@ -5,7 +7,8 @@ export interface CreateMessageInput {
   sender_id: string;
   type: MessageType;
   content: string;
-  reply_to_message_id: string;
+  reply_to_message_id: string | null;
+  files?: File[];
   updated_at?: string;
   deleted_at?: string;
 }
@@ -13,7 +16,8 @@ export interface CreateMessageInput {
 export interface Message extends CreateMessageInput {
   id: string;
   created_at: string;
-  attachments?: Attachment[];
+  attachments: Attachment[];
+  receipts: Receipt[];
 }
 
 export interface AttachmentInput {

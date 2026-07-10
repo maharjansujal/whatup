@@ -1,13 +1,10 @@
 import { deleteAsset, uploadStream } from "../../shared/cloudinary/upload";
 import { createAppError } from "../../shared/errors/appError";
 import { messagesRepository } from "./repository";
-import {
-  Message,
-  Attachment,
-  AttachmentInput,
-  CreateMessageInput,
-} from "./types";
+import { Message, Attachment, CreateMessageInput } from "./types";
 import { db } from "../../shared/db";
+import { memberRepository } from "../members/repository";
+import { receiptsRepository } from "../receipts/repository";
 
 const createMessage = async (data: CreateMessageInput): Promise<Message> => {
   const hasText = data.content.trim().length > 0;
@@ -69,6 +66,20 @@ const createMessage = async (data: CreateMessageInput): Promise<Message> => {
       messageId: message.id,
       createdAt: message.created_at,
     });
+
+    const memberIds = await memberRepository.getMemberIds(data.conversation_id);
+
+    const recipientIds = memberIds.filter((id) => id !== data.sender_id);
+
+    await Promise.all(
+      recipientIds.map((userId) =>
+        receiptsRepository.createReceipt({
+          messageId: message.id,
+          userId,
+          executor: client,
+        }),
+      ),
+    );
 
     await client.query("COMMIT");
 

@@ -17,7 +17,7 @@ router.use("/users", userRoutes);
 router.use("/conversations", conversationRoutes);
 router.use("/conversations", requireAuth, memberRoutes);
 router.use("/conversations", requireAuth, messagesRoutes);
-router.use("/receipt", requireAuth, receiptRoutes);
+router.use("/messages", requireAuth, receiptRoutes);
 router.use("/invite", requireAuth, inviteRoutes);
 router.use("/block", requireAuth, blockRoutes);
 router.use("/request", requireAuth, requestRoutes);
