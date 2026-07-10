@@ -1,5 +1,4 @@
 import { db } from "../../shared/db";
-import { createAppError } from "../../shared/errors/appError";
 import { CreateMemberInput, Member } from "./types";
 import { Pool, PoolClient } from "pg";
 

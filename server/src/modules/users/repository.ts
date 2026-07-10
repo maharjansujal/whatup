@@ -2,7 +2,7 @@ import {
   USER_AUTH_COLUMNS,
   USER_PUBLIC_COLUMNS,
 } from "../../shared/constants/publicColumns";
-import { db } from "../../shared/db";
+import { db, DbExecutor } from "../../shared/db";
 import { updateTable } from "../../shared/utils/updateTable";
 import { UpdateUserDto, User } from "./types";
 
@@ -45,6 +45,22 @@ export const update = async ({
     publicColumns: USER_PUBLIC_COLUMNS,
   });
   return result;
+};
+
+export const uploadAvatar = async ({
+  id,
+  avatar_url,
+  executor = db,
+}: {
+  id: string;
+  avatar_url: string;
+  executor: DbExecutor;
+}) => {
+  const result = await executor.query(
+    `UPDATE users SET avatar_url = $2 WHERE id = $1 RETURNING *`,
+    [id, avatar_url],
+  );
+  return result.rows[0];
 };
 
 const searchUser = async ({

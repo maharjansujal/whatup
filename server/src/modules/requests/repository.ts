@@ -1,12 +1,9 @@
-import { Pool, PoolClient } from "pg";
-import { db } from "../../shared/db";
+import { db, DbExecutor } from "../../shared/db";
 import { ConversationRequest } from "./types";
-
-type DBExecutor = Pool | PoolClient;
 
 const createRequest = async (
   data: { conversationId: string; requestorId: string; recipientId: string },
-  executor: DBExecutor = db,
+  executor: DbExecutor = db,
 ): Promise<ConversationRequest> => {
   const result = await executor.query(
     `INSERT INTO conversation_requests (conversation_id, requestor_id, recipient_id, status)
@@ -20,7 +17,7 @@ const createRequest = async (
 const findPending = async (
   requestorId: string,
   recipientId: string,
-  executor: DBExecutor = db,
+  executor: DbExecutor = db,
 ): Promise<ConversationRequest | null> => {
   const result = await executor.query(
     `SELECT * FROM conversation_requests
@@ -32,7 +29,7 @@ const findPending = async (
 
 const findById = async (
   id: string,
-  executor: DBExecutor = db,
+  executor: DbExecutor = db,
 ): Promise<ConversationRequest | null> => {
   const result = await executor.query(
     `SELECT * FROM conversation_requests WHERE id = $1`,
@@ -43,7 +40,7 @@ const findById = async (
 
 const accept = async (
   id: string,
-  executor: DBExecutor = db,
+  executor: DbExecutor = db,
 ): Promise<ConversationRequest | null> => {
   const result = await executor.query(
     `UPDATE conversation_requests
@@ -58,7 +55,7 @@ const accept = async (
 // Decline request
 const decline = async (
   id: string,
-  executor: DBExecutor = db,
+  executor: DbExecutor = db,
 ): Promise<ConversationRequest | null> => {
   const result = await executor.query(
     `UPDATE conversation_requests
@@ -72,7 +69,7 @@ const decline = async (
 
 const cancel = async (
   id: string,
-  executor: DBExecutor = db,
+  executor: DbExecutor = db,
 ): Promise<ConversationRequest | null> => {
   const result = await executor.query(
     `UPDATE conversation_requests
@@ -86,7 +83,7 @@ const cancel = async (
 
 const listIncoming = async (
   userId: string,
-  executor: DBExecutor = db,
+  executor: DbExecutor = db,
 ): Promise<ConversationRequest[]> => {
   const result = await executor.query(
     `SELECT * FROM conversation_requests
@@ -99,7 +96,7 @@ const listIncoming = async (
 
 const listOutgoing = async (
   userId: string,
-  executor: DBExecutor = db,
+  executor: DbExecutor = db,
 ): Promise<ConversationRequest[]> => {
   const result = await executor.query(
     `SELECT * FROM conversation_requests

@@ -5,15 +5,13 @@ import {
   CreateConversationInput,
   CreateMemberInput,
 } from "./types";
-import { db } from "../../shared/db";
+import { db, DbExecutor } from "../../shared/db";
 import { Member } from "../members/types";
 import { updateTable } from "../../shared/utils/updateTable";
 
-type DBExecutor = Pool | PoolClient;
-
 const create = async (
   { type, createdByUserId, name }: CreateConversationInput,
-  executor: DBExecutor = db,
+  executor: DbExecutor = db,
 ): Promise<Conversation> => {
   const result = await executor.query(
     `INSERT INTO conversations (type, created_by_user_id, name)
@@ -27,7 +25,7 @@ const create = async (
 
 const findById = async (
   id: string,
-  executor: DBExecutor = db,
+  executor: DbExecutor = db,
 ): Promise<Conversation> => {
   const result = await executor.query(
     `SELECT *
@@ -42,7 +40,7 @@ const findById = async (
 
 const createMember = async (
   { conversationId, userId, role = "member" }: CreateMemberInput,
-  executor: DBExecutor = db,
+  executor: DbExecutor = db,
 ): Promise<Member> => {
   const result = await executor.query(
     `INSERT INTO conversation_members (conversation_id, user_id, role)
@@ -61,7 +59,7 @@ const findDirectConversation = async ({
 }: {
   userId1: string;
   userId2: string;
-  executor?: DBExecutor;
+  executor?: DbExecutor;
 }): Promise<Conversation | null> => {
   const result = await executor.query(
     `
@@ -93,7 +91,7 @@ const findUserConversations = async ({
   executor = db,
 }: {
   userId: string;
-  executor?: DBExecutor;
+  executor?: DbExecutor;
 }) => {
   const result = await executor.query(
     `
@@ -167,7 +165,7 @@ const findConversationForUser = async ({
 }: {
   userId: string;
   conversationId: string;
-  executor?: DBExecutor;
+  executor?: DbExecutor;
 }) => {
   const result = await executor.query(
     `
@@ -248,7 +246,7 @@ const updateConversation = async ({
 }: {
   id: string;
   updates: ConversationUpdateInput;
-  executor?: DBExecutor;
+  executor?: DbExecutor;
 }) => {
   return updateTable("conversations", id, updates, {
     executor,
@@ -260,7 +258,7 @@ const deleteConversation = async ({
   executor = db,
 }: {
   id: string;
-  executor?: DBExecutor;
+  executor?: DbExecutor;
 }) => {
   const result = await executor.query(
     `
@@ -284,7 +282,7 @@ const updateLastMessage = async ({
   conversationId: string;
   messageId: string;
   createdAt: Date;
-  executor?: DBExecutor;
+  executor?: DbExecutor;
 }): Promise<Conversation> => {
   const result = await executor.query(
     `
@@ -305,7 +303,7 @@ const exists = async ({
   executor = db,
 }: {
   conversationId: string;
-  executor?: DBExecutor;
+  executor?: DbExecutor;
 }): Promise<boolean> => {
   const result = await executor.query(
     `SELECT EXISTS (
@@ -325,7 +323,7 @@ const isGroup = async ({
   executor = db,
 }: {
   conversationId: string;
-  executor?: DBExecutor;
+  executor?: DbExecutor;
 }): Promise<boolean> => {
   const result = await executor.query(
     `SELECT type FROM conversations WHERE id = $1 AND deleted_at IS NULL`,
@@ -336,7 +334,7 @@ const isGroup = async ({
 
 const getCreator = async (
   conversationId: string,
-  executor: DBExecutor = db,
+  executor: DbExecutor = db,
 ): Promise<string | null> => {
   const result = await executor.query(
     `SELECT created_by_user_id FROM conversations WHERE id = $1 AND deleted_at IS NULL`,
@@ -352,7 +350,7 @@ const isOwner = async ({
 }: {
   conversationId: string;
   userId: string;
-  executor?: DBExecutor;
+  executor?: DbExecutor;
 }): Promise<boolean> => {
   const result = await executor.query(
     `
@@ -374,7 +372,7 @@ const isAdmin = async ({
 }: {
   conversationId: string;
   userId: string;
-  executor?: DBExecutor;
+  executor?: DbExecutor;
 }): Promise<boolean> => {
   const result = await executor.query(
     `
@@ -394,7 +392,7 @@ const findConversationIdsByUser = async ({
   executor = db,
 }: {
   userId: string;
-  executor?: DBExecutor;
+  executor?: DbExecutor;
 }) => {
   const result = await executor.query(
     `

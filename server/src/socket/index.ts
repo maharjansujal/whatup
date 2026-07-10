@@ -82,15 +82,6 @@ export function initSocket(server: http.Server) {
       socket.join(conversationId);
     }
 
-    // console.log(onlineUsers);
-    console.log(
-      "Connected users in socket",
-      [...onlineUsers.entries()].map(([userId, sockets]) => ({
-        userId,
-        sockets: [...sockets],
-      })),
-    );
-
     socket.on(SOCKET_EVENTS.TYPING_START, ({ conversationId }) => {
       console.log("Received typing:start", conversationId);
       socket.to(conversationId).emit(SOCKET_EVENTS.TYPING_START, {

@@ -1,8 +1,5 @@
-import { Pool, PoolClient } from "pg";
-import { db } from "../../shared/db";
+import { db, DbExecutor } from "../../shared/db";
 import { Receipt } from "./types";
-
-type DBExecutor = Pool | PoolClient;
 
 const createReceipt = async ({
   messageId,
@@ -11,7 +8,7 @@ const createReceipt = async ({
 }: {
   messageId: string;
   userId: string;
-  executor?: DBExecutor;
+  executor?: DbExecutor;
 }): Promise<Receipt> => {
   const result = await executor.query(
     `
@@ -28,7 +25,7 @@ const createReceipt = async ({
 const markDelivered = async (
   messageId: string,
   userId: string,
-  executor: DBExecutor = db,
+  executor: DbExecutor = db,
 ): Promise<Receipt> => {
   const result = await executor.query(
     `
@@ -47,7 +44,7 @@ const markAllDelivered = async ({
   executor = db,
 }: {
   userId: string;
-  executor?: DBExecutor;
+  executor?: DbExecutor;
 }) => {
   const result = await executor.query(
     `
@@ -71,7 +68,7 @@ RETURNING
 const markSeen = async (
   messageId: string,
   userId: string,
-  executor: DBExecutor = db,
+  executor: DbExecutor = db,
 ): Promise<Receipt> => {
   const result = await executor.query(
     `
@@ -87,7 +84,7 @@ const markSeen = async (
 
 const getReceipts = async (
   messageId: string,
-  executor: DBExecutor = db,
+  executor: DbExecutor = db,
 ): Promise<Receipt[]> => {
   const result = await executor.query(
     `
@@ -102,7 +99,7 @@ const getReceipts = async (
 
 const getSeenUsers = async (
   messageId: string,
-  executor: DBExecutor = db,
+  executor: DbExecutor = db,
 ): Promise<{ user_id: string; seen_at: Date }[]> => {
   const result = await executor.query(
     `
@@ -117,7 +114,7 @@ const getSeenUsers = async (
 
 const getDeliveredUsers = async (
   messageId: string,
-  executor: DBExecutor = db,
+  executor: DbExecutor = db,
 ): Promise<{ user_id: string; delivered_at: Date }[]> => {
   const result = await executor.query(
     `

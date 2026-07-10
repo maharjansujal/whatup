@@ -1,5 +1,4 @@
-import { Pool, PoolClient } from "pg";
-import { db } from "../../shared/db";
+import { db, DbExecutor } from "../../shared/db";
 import {
   Attachment,
   AttachmentInput,
@@ -7,7 +6,6 @@ import {
   type Message,
 } from "./types";
 
-type DbExecutor = Pool | PoolClient;
 const MESSAGE_WITH_ATTACHMENTS_SELECT = `
     SELECT
     m.*,

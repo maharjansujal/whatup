@@ -1,6 +1,8 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 CREATE TABLE
     users (
-        id BIGSERIAL PRIMARY KEY,
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
         username TEXT UNIQUE NOT NULL,
         display_name TEXT,
         email TEXT UNIQUE NOT NULL,
@@ -29,13 +31,13 @@ CREATE TYPE conversation_request_status AS ENUM ('pending', 'accepted', 'decline
 
 CREATE TABLE
     conversations (
-        id BIGSERIAL PRIMARY KEY,
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
         type conversation_type NOT NULL,
         name TEXT,
         description TEXT,
         image_url TEXT,
-        created_by_user_id BIGINT NOT NULL REFERENCES users (id),
-        last_message_id BIGINT,
+        created_by_user_id UUID NOT NULL REFERENCES users (id),
+        last_message_id UUID REFERENCES messages (id),
         last_message_at TIMESTAMPTZ,
         created_at TIMESTAMPTZ NOT NULL DEFAULT now (),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT now (),
@@ -48,10 +50,10 @@ CREATE INDEX idx_conversations_last_message_at ON conversations (last_message_at
 
 CREATE TABLE
     conversation_invites (
-        id BIGSERIAL PRIMARY KEY,
-        conversation_id BIGINT NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
+        conversation_id UUID NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
         code TEXT UNIQUE NOT NULL,
-        created_by_user_id BIGINT NOT NULL REFERENCES users (id),
+        created_by_user_id UUID NOT NULL REFERENCES users (id),
         expires_at TIMESTAMPTZ,
         max_uses INT,
         used_count INT NOT NULL DEFAULT 0,
@@ -67,12 +69,12 @@ CREATE INDEX idx_invites_expires_at ON conversation_invites (expires_at);
 
 CREATE TABLE
     conversation_members (
-        id BIGSERIAL PRIMARY KEY,
-        conversation_id BIGINT NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
-        user_id BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
+        conversation_id UUID NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
+        user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
         role conversation_role NOT NULL DEFAULT 'member',
         joined_at TIMESTAMPTZ NOT NULL DEFAULT now (),
-        last_read_message_id BIGINT,
+        last_read_message_id UUID REFERENCES messages (id),
         last_read_at TIMESTAMPTZ,
         muted_until TIMESTAMPTZ,
         is_archived BOOLEAN NOT NULL DEFAULT FALSE,
@@ -86,12 +88,12 @@ CREATE INDEX idx_members_conversation_id ON conversation_members (conversation_i
 
 CREATE TABLE
     messages (
-        id BIGSERIAL PRIMARY KEY,
-        conversation_id BIGINT NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
-        sender_id BIGINT REFERENCES users (id),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
+        conversation_id UUID NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
+        sender_id UUID REFERENCES users (id),
         type message_type NOT NULL,
         content TEXT,
-        reply_to_message_id BIGINT REFERENCES messages (id),
+        reply_to_message_id UUID REFERENCES messages (id),
         updated_at TIMESTAMPTZ,
         deleted_at TIMESTAMPTZ,
         created_at TIMESTAMPTZ NOT NULL DEFAULT now ()
@@ -105,8 +107,8 @@ CREATE INDEX idx_messages_reply_to ON messages (reply_to_message_id);
 
 CREATE TABLE
     message_receipts (
-        message_id BIGINT NOT NULL REFERENCES messages (id) ON DELETE CASCADE,
-        user_id BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+        message_id UUID NOT NULL REFERENCES messages (id) ON DELETE CASCADE,
+        user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
         delivered_at TIMESTAMPTZ,
         seen_at TIMESTAMPTZ,
         PRIMARY KEY (message_id, user_id)
@@ -118,8 +120,8 @@ CREATE INDEX idx_receipts_seen_at ON message_receipts (seen_at);
 
 CREATE TABLE
     message_attachments (
-        id BIGSERIAL PRIMARY KEY,
-        message_id BIGINT NOT NULL REFERENCES messages (id) ON DELETE CASCADE,
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
+        message_id UUID NOT NULL REFERENCES messages (id) ON DELETE CASCADE,
         cloudinary_public_id TEXT NOT NULL,
         file_url TEXT NOT NULL,
         filename TEXT,
@@ -138,9 +140,9 @@ CREATE INDEX idx_attachments_mime_type ON message_attachments (mime_type);
 
 CREATE TABLE
     conversation_requests (
-        id BIGSERIAL PRIMARY KEY,
-        requester_id BIGINT NOT NULL REFERENCES users (id),
-        recipient_id BIGINT NOT NULL REFERENCES users (id),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
+        requester_id UUID NOT NULL REFERENCES users (id),
+        recipient_id UUID NOT NULL REFERENCES users (id),
         status conversation_request_status NOT NULL DEFAULT 'pending',
         created_at TIMESTAMPTZ NOT NULL DEFAULT now (),
         responded_at TIMESTAMPTZ
@@ -152,8 +154,8 @@ CREATE INDEX idx_conversation_requests_recipient ON conversation_requests (recip
 
 CREATE TABLE
     user_blocks (
-        blocker_id BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-        blocked_id BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+        blocker_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+        blocked_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
         created_at TIMESTAMPTZ NOT NULL DEFAULT now (),
         PRIMARY KEY (blocker_id, blocked_id)
     );
@@ -161,7 +163,5 @@ CREATE TABLE
 CREATE INDEX idx_user_blocks_blocker ON user_blocks (blocker_id);
 
 CREATE INDEX idx_user_blocks_blocked ON user_blocks (blocked_id);
-
-ALTER TABLE conversations ADD CONSTRAINT fk_conversations_last_message FOREIGN KEY (last_message_id) REFERENCES messages (id);
 
 ALTER TABLE conversation_members ADD CONSTRAINT fk_conversation_members_last_read_message FOREIGN KEY (last_read_message_id) REFERENCES messages (id);

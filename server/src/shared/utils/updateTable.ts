@@ -1,6 +1,4 @@
-import { Pool } from "undici-types";
 import { db } from "../db";
-import { PoolClient } from "pg";
 
 type DBExecutor = {
   query: (text: string, params?: any[]) => Promise<any>;
