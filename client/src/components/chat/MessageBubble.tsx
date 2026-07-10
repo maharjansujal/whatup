@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Check, CheckCheck, FileText, Pencil, Trash2, X } from "lucide-react";
+import {
+  Check,
+  CheckCheck,
+  FileText,
+  Info,
+  Pencil,
+  Trash2,
+  X,
+} from "lucide-react";
 import { Avatar } from "../common/Avatar";
 import { useGetUsers } from "../../hooks/get/useGetUsers";
 import { useChat } from "../../context/ChatContext";
@@ -10,6 +18,9 @@ import { MessageAttachment } from "./MessageAttachment";
 import { useAlert } from "../shared/alert/useAlert";
 import { useConfirm } from "../shared/confirm/useConfirm";
 import { useSeenObserver } from "../../hooks/observers/useSeenObserver";
+import { useModal } from "../../context/ModalContext";
+import { MessageInfoModal } from "../modals/MessageInfoModal";
+import type { Receipt } from "../../types/receipt";
 
 interface MessageBubbleProps {
   message: Message;
@@ -53,6 +64,8 @@ export function MessageBubble({
 
   const patchMessage = useUpdateMessage();
   const deleteMessage = useDeleteMessage();
+
+  const { openModal, closeModal } = useModal();
 
   const { type, content, id, attachments } = message;
 
@@ -108,6 +121,10 @@ export function MessageBubble({
     });
   };
 
+  const handleInfo = (receipts: Receipt[]) => {
+    openModal(<MessageInfoModal receipts={receipts} onClose={closeModal} />);
+  };
+
   return (
     <div
       ref={seenRef}
@@ -148,6 +165,13 @@ export function MessageBubble({
                 className="rounded-md p-1 text-[#9A9CA8] hover:bg-[#F2F2EF] hover:text-red-500"
               >
                 <Trash2 size={13} />
+              </button>
+              <button
+                title="Message Info"
+                onClick={() => handleInfo(message.receipts)}
+                className="rounded-md p-1 text-[#9A9CA8] hover:bg-[#F2F2EF] hover:text-blue-500"
+              >
+                <Info size={13} />
               </button>
             </div>
           )}

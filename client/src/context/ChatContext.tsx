@@ -75,6 +75,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
       console.log("Message before update:", msg);
       console.log("receipts", msg?.receipts);
+
       return prev.map((message) => {
         if (message.id !== payload.messageId) {
           return message;
@@ -89,20 +90,21 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           ...message,
           receipts: hasReceipt
             ? currentReceipts.map((receipt) =>
-              String(receipt.user_id) === String(payload.userId)
-                ? {
-                  ...receipt,
-                  delivered_at: payload.deliveredAt,
-                }
-                : receipt,
-            )
+                String(receipt.user_id) === String(payload.userId)
+                  ? {
+                      ...receipt,
+                      delivered_at: payload.deliveredAt,
+                    }
+                  : receipt,
+              )
             : [
-              ...currentReceipts,
-              {
-                user_id: payload.userId,
-                delivered_at: payload.deliveredAt,
-              },
-            ],
+                ...currentReceipts,
+                {
+                  message_id: payload.messageId,
+                  user_id: payload.userId,
+                  delivered_at: payload.deliveredAt,
+                },
+              ],
         };
       });
     });
@@ -128,20 +130,21 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           ...message,
           receipts: hasReceipt
             ? currentReceipts.map((receipt) =>
-              String(receipt.user_id) === String(payload.userId)
-                ? {
-                  ...receipt,
-                  seen_at: payload.seenAt,
-                }
-                : receipt,
-            )
+                String(receipt.user_id) === String(payload.userId)
+                  ? {
+                      ...receipt,
+                      seen_at: payload.seenAt,
+                    }
+                  : receipt,
+              )
             : [
-              ...currentReceipts,
-              {
-                user_id: payload.userId,
-                seen_at: payload.seenAt,
-              },
-            ],
+                ...currentReceipts,
+                {
+                  message_id: payload.messageId,
+                  user_id: payload.userId,
+                  seen_at: payload.seenAt,
+                },
+              ],
         };
       }),
     );
@@ -193,7 +196,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           if (!old) return old;
           if (old.some((m) => m.id === message.id)) return old;
           return [...old, message];
-        }
+        },
       );
 
       if (message.sender_id !== authUser?.id) {
