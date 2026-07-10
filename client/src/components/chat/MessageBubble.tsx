@@ -21,6 +21,7 @@ import { useSeenObserver } from "../../hooks/observers/useSeenObserver";
 import { useModal } from "../../context/ModalContext";
 import { MessageInfoModal } from "../modals/MessageInfoModal";
 import type { Receipt } from "../../types/receipt";
+import { useAuth } from "../../context/AuthContext";
 
 interface MessageBubbleProps {
   message: Message;
@@ -51,8 +52,9 @@ export function MessageBubble({
   const sender = getUserById(message.sender_id);
   const alert = useAlert();
   const confirm = useConfirm();
+  const { authUser } = useAuth();
 
-  const receipt = message.receipts?.[0];
+  const receipt = message.receipts?.find((r) => r.user_id === authUser?.id);
   const seenRef = useSeenObserver({
     messageId: message.id,
     isOwn,

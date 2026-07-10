@@ -28,6 +28,7 @@ export function MessageInfoModal({
   onClose: () => void;
 }) {
   const { getUserById } = useGetUsers();
+  console.log("Receipts", receipts);
 
   const seen = receipts.filter((r) => r.seen_at);
   const deliveredOnly = receipts.filter((r) => r.delivered_at && !r.seen_at);
@@ -51,7 +52,7 @@ export function MessageInfoModal({
 
   return (
     <Modal title="Message info" onClose={onClose}>
-      <div className="w-[300px] space-y-4">
+      <div className="w-75 space-y-4">
         {groups.map((group) => (
           <div key={group.label}>
             <div className="mb-1.5 flex items-center gap-1.5 px-1">
