@@ -8,6 +8,7 @@ import {
 import type { Socket } from "socket.io-client";
 import socket from "../socket/socket";
 import { SOCKET_EVENTS } from "../socket/socket_events";
+import { useAuth } from "./AuthContext";
 
 interface SocketContextType {
   socket: Socket;
@@ -21,6 +22,17 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [onlineUsers, setOnlineUsers] = useState(new Set<string>());
 
+  const { authUser } = useAuth();
+
+  useEffect(() => {
+    if (!authUser) return;
+
+    socket.connect();
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [authUser]);
   useEffect(() => {
     const handleConnect = () => {
       console.log("Socket connected:", socket.id);

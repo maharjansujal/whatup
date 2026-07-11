@@ -4,9 +4,11 @@ import { useAuth } from "../../context/AuthContext";
 export function ProtectedRoute() {
   const { authUser, isLoading } = useAuth();
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-  if (authUser === null) {
+  if (!authUser) {
     return <Navigate to="/login" replace />;
   }
 

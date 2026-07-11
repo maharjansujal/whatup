@@ -24,7 +24,15 @@ export function usePostAuth() {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await api.post("/auth/logout"); // backend clears cookie
+      try {
+        await api.post("/auth/logout");
+      } finally {
+        socket.disconnect();
+
+        queryClient.clear();
+
+        navigate("/login");
+      }
     },
     onSuccess: () => {
       socket.disconnect();
