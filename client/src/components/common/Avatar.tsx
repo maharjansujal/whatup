@@ -1,8 +1,10 @@
+import type { Presence } from "../../lib/getPresence";
+
 interface AvatarProps {
   src?: string;
   name: string;
   size?: "sm" | "md" | "lg" | "xs";
-  isOnline?: boolean;
+  presence?: Presence;
   ring?: boolean;
 }
 
@@ -20,6 +22,13 @@ const dotSizeMap: Record<NonNullable<AvatarProps["size"]>, string> = {
   lg: "h-3.5 w-3.5",
 };
 
+const presenceMap: Record<Presence, string> = {
+  away: "bg-orange-200",
+  online: "bg-green-500",
+  offline: "bg-gray-500",
+  dnd: "bg-red-500",
+};
+
 function initialsFor(name: string): string {
   const parts = name.trim().split(/\s+/);
   const first = parts[0]?.[0] ?? "";
@@ -31,7 +40,7 @@ export function Avatar({
   src,
   name,
   size = "md",
-  isOnline,
+  presence,
   ring,
 }: AvatarProps) {
   const dims = sizeMap[size];
@@ -51,10 +60,10 @@ export function Avatar({
           {initialsFor(name)}
         </div>
       )}
-      {typeof isOnline === "boolean" && (
+      {presence && (
         <span
           className={`absolute bottom-0 right-0 ${dotSizeMap[size]} rounded-full border-2 border-[#12131C] ${
-            isOnline ? "bg-[#00C2A8]" : "bg-[#5B5F73]"
+            presenceMap[presence]
           }`}
         />
       )}

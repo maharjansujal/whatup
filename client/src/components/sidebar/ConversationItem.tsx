@@ -1,6 +1,7 @@
 import { useAuth } from "../../context/AuthContext";
-import { useSocket } from "../../context/SocketContext";
+import { usePresence } from "../../context/SocketContext";
 import { useGetUsers } from "../../hooks/get/useGetUsers";
+import type { Presence } from "../../lib/getPresence";
 import type { Conversation, LastMessage } from "../../types/conversation";
 import { Avatar } from "../common/Avatar";
 import { GroupAvatarStack } from "./GroupAvatarStack";
@@ -56,8 +57,12 @@ export function ConversationItem({
       ? (conversation.name ?? "Unnamed group")
       : (otherUser?.display_name ?? "Unknown");
 
-  const { onlineUsers } = useSocket();
-  const isOnline = onlineUsers.has(otherUserId ?? "");
+  // const { onlineUsers } = useSocket();
+  // const isOnline = onlineUsers.has(otherUserId ?? "");
+  let presence: Presence = "offline";
+  if (otherUser) {
+    presence = usePresence(otherUser);
+  }
 
   return (
     <button
@@ -69,7 +74,7 @@ export function ConversationItem({
       {conversation.type === "group" ? (
         <GroupAvatarStack memberIds={conversation.member_ids} />
       ) : (
-        <Avatar src={otherUser?.avatar_url} name={title} isOnline={isOnline} />
+        <Avatar src={otherUser?.avatar_url} name={title} presence={presence} />
       )}
 
       <div className="min-w-0 flex-1">

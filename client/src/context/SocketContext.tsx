@@ -9,11 +9,18 @@ import type { Socket } from "socket.io-client";
 import socket from "../socket/socket";
 import { SOCKET_EVENTS } from "../socket/socket_events";
 import { useAuth } from "./AuthContext";
+import type { User } from "../types/user";
+import { getPresence } from "../lib/getPresence";
 
 interface SocketContextType {
   socket: Socket;
   isConnected: boolean;
   onlineUsers: Set<string>;
+}
+
+export function usePresence(user: User) {
+  const { onlineUsers } = useSocket();
+  return getPresence({ user, onlineUsers });
 }
 
 const SocketContext = createContext<SocketContextType | null>(null);

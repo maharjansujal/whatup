@@ -4,6 +4,7 @@ import { useChat } from "../../context/ChatContext";
 import { useAuth } from "../../context/AuthContext";
 import { useModal } from "../../context/ModalContext";
 import { lazy } from "react";
+import { usePresence } from "../../context/SocketContext";
 
 const EditProfileModal = lazy(() =>
   import("../modals/EditProfileModal").then((module) => ({
@@ -15,6 +16,10 @@ export function SidebarHeader() {
   const { authUser: currentUser } = useAuth();
   const { conversationQuery, setConversationQuery } = useChat();
   const { openModal, closeModal } = useModal();
+  if (!currentUser) return null;
+  const presence = usePresence(currentUser);
+
+  if (!currentUser) return null;
 
   return (
     <div className="border-b border-[#1F2130] px-4 pb-3 pt-4">
@@ -24,14 +29,11 @@ export function SidebarHeader() {
             src={currentUser?.avatar_url}
             name={currentUser?.display_name ?? ""}
             size="sm"
-            isOnline
+            presence={presence}
           />
           <div className="min-w-0 leading-tight">
             <p className="truncate font-['Space_Grotesk'] text-[13.5px] font-semibold text-[#E7E8F0]">
               {currentUser?.display_name}
-            </p>
-            <p className="font-['IBM_Plex_Mono'] text-[10.5px] text-[#5FE0CB]">
-              online
             </p>
           </div>
         </div>

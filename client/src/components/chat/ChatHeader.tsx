@@ -5,8 +5,9 @@ import { useAuth } from "../../context/AuthContext";
 import { useGetUsers } from "../../hooks/get/useGetUsers";
 import { GroupAvatarStack } from "../sidebar/GroupAvatarStack";
 import { useModal } from "../../context/ModalContext";
-import { useSocket } from "../../context/SocketContext";
+import { usePresence, useSocket } from "../../context/SocketContext";
 import { lazy } from "react";
+import type { Presence } from "../../lib/getPresence";
 
 const MembersModal = lazy(() =>
   import("../modals/MembersModal").then((module) => ({
@@ -55,6 +56,11 @@ export function ChatHeader({
 
   const isOnline = otherUserId ? onlineUsers.has(otherUserId) : false;
 
+  let presence: Presence = "offline";
+  if (otherUser) {
+    presence = usePresence(otherUser);
+  }
+
   const title = conversation
     ? conversation.type === "group"
       ? (conversation.name ?? "Unnamed group")
@@ -82,7 +88,7 @@ export function ChatHeader({
           <Avatar
             src={otherUser?.avatar_url}
             name={title}
-            isOnline={isOnline}
+            presence={presence}
           />
         )}
         <div className="leading-tight">

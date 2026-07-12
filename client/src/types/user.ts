@@ -11,6 +11,8 @@ export interface User {
   created_at: string;
   updated_at?: string;
   deleted_at?: string;
+  custom_status?: "dnd" | "away";
+  status_till?: string;
 }
 
 export interface UpdateUserDto {
@@ -32,4 +34,9 @@ export interface LoginDto {
   username?: string;
   email?: string;
   password: string;
+}
+
+export interface UserStatus {
+  status: "away" | "dnd";
+  statusTill: Date | null;
 }
