@@ -37,6 +37,7 @@ interface ChatContextValue {
     content: string;
     files?: File[];
   }) => void;
+  isSendingMessage: boolean;
   createGroupConversation: (name: string, memberIds: string[]) => void;
   startDirectConversation: (userId: string) => void;
   getConversationPreview: (conversationId: string) => string;
@@ -398,6 +399,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       setActiveConversationId(id);
     },
     sendMessage,
+    isSendingMessage: postMessage.isPending,
     createGroupConversation,
     startDirectConversation,
     getConversationPreview,

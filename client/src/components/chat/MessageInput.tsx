@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { Paperclip, SendHorizontal, Smile } from "lucide-react";
+import { Loader2, Paperclip, SendHorizontal, Smile } from "lucide-react";
 import { useChat } from "../../context/ChatContext";
 import socket from "../../socket/socket";
 import { SOCKET_EVENTS } from "../../socket/socket_events";
@@ -8,7 +8,7 @@ import EmojiPicker, { type EmojiClickData } from "emoji-picker-react";
 export function MessageInput() {
   const [value, setValue] = useState("");
   const [files, setFiles] = useState<File[]>([]);
-  const { sendMessage, activeConversationId } = useChat();
+  const { sendMessage, activeConversationId, isSendingMessage } = useChat();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -158,7 +158,11 @@ export function MessageInput() {
           title="Send"
           className="shrink-0 rounded-full bg-[#00C2A8] p-2 text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-30"
         >
-          <SendHorizontal size={16} />
+          {!isSendingMessage ? (
+            <SendHorizontal size={16} />
+          ) : (
+            <Loader2 size={16} />
+          )}
         </button>
       </div>
     </div>

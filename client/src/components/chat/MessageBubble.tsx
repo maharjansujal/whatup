@@ -64,6 +64,10 @@ export function MessageBubble({
   const patchMessage = useUpdateMessage();
   const deleteMessage = useDeleteMessage();
 
+  const isDeleting =
+    deleteMessage.isPending &&
+    deleteMessage.variables?.messageId === message.id;
+
   const { openModal, closeModal } = useModal();
 
   const { type, content, id, attachments } = message;
@@ -79,6 +83,39 @@ export function MessageBubble({
   }
 
   const isDeleted = !!message.deleted_at;
+
+  if (isDeleting) {
+    return (
+      <div
+        className={`flex items-end gap-2 ${isOwn ? "flex-row-reverse" : ""}`}
+      >
+        <div className="w-8 shrink-0">
+          {!isOwn && showAvatar && (
+            <Avatar
+              src={sender?.avatar_url}
+              name={sender?.display_name ?? "?"}
+              size="sm"
+            />
+          )}
+        </div>
+
+        <div
+          className={`max-w-[65%] ${
+            isOwn ? "items-end" : "items-start"
+          } flex flex-col`}
+        >
+          <div className="animate-pulse rounded-2xl bg-[#F2F2EF] px-4 py-3">
+            <div className="h-3 w-40 rounded bg-gray-300" />
+            <div className="mt-2 h-3 w-28 rounded bg-gray-300" />
+          </div>
+
+          <span className="mt-1 px-1 text-[10px] text-[#B0B2BE]">
+            Deleting...
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   const handleSaveEdit = () => {
     const trimmed = draft.trim();
