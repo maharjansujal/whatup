@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 
 import { Form } from "../form/form";
 import { FormField } from "../form/formField";
+import { FormItem } from "../form/formItem";
+import { FormMessage } from "../form/formMessage";
 import { Input } from "../shared/input";
 import { Button } from "../shared/button";
 
@@ -11,7 +13,7 @@ export interface RegisterFormValues {
   display_name: string;
   email: string;
   password: string;
-  avatar?: FileList;
+  avatar?: FileList | null;
 }
 
 interface RegisterFormProps {
@@ -38,9 +40,14 @@ export function RegisterForm({ methods, onSubmit }: RegisterFormProps) {
         <Input type="password" placeholder="Enter password" />
       </FormField>
 
-      <FormField name="avatar" label="Avatar">
-        <input type="file" accept="image/*" {...methods.register("avatar")} />
-      </FormField>
+      <FormItem label="Avatar">
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => methods.setValue("avatar", e.target.files ?? undefined)}
+        />
+        <FormMessage message={methods.formState.errors.avatar?.message} />
+      </FormItem>
 
       <Button type="submit">Register</Button>
 

@@ -21,6 +21,7 @@ export function usePostAuth() {
 
       if (data.avatar) {
         formData.append("avatar", data.avatar);
+        console.log(data.avatar);
       }
 
       const res = await api.post("/auth/register", formData);

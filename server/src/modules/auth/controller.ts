@@ -2,7 +2,7 @@ import { authService } from "./service";
 import { asyncHandler } from "../../shared/utils/asyncHandler";
 
 const register = asyncHandler(async (req, res) => {
-  const user = await await authService.register({
+  const user = await authService.register({
     ...req.body,
     avatar: req.file,
   });
