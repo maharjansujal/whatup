@@ -7,6 +7,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import http from "http";
 import { initSocket } from "./src/socket";
+import { startCleanupJobs } from "./src/jobs/cleanup";
 
 const PORT = process.env.PORT || 5000;
 
@@ -30,6 +31,8 @@ const server = http.createServer(app);
 
 // Initialize socket.io on top of HTTP server
 initSocket(server);
+
+startCleanupJobs();
 
 server.listen(Number(PORT), () => {
   console.log(`Server started on port: ${PORT}`);

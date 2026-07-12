@@ -204,7 +204,11 @@ const deleteStatus = async (userId: string) => {
     `
     DELETE
     FROM user_statuses
-    WHERE user_id = $1;
+    WHERE status_till IS NOT NULL
+      AND status_till <= NOW()
+    RETURNING
+    user_id,
+    status;
     `,
     [userId],
   );
