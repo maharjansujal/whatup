@@ -5,9 +5,20 @@ import { useAuth } from "../../context/AuthContext";
 import { useGetUsers } from "../../hooks/get/useGetUsers";
 import { GroupAvatarStack } from "../sidebar/GroupAvatarStack";
 import { useModal } from "../../context/ModalContext";
-import { MembersModal } from "../modals/MembersModal";
-import { ConversationInfoModal } from "../modals/ConversationInfoModal";
 import { useSocket } from "../../context/SocketContext";
+import { lazy } from "react";
+
+const MembersModal = lazy(() =>
+  import("../modals/MembersModal").then((module) => ({
+    default: module.MembersModal,
+  })),
+);
+
+const ConversationInfoModal = lazy(() =>
+  import("../modals/ConversationInfoModal").then((module) => ({
+    default: module.ConversationInfoModal,
+  })),
+);
 
 interface ChatHeaderProps {
   conversation?: Conversation;

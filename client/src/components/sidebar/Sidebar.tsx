@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { lazy, useState } from "react";
 import {
   Archive,
   ArrowLeft,
@@ -9,9 +9,19 @@ import {
 } from "lucide-react";
 import { SidebarHeader } from "./SidebarHeader";
 import { ConversationList } from "./ConversationList";
-import { SearchPeopleModal } from "../modals/SearchPeopleModal";
-import { CreateGroupModal } from "../modals/CreateGroupModal";
 import { useAuth } from "../../context/AuthContext";
+
+const SearchPeopleModal = lazy(() =>
+  import("../modals/SearchPeopleModal").then((module) => ({
+    default: module.SearchPeopleModal,
+  })),
+);
+
+const CreateGroupModal = lazy(() =>
+  import("../modals/CreateGroupModal").then((module) => ({
+    default: module.CreateGroupModal,
+  })),
+);
 
 const FILTERS = ["all", "groups", "dms", "muted"] as const;
 type Filter = (typeof FILTERS)[number];

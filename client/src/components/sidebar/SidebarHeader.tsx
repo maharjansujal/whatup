@@ -3,7 +3,13 @@ import { Avatar } from "../common/Avatar";
 import { useChat } from "../../context/ChatContext";
 import { useAuth } from "../../context/AuthContext";
 import { useModal } from "../../context/ModalContext";
-import { EditProfileModal } from "../modals/EditProfileModal";
+import { lazy } from "react";
+
+const EditProfileModal = lazy(() =>
+  import("../modals/EditProfileModal").then((module) => ({
+    default: module.EditProfileModal,
+  })),
+);
 
 export function SidebarHeader() {
   const { authUser: currentUser } = useAuth();
