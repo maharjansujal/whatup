@@ -97,6 +97,16 @@ export function SocketProvider({ children }: { children: ReactNode }) {
             : user,
         );
       });
+
+      // Also patch the current user's own auth cache so SidebarHeader updates immediately
+      queryClient.setQueryData(["auth-user"], (old: User | null | undefined) => {
+        if (!old || old.id !== status.user_id) return old;
+        return {
+          ...old,
+          custom_status: status.status,
+          status_till: status.status_till,
+        };
+      });
     };
 
     const handleStatusClear = (payload: { userId: string }) => {
@@ -112,6 +122,12 @@ export function SocketProvider({ children }: { children: ReactNode }) {
               }
             : user,
         );
+      });
+
+      // Also clear the current user's own auth cache
+      queryClient.setQueryData(["auth-user"], (old: User | null | undefined) => {
+        if (!old || old.id !== payload.userId) return old;
+        return { ...old, custom_status: null, status_till: null };
       });
     };
 

@@ -27,7 +27,7 @@ export function EditProfileModal({ onClose }: { onClose: () => void }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordSaved, setPasswordSaved] = useState(false);
 
-  const { updateStatus, isUpdatingStatus } = useUpdateStatus();
+  const { updateStatus, isUpdatingStatus, clearStatus } = useUpdateStatus();
 
   const [status, setStatus] = useState<"away" | "dnd">("away");
   const [duration, setDuration] = useState("30");
@@ -79,6 +79,13 @@ export function EditProfileModal({ onClose }: { onClose: () => void }) {
     setTimeout(() => {
       setStatusSaved(false);
     }, 2000);
+  };
+
+  const handleClearStatus = async () => {
+    await clearStatus();
+
+    setStatus("away");
+    setDuration("30");
   };
 
   return (
@@ -168,6 +175,13 @@ export function EditProfileModal({ onClose }: { onClose: () => void }) {
             ) : (
               "Save status"
             )}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleClearStatus}
+            className="mt-2 w-full"
+          >
+            Clear status
           </Button>
         </div>
 

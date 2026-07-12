@@ -204,11 +204,7 @@ const deleteStatus = async (userId: string) => {
     `
     DELETE
     FROM user_statuses
-    WHERE status_till IS NOT NULL
-      AND status_till <= NOW()
-    RETURNING
-    user_id,
-    status;
+    WHERE user_id = $1;
     `,
     [userId],
   );
@@ -221,7 +217,7 @@ const deleteExpiredStatuses = async () => {
     FROM user_statuses
     WHERE status_till IS NOT NULL
       AND status_till <= NOW()
-    RETURNING user_id;
+    RETURNING user_id, status;
     `,
   );
 

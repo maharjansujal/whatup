@@ -162,6 +162,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [fetchedMessages]);
 
   useEffect(() => {
+    console.log(canShowNotification(authUser ?? undefined));
+  }, [authUser?.custom_status]);
+
+  useEffect(() => {
     const handleMessage = (message: Message) => {
       // setMessages((prev) => [...prev, message]);
 
@@ -208,7 +212,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         });
       }
 
-      if (message.sender_id !== authUser?.id && canShowNotification()) {
+      if (
+        message.sender_id !== authUser?.id &&
+        canShowNotification(authUser ?? undefined)
+      ) {
         showNotification({
           title: `${message.sender.display_name} sent you a message`,
           body:
@@ -247,7 +254,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       socket.off(SOCKET_EVENTS.MESSAGE_DELIVERED, handleMessageDelivered);
       socket.off(SOCKET_EVENTS.MESSAGE_SEEN, handleMessageSeen);
     };
-  }, [socket, activeConversationId, authUser?.id, queryClient]);
+  }, [socket, activeConversationId, authUser?.id, authUser?.custom_status, authUser?.status_till, queryClient]);
 
   const postMessage = usePostMessage();
 

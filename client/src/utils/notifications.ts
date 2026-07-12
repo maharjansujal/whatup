@@ -1,3 +1,5 @@
+import type { User } from "../types/user";
+
 export function requestNotificationPermission() {
   if (!("Notification" in window)) {
     return;
@@ -39,6 +41,10 @@ export function showNotification({
   };
 }
 
-export function canShowNotification() {
-  return document.hidden && Notification.permission === "granted";
+export function canShowNotification(user?: User) {
+  return (
+    document.hidden &&
+    Notification.permission === "granted" &&
+    !user?.custom_status
+  );
 }
