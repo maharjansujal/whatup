@@ -13,9 +13,16 @@ export interface CreateMessageInput {
   deleted_at?: string;
 }
 
+export interface MessageSender {
+  id: string;
+  username: string;
+  display_name: string;
+  avatar_url: string | null;
+}
 export interface Message extends CreateMessageInput {
   id: string;
   created_at: string;
+  sender: MessageSender;
   attachments: Attachment[];
   receipts: Receipt[];
 }

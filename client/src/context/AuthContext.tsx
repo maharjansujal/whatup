@@ -1,8 +1,9 @@
 // src/context/AuthContext.tsx
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect } from "react";
 import type { LoginDto, RegisterDto, User } from "../types/user";
 import { useGetAuth } from "../hooks/get/useGetAuth";
 import { usePostAuth } from "../hooks/post/usePostAuth";
+import { requestNotificationPermission } from "../utils/notifications";
 
 interface AuthContextType {
   authUser: User | null | undefined;
@@ -17,6 +18,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { data: authUser, isLoading } = useGetAuth();
   const { login, register, logout } = usePostAuth();
+
+  useEffect(() => {
+    if (!authUser) return;
+
+    requestNotificationPermission();
+  }, [authUser]);
 
   return (
     <AuthContext.Provider

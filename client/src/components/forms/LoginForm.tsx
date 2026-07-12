@@ -21,7 +21,7 @@ export function LoginForm() {
     },
   });
 
-  const { login } = usePostAuth();
+  const { login, isLoggingIn } = usePostAuth();
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -61,7 +61,9 @@ export function LoginForm() {
       <div className="flex justify-center w-full"></div>
 
       <div className="mt-4 flex flex-col items-center">
-        <Button type="submit">Login</Button>
+        <Button type="submit" disabled={isLoggingIn}>
+          Login
+        </Button>
 
         {methods.formState.errors.root && (
           <p className="mt-2 text-center text-sm text-red-500">

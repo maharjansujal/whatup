@@ -19,6 +19,7 @@ import { useSocket } from "./SocketContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePostMessage } from "../hooks/post/usePostMessage";
 import { useUpdateReceipt } from "../hooks/update/useUpdateReceipt";
+import { canShowNotification, showNotification } from "../utils/notifications";
 
 interface ChatContextValue {
   conversations: Conversation[];
@@ -203,6 +204,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         updateReceipt.mutate({
           messageId: message.id,
           status: "delivered",
+        });
+      }
+
+      if (message.sender_id !== authUser?.id && canShowNotification()) {
+        showNotification({
+          title: `${message.sender.display_name} sent you a message`,
+          body:
+            message.content ??
+            `${message.sender.display_name} sent you an attachment`,
         });
       }
 

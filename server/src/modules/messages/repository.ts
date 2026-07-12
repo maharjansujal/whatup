@@ -7,16 +7,30 @@ import {
 } from "./types";
 
 const MESSAGE_WITH_ATTACHMENTS_SELECT = `
-    SELECT
+  SELECT
     m.*,
+    sender.sender,
     COALESCE(att.attachments, '[]'::json) AS attachments,
     COALESCE(rec.receipts, '[]'::json) AS receipts
   FROM messages m
+
+  LEFT JOIN LATERAL (
+    SELECT json_build_object(
+      'id', u.id,
+      'username', u.username,
+      'display_name', u.display_name,
+      'avatar_url', u.avatar_url
+    ) AS sender
+    FROM users u
+    WHERE u.id = m.sender_id
+  ) sender ON TRUE
+
   LEFT JOIN LATERAL (
     SELECT json_agg(ma ORDER BY ma.created_at) AS attachments
     FROM message_attachments ma
     WHERE ma.message_id = m.id
   ) att ON TRUE
+
   LEFT JOIN LATERAL (
     SELECT json_agg(
       json_build_object(
@@ -29,7 +43,7 @@ const MESSAGE_WITH_ATTACHMENTS_SELECT = `
     FROM message_receipts mr
     WHERE mr.message_id = m.id
   ) rec ON TRUE
-  `;
+`;
 const create = async ({
   executor = db,
   data,
