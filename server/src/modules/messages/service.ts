@@ -3,16 +3,13 @@ import { createAppError } from "../../shared/errors/appError";
 import { messagesRepository } from "./repository";
 import { Message, Attachment, CreateMessageInput } from "./types";
 import { db } from "../../shared/db";
-import { memberRepository } from "../members/repository";
 import { receiptsRepository } from "../receipts/repository";
 
 const createMessage = async (data: CreateMessageInput): Promise<Message> => {
   const hasText = data.content.trim().length > 0;
   const files = data.files ?? [];
 
-  const hasFiles = files.length > 0;
-
-  if (!hasText && !hasFiles) {
+  if (!hasText && files.length === 0) {
     throw createAppError(
       "Message must contain text or at least one attachment",
       400,
@@ -44,8 +41,6 @@ const createMessage = async (data: CreateMessageInput): Promise<Message> => {
     }),
   );
 
-  console.log("UPLOADED FILES", uploadedFiles);
-
   const client = await db.connect();
 
   try {
@@ -71,27 +66,20 @@ const createMessage = async (data: CreateMessageInput): Promise<Message> => {
       createdAt: message.created_at,
     });
 
-    const memberIds = await memberRepository.getMemberIds(data.conversation_id);
+    await receiptsRepository.createReceiptsForConversation({
+      messageId: message.id,
+      conversationId: data.conversation_id,
+      senderId: data.sender_id,
+      executor: client,
+    });
 
-    const recipientIds = memberIds.filter((id) => id !== data.sender_id);
-
-    await Promise.all(
-      recipientIds.map((userId) =>
-        receiptsRepository.createReceipt({
-          messageId: message.id,
-          userId,
-          executor: client,
-        }),
-      ),
-    );
-
-    await client.query("COMMIT");
-
-    const createdMessage = await messagesRepository.findById(message.id);
+    const createdMessage = await messagesRepository.findById(message.id, client);
 
     if (!createdMessage) {
       throw createAppError("Failed to retrieve created message", 500);
     }
+
+    await client.query("COMMIT");
 
     return createdMessage;
   } catch (error) {

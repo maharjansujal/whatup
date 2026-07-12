@@ -7,6 +7,7 @@ import type { LoginDto } from "../../types/user";
 import { usePostAuth } from "../../hooks/post/usePostAuth";
 import { Link } from "react-router-dom";
 import { AxiosError } from "axios";
+import { Loader2 } from "lucide-react";
 
 type LoginFormData = {
   identifier: string;
@@ -61,8 +62,15 @@ export function LoginForm() {
       <div className="flex justify-center w-full"></div>
 
       <div className="mt-4 flex flex-col items-center">
-        <Button type="submit" disabled={isLoggingIn}>
-          Login
+        <Button type="submit" disabled={isLoggingIn} aria-busy={isLoggingIn}>
+          {isLoggingIn ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Logging in...
+            </>
+          ) : (
+            "Login"
+          )}
         </Button>
 
         {methods.formState.errors.root && (

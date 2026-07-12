@@ -146,8 +146,11 @@ const updateConversationLastMessage = async ({
   );
 };
 
-const findById = async (messageId: string): Promise<Message | null> => {
-  const result = await db.query(
+const findById = async (
+  messageId: string,
+  executor: DbExecutor = db,
+): Promise<Message | null> => {
+  const result = await executor.query(
     `
     ${MESSAGE_WITH_ATTACHMENTS_SELECT}
     WHERE m.id = $1

@@ -82,6 +82,31 @@ const markSeen = async (
   return result.rows[0];
 };
 
+const createReceiptsForConversation = async ({
+  messageId,
+  conversationId,
+  senderId,
+  executor = db,
+}: {
+  messageId: string;
+  conversationId: string;
+  senderId: string;
+  executor?: DbExecutor;
+}) => {
+  await executor.query(
+    `
+    INSERT INTO message_receipts (message_id, user_id)
+    SELECT
+      $1,
+      cm.user_id
+    FROM conversation_members cm
+    WHERE cm.conversation_id = $2
+      AND cm.user_id <> $3
+    ON CONFLICT (message_id, user_id) DO NOTHING
+    `,
+    [messageId, conversationId, senderId],
+  );
+};
 const getReceipts = async (
   messageId: string,
   executor: DbExecutor = db,
@@ -135,4 +160,5 @@ export const receiptsRepository = {
   getReceipts,
   getSeenUsers,
   getDeliveredUsers,
+  createReceiptsForConversation,
 };

@@ -7,6 +7,7 @@ import { FormItem } from "../form/formItem";
 import { FormMessage } from "../form/formMessage";
 import { Input } from "../shared/input";
 import { Button } from "../shared/button";
+import { Loader2 } from "lucide-react";
 
 export interface RegisterFormValues {
   username: string;
@@ -19,9 +20,14 @@ export interface RegisterFormValues {
 interface RegisterFormProps {
   methods: UseFormReturn<RegisterFormValues>;
   onSubmit: SubmitHandler<RegisterFormValues>;
+  isRegistering: boolean;
 }
 
-export function RegisterForm({ methods, onSubmit }: RegisterFormProps) {
+export function RegisterForm({
+  methods,
+  onSubmit,
+  isRegistering,
+}: RegisterFormProps) {
   return (
     <Form methods={methods} onSubmit={onSubmit}>
       <FormField name="username" label="Username" required>
@@ -44,12 +50,23 @@ export function RegisterForm({ methods, onSubmit }: RegisterFormProps) {
         <input
           type="file"
           accept="image/*"
-          onChange={(e) => methods.setValue("avatar", e.target.files ?? undefined)}
+          onChange={(e) =>
+            methods.setValue("avatar", e.target.files ?? undefined)
+          }
         />
         <FormMessage message={methods.formState.errors.avatar?.message} />
       </FormItem>
 
-      <Button type="submit">Register</Button>
+      <Button type="submit" disabled={isRegistering}>
+        {isRegistering ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Registering...
+          </>
+        ) : (
+          "Register"
+        )}
+      </Button>
 
       <p className="mt-4 text-center text-sm text-gray-600">
         Already have an account?{" "}

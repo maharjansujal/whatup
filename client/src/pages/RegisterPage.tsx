@@ -7,7 +7,7 @@ import {
 } from "../components/forms/RegisterForm";
 
 export function RegisterPage() {
-  const { register } = usePostAuth();
+  const { register, isRegistering } = usePostAuth();
   const methods = useForm<RegisterFormValues>({
     defaultValues: {
       username: "",
@@ -40,7 +40,11 @@ export function RegisterPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <div className="w-full max-w-md rounded-lg bg-white p-6 shadow">
         <h1 className="mb-4 text-xl font-semibold">Register</h1>
-        <RegisterForm methods={methods} onSubmit={onSubmit} />
+        <RegisterForm
+          methods={methods}
+          onSubmit={onSubmit}
+          isRegistering={isRegistering}
+        />
       </div>
     </div>
   );

@@ -5,7 +5,6 @@ import { SOCKET_EVENTS } from "./socket_events";
 import { AuthUser } from "../types/express";
 import { conversationRepository } from "../modules/conversations/repository";
 import "multer";
-import { messageService } from "../modules/messages/service";
 import { receiptsService } from "../modules/receipts/service";
 
 // Utility: verifyToken (reusable for sockets)
@@ -55,10 +54,8 @@ export function initSocket(server: http.Server) {
     const receipts = await receiptsService.markAllDelivered(userId);
 
     for (const receipt of receipts) {
-      const message = await messageService.getMessageById(receipt.message_id);
-
       getIO()
-        .to(`user:${message.sender_id}`)
+        .to(`user:${receipt.sender_id}`)
         .emit(SOCKET_EVENTS.MESSAGE_DELIVERED, {
           messageId: receipt.message_id,
           userId,
