@@ -5,11 +5,11 @@ import "multer";
 export function uploadStream({
   fileBuffer,
   folder,
-  resourceType = "auto",
+  resourceType,
 }: {
   fileBuffer: Buffer;
   folder: string;
-  resourceType?: "auto" | "image" | "video" | "raw";
+  resourceType?: "image" | "video" | "raw";
 }): Promise<UploadApiResponse> {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(

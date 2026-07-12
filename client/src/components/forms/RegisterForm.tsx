@@ -11,8 +11,7 @@ export interface RegisterFormValues {
   display_name: string;
   email: string;
   password: string;
-  avatar_url?: string;
-  bio?: string;
+  avatar?: FileList;
 }
 
 interface RegisterFormProps {
@@ -39,12 +38,8 @@ export function RegisterForm({ methods, onSubmit }: RegisterFormProps) {
         <Input type="password" placeholder="Enter password" />
       </FormField>
 
-      <FormField name="avatar_url" label="Avatar URL">
-        <Input placeholder="https://example.com/avatar.png" />
-      </FormField>
-
-      <FormField name="bio" label="Bio">
-        <Input placeholder="Tell us about yourself..." />
+      <FormField name="avatar" label="Avatar">
+        <input type="file" accept="image/*" {...methods.register("avatar")} />
       </FormField>
 
       <Button type="submit">Register</Button>

@@ -1,25 +1,32 @@
 import { useForm } from "react-hook-form";
 import { usePostAuth } from "../hooks/post/usePostAuth";
-import type { RegisterDto } from "../types/user";
 import { AxiosError } from "axios";
-import { RegisterForm } from "../components/forms/RegisterForm";
+import {
+  RegisterForm,
+  type RegisterFormValues,
+} from "../components/forms/RegisterForm";
 
 export function RegisterPage() {
   const { register } = usePostAuth();
-  const methods = useForm<RegisterDto>({
+  const methods = useForm<RegisterFormValues>({
     defaultValues: {
       username: "",
       display_name: "",
       email: "",
       password: "",
-      avatar_url: "",
-      bio: "",
     },
   });
 
-  const onSubmit = async (data: RegisterDto) => {
+  const onSubmit = async (data: RegisterFormValues) => {
+    console.log("Data to be submitted", data);
     try {
-      await register(data);
+      await register({
+        username: data.username,
+        display_name: data.display_name,
+        email: data.email,
+        password: data.password,
+        avatar: data.avatar?.[0],
+      });
     } catch (error) {
       if (error instanceof AxiosError) {
         methods.setError("root", {

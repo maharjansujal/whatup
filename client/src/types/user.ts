@@ -5,6 +5,7 @@ export interface User {
   email: string;
   password_hash: string;
   avatar_url?: string;
+  avatar_public_id?: string;
   bio?: string;
   last_seen_at?: string;
   created_at: string;
@@ -24,8 +25,7 @@ export interface RegisterDto {
   display_name: string;
   email: string;
   password: string;
-  avatar_url?: string;
-  bio?: string;
+  avatar?: File;
 }
 
 export interface LoginDto {

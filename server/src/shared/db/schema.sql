@@ -8,6 +8,7 @@ CREATE TABLE
         email TEXT UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
         avatar_url TEXT,
+        avatar_public_id TEXT,
         bio TEXT,
         last_seen_at TIMESTAMPTZ,
         created_at TIMESTAMPTZ NOT NULL DEFAULT now (),

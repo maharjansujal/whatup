@@ -29,7 +29,10 @@ const createMessage = async (data: CreateMessageInput): Promise<Message> => {
       return {
         file_url: result.secure_url,
         cloudinary_public_id: result.public_id,
-        cloudinary_resource_type: result.resource_type,
+        cloudinary_resource_type: result.resource_type as
+          | "image"
+          | "video"
+          | "raw",
         filename: file.originalname,
         mime_type: file.mimetype,
         size: file.size,
@@ -95,7 +98,9 @@ const createMessage = async (data: CreateMessageInput): Promise<Message> => {
     await client.query("ROLLBACK");
 
     await Promise.allSettled(
-      uploadedFiles.map((file) => deleteAsset(file.cloudinary_public_id)),
+      uploadedFiles.map((file) =>
+        deleteAsset(file.cloudinary_public_id, file.cloudinary_resource_type),
+      ),
     );
 
     throw error;

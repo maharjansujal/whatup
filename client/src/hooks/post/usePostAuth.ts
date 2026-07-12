@@ -12,9 +12,22 @@ export function usePostAuth() {
 
   const registerMutation = useMutation<User, Error, RegisterDto>({
     mutationFn: async (data) => {
-      const res = await api.post("/auth/register", data);
+      const formData = new FormData();
+
+      formData.append("username", data.username);
+      formData.append("display_name", data.display_name);
+      formData.append("email", data.email);
+      formData.append("password", data.password);
+
+      if (data.avatar) {
+        formData.append("avatar", data.avatar);
+      }
+
+      const res = await api.post("/auth/register", formData);
+
       return res.data;
     },
+
     onSuccess: () => {
       alert.success("User registered successfully!");
       queryClient.invalidateQueries({ queryKey: ["users"] });

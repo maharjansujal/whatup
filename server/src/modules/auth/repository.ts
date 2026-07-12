@@ -5,10 +5,31 @@ import {
 import { db } from "../../shared/db";
 import { RegisterDto } from "./validator";
 
-const create = async (data: RegisterDto) => {
+const create = async (
+  data: RegisterDto & {
+    avatar_url: string | null;
+    avatar_public_id: string | null;
+  },
+) => {
   const result = await db.query(
-    `INSERT INTO users(username, display_name, email, password_hash) VALUES($1,$2,$3,$4) RETURNING ${USER_AUTH_COLUMNS}`,
-    [data.username, data.display_name, data.email, data.password],
+    `INSERT INTO users(
+      username,
+      display_name,
+      email,
+      password_hash,
+      avatar_url,
+      avatar_public_id
+    )
+    VALUES($1,$2,$3,$4,$5,$6)
+    RETURNING ${USER_AUTH_COLUMNS}`,
+    [
+      data.username,
+      data.display_name,
+      data.email,
+      data.password,
+      data.avatar_url,
+      data.avatar_public_id,
+    ],
   );
 
   return result.rows[0];

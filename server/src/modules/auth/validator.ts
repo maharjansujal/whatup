@@ -23,4 +23,6 @@ export const LoginSchema = z
 
 export type LoginDto = z.infer<typeof LoginSchema>;
 
-export type RegisterDto = z.infer<typeof RegisterSchema>;
+export type RegisterDto = z.infer<typeof RegisterSchema> & {
+  avatar?: Express.Multer.File;
+};

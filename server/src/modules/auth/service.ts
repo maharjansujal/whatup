@@ -5,6 +5,7 @@ import { authRepository } from "./repository";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { userRepository } from "../users/repository";
+import { deleteAsset, uploadStream } from "../../shared/cloudinary/upload";
 
 async function register(data: RegisterDto) {
   const emailExists = await userRepository.findByEmail(data.email);
@@ -18,14 +19,33 @@ async function register(data: RegisterDto) {
     throw createAppError("Username already exists", 400);
   }
 
-  const hashedPassword = await hashPassword(data.password);
+  let uploadedAvatar: Awaited<ReturnType<typeof uploadStream>> | null = null;
 
-  const user = await authRepository.create({
-    ...data,
-    password: hashedPassword,
-  });
+  try {
+    if (data.avatar) {
+      uploadedAvatar = await uploadStream({
+        fileBuffer: data.avatar.buffer,
+        folder: "whatup/avatars",
+      });
+    }
 
-  return user;
+    const hashedPassword = await hashPassword(data.password);
+
+    const user = await authRepository.create({
+      ...data,
+      password: hashedPassword,
+      avatar_url: uploadedAvatar?.secure_url ?? null,
+      avatar_public_id: uploadedAvatar?.public_id ?? null,
+    });
+
+    return user;
+  } catch (error) {
+    if (uploadedAvatar) {
+      await deleteAsset(uploadedAvatar.public_id, "image");
+    }
+
+    throw error;
+  }
 }
 
 async function login(data: LoginDto) {
