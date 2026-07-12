@@ -1,13 +1,5 @@
 import { useState } from "react";
-import {
-  Check,
-  CheckCheck,
-  FileText,
-  Info,
-  Pencil,
-  Trash2,
-  X,
-} from "lucide-react";
+import { Check, FileText, Info, Pencil, Trash2, X } from "lucide-react";
 import { Avatar } from "../common/Avatar";
 import { useGetUsers } from "../../hooks/get/useGetUsers";
 import { useChat } from "../../context/ChatContext";
@@ -51,7 +43,7 @@ export function MessageBubble({
   latestSeenUsers,
 }: MessageBubbleProps) {
   const { getUserById } = useGetUsers();
-  const { activeConversationId, activeConversation } = useChat();
+  const { activeConversationId } = useChat();
   const sender = getUserById(message.sender_id);
   const alert = useAlert();
   const confirm = useConfirm();
@@ -73,8 +65,6 @@ export function MessageBubble({
   const deleteMessage = useDeleteMessage();
 
   const { openModal, closeModal } = useModal();
-
-  const isGroup = activeConversation?.type === "group";
 
   const { type, content, id, attachments } = message;
 

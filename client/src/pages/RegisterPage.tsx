@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { usePostAuth } from "../hooks/post/usePostAuth";
 import type { RegisterDto } from "../types/user";
 import { AxiosError } from "axios";
-import { UserForm } from "../components/forms/UserForm";
+import { RegisterForm } from "../components/forms/RegisterForm";
 
 export function RegisterPage() {
   const { register } = usePostAuth();
@@ -33,11 +33,7 @@ export function RegisterPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <div className="w-full max-w-md rounded-lg bg-white p-6 shadow">
         <h1 className="mb-4 text-xl font-semibold">Register</h1>
-        <UserForm<RegisterDto>
-          mode="create"
-          methods={methods}
-          onSubmit={onSubmit}
-        />
+        <RegisterForm methods={methods} onSubmit={onSubmit} />
       </div>
     </div>
   );

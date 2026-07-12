@@ -1,29 +1,42 @@
-import { Search } from "lucide-react";
+import { Search, Settings } from "lucide-react";
 import { Avatar } from "../common/Avatar";
 import { useChat } from "../../context/ChatContext";
 import { useAuth } from "../../context/AuthContext";
+import { useModal } from "../../context/ModalContext";
+import { EditProfileModal } from "../modals/EditProfileModal";
 
 export function SidebarHeader() {
   const { authUser: currentUser } = useAuth();
   const { conversationQuery, setConversationQuery } = useChat();
+  const { openModal, closeModal } = useModal();
 
   return (
     <div className="border-b border-[#1F2130] px-4 pb-3 pt-4">
-      <div className="flex items-center gap-2.5">
-        <Avatar
-          src={currentUser?.avatar_url}
-          name={currentUser?.display_name ?? ""}
-          size="sm"
-          isOnline
-        />
-        <div className="leading-tight">
-          <p className="font-['Space_Grotesk'] text-[13.5px] font-semibold text-[#E7E8F0]">
-            {currentUser?.display_name}
-          </p>
-          <p className="font-['IBM_Plex_Mono'] text-[10.5px] text-[#5FE0CB]">
-            online
-          </p>
+      <div className="flex items-center justify-between gap-2.5">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <Avatar
+            src={currentUser?.avatar_url}
+            name={currentUser?.display_name ?? ""}
+            size="sm"
+            isOnline
+          />
+          <div className="min-w-0 leading-tight">
+            <p className="truncate font-['Space_Grotesk'] text-[13.5px] font-semibold text-[#E7E8F0]">
+              {currentUser?.display_name}
+            </p>
+            <p className="font-['IBM_Plex_Mono'] text-[10.5px] text-[#5FE0CB]">
+              online
+            </p>
+          </div>
         </div>
+
+        <button
+          title="Edit profile"
+          onClick={() => openModal(<EditProfileModal onClose={closeModal} />)}
+          className="shrink-0 rounded-lg p-1.5 text-[#8A8DA3] transition-colors hover:bg-[#1D1F2E] hover:text-[#00C2A8]"
+        >
+          <Settings size={16} />
+        </button>
       </div>
 
       <div className="relative mt-3.5">
