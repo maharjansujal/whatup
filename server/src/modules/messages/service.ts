@@ -29,6 +29,7 @@ const createMessage = async (data: CreateMessageInput): Promise<Message> => {
       return {
         file_url: result.secure_url,
         cloudinary_public_id: result.public_id,
+        cloudinary_resource_type: result.resource_type,
         filename: file.originalname,
         mime_type: file.mimetype,
         size: file.size,
@@ -129,6 +130,7 @@ const updateMessageContent = async ({
 
 // Soft delete a message
 const deleteMessage = async (messageId: string): Promise<Message> => {
+  await deleteAttachments(messageId);
   const deleted = await messagesRepository.softDelete(messageId);
   if (!deleted) {
     throw createAppError("Message not found or already deleted", 404);
@@ -171,7 +173,40 @@ const getAttachments = async (messageId: string): Promise<Attachment[]> => {
 };
 
 const deleteAttachments = async (messageId: string): Promise<Attachment[]> => {
-  return messagesRepository.deleteAttachments(messageId);
+  const client = await db.connect();
+
+  try {
+    const attachments = await messagesRepository.getAttachments(messageId);
+
+    if (!attachments.length) {
+      return [];
+    }
+
+    await Promise.all(
+      attachments.map((attachment) =>
+        deleteAsset(
+          attachment.cloudinary_public_id,
+          attachment.cloudinary_resource_type,
+        ),
+      ),
+    );
+
+    await client.query("BEGIN");
+
+    const deleted = await messagesRepository.deleteAttachments({
+      executor: client,
+      messageId,
+    });
+
+    await client.query("COMMIT");
+
+    return deleted;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 };
 
 export const messageService = {

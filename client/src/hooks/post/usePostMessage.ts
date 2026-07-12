@@ -1,6 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { api } from "../../api/api";
 import type { Message, MessageType } from "../../types/message";
+import { useAlert } from "../../components/shared/alert/useAlert";
+import type { AxiosError } from "axios";
 
 interface Payload {
   conversationId: string;
@@ -10,7 +12,8 @@ interface Payload {
 }
 
 export function usePostMessage() {
-  return useMutation<Message, Error, Payload>({
+  const alert = useAlert();
+  return useMutation<Message, AxiosError<{ message: string }>, Payload>({
     mutationFn: async ({ conversationId, type = "text", content, files }) => {
       const formData = new FormData();
       formData.append("content", content);
@@ -21,6 +24,9 @@ export function usePostMessage() {
         formData,
       );
       return res.data;
+    },
+    onError: (error: AxiosError<{ message: string }>) => {
+      alert.error(error.response?.data.message ?? "Failed to send message");
     },
   });
 }

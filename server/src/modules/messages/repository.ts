@@ -75,6 +75,7 @@ const createAttachments = async ({
       attachment.message_id,
       attachment.file_url,
       attachment.cloudinary_public_id,
+      attachment.cloudinary_resource_type,
       attachment.filename,
       attachment.mime_type,
       attachment.size,
@@ -84,10 +85,10 @@ const createAttachments = async ({
       attachment.thumbnail_url ?? null,
     );
 
-    const offset = index * 10;
+    const offset = index * 11;
 
     return `(
-  ${Array.from({ length: 10 }, (_, i) => `$${offset + i + 1}`).join(", ")}
+  ${Array.from({ length: 11 }, (_, i) => `$${offset + i + 1}`).join(", ")}
     )`;
   });
 
@@ -96,6 +97,7 @@ const createAttachments = async ({
       message_id,
       file_url,
       cloudinary_public_id,
+      cloudinary_resource_type,
       filename,
       mime_type,
       size,
@@ -256,11 +258,20 @@ const getAttachments = async (messageId: string): Promise<Attachment[]> => {
   return result.rows;
 };
 
-const deleteAttachments = async (messageId: string): Promise<Attachment[]> => {
-  const result = await db.query(
-    `DELETE FROM message_attachments WHERE message_id = $1 RETURNING *`,
+const deleteAttachments = async ({
+  executor = db,
+  messageId,
+}: {
+  executor?: DbExecutor;
+  messageId: string;
+}): Promise<Attachment[]> => {
+  const result = await executor.query(
+    `DELETE FROM message_attachments
+     WHERE message_id = $1
+     RETURNING *`,
     [messageId],
   );
+
   return result.rows;
 };
 

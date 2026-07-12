@@ -25,6 +25,7 @@ export interface AttachmentInput {
   message_id: string;
   file_url: string;
   cloudinary_public_id: string;
+  cloudinary_resource_type: "image" | "video" | "raw";
   filename: string;
   mime_type: string;
   size: number;

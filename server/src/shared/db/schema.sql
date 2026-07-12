@@ -29,24 +29,58 @@ CREATE TYPE message_type AS ENUM ('text', 'image', 'file', 'system');
 
 CREATE TYPE conversation_request_status AS ENUM ('pending', 'accepted', 'declined', 'cancelled');
 
-CREATE TABLE
-    conversations (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
-        type conversation_type NOT NULL,
-        name TEXT,
-        description TEXT,
-        image_url TEXT,
-        created_by_user_id UUID NOT NULL REFERENCES users (id),
-        last_message_id UUID REFERENCES messages (id),
-        last_message_at TIMESTAMPTZ,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT now (),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT now (),
-        deleted_at TIMESTAMPTZ
-    );
+CREATE TABLE conversations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    type conversation_type NOT NULL,
+    name TEXT,
+    description TEXT,
+    image_url TEXT,
+    created_by_user_id UUID NOT NULL REFERENCES users(id),
 
-CREATE INDEX idx_conversations_created_by ON conversations (created_by_user_id);
+    -- Add FK later to avoid circular dependency
+    last_message_id UUID,
+    last_message_at TIMESTAMPTZ,
 
-CREATE INDEX idx_conversations_last_message_at ON conversations (last_message_at);
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    deleted_at TIMESTAMPTZ
+);
+
+CREATE INDEX idx_conversations_created_by
+ON conversations(created_by_user_id);
+
+CREATE INDEX idx_conversations_last_message_at
+ON conversations(last_message_at);
+
+
+-- Messages table
+CREATE TABLE messages (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    conversation_id UUID NOT NULL
+        REFERENCES conversations(id) ON DELETE CASCADE,
+    sender_id UUID REFERENCES users(id),
+    type message_type NOT NULL,
+    content TEXT,
+    reply_to_message_id UUID REFERENCES messages(id),
+    updated_at TIMESTAMPTZ,
+    deleted_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_messages_conversation_created
+ON messages(conversation_id, created_at DESC);
+
+CREATE INDEX idx_messages_sender_id
+ON messages(sender_id);
+
+CREATE INDEX idx_messages_reply_to
+ON messages(reply_to_message_id);
+
+
+ALTER TABLE conversations
+ADD CONSTRAINT fk_conversations_last_message
+FOREIGN KEY (last_message_id)
+REFERENCES messages(id);
 
 CREATE TABLE
     conversation_invites (
@@ -87,25 +121,6 @@ CREATE INDEX idx_members_user_id ON conversation_members (user_id);
 CREATE INDEX idx_members_conversation_id ON conversation_members (conversation_id);
 
 CREATE TABLE
-    messages (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
-        conversation_id UUID NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
-        sender_id UUID REFERENCES users (id),
-        type message_type NOT NULL,
-        content TEXT,
-        reply_to_message_id UUID REFERENCES messages (id),
-        updated_at TIMESTAMPTZ,
-        deleted_at TIMESTAMPTZ,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT now ()
-    );
-
-CREATE INDEX idx_messages_conversation_created ON messages (conversation_id, created_at DESC);
-
-CREATE INDEX idx_messages_sender_id ON messages (sender_id);
-
-CREATE INDEX idx_messages_reply_to ON messages (reply_to_message_id);
-
-CREATE TABLE
     message_receipts (
         message_id UUID NOT NULL REFERENCES messages (id) ON DELETE CASCADE,
         user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
@@ -123,6 +138,7 @@ CREATE TABLE
         id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
         message_id UUID NOT NULL REFERENCES messages (id) ON DELETE CASCADE,
         cloudinary_public_id TEXT NOT NULL,
+        cloudinary_resource_type TEXT NOT NULL,
         file_url TEXT NOT NULL,
         filename TEXT,
         mime_type TEXT,

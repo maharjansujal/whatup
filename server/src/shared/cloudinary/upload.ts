@@ -1,5 +1,6 @@
 import { UploadApiResponse } from "cloudinary";
 import { cloudinary } from "./index";
+import "multer";
 
 export function uploadStream({
   fileBuffer,
@@ -31,7 +32,7 @@ export function uploadStream({
 
 export async function deleteAsset(
   publicId: string,
-  resourceType: "image" | "video" | "raw" | "auto" = "auto",
+  resourceType: "image" | "video" | "raw",
 ) {
   return cloudinary.uploader.destroy(publicId, {
     resource_type: resourceType,
