@@ -1,3 +1,4 @@
+import { createAppError } from "../../shared/errors/appError";
 import { asyncHandler } from "../../shared/utils/asyncHandler";
 import { userService } from "./service";
 
@@ -30,6 +31,29 @@ const updateMe = asyncHandler(async (req, res) => {
   });
 });
 
+const updateAvatar = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    throw createAppError("Avatar image is required", 400);
+  }
+
+  const user = await userService.updateAvatar({
+    userId: req.user.id,
+    file: req.file,
+  });
+
+  res.status(200).json(user);
+});
+
+const updatePassword = asyncHandler(async (req, res) => {
+  const user = await userService.updatePassword({
+    userId: req.user.id,
+    currentPassword: req.body.currentPassword,
+    newPassword: req.body.newPassword,
+  });
+
+  res.status(200).json(user);
+});
+
 const searchUser = asyncHandler(async (req, res) => {
   const { username, email } = req.query;
   const result = await userService.searchUser({
@@ -45,4 +69,6 @@ export const userController = {
   getMe,
   updateMe,
   searchUser,
+  updateAvatar,
+  updatePassword,
 };

@@ -5,23 +5,37 @@ import type { User } from "../../types/user";
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
-  const updateAvatar = useMutation<User, Error, { avatar_url: string }>({
-    mutationFn: async (data) => {
-      const res = await api.patch("/users/me", data);
+  const updateAvatar = useMutation<User, Error, { avatar: File }>({
+    mutationFn: async ({ avatar }) => {
+      const formData = new FormData();
+
+      formData.append("avatar", avatar);
+
+      const res = await api.patch("/users/me/avatar", formData);
+
       return res.data.data ?? res.data;
     },
+
     onSuccess: (user) => {
       queryClient.setQueryData(["auth-user"], user);
     },
   });
 
   const updatePassword = useMutation<
-    void,
+    User,
     Error,
-    { current_password: string; new_password: string }
+    {
+      currentPassword: string;
+      newPassword: string;
+    }
   >({
     mutationFn: async (data) => {
-      await api.patch("/users/me/password", data);
+      const res = await api.patch("/users/me/password", data);
+      return res.data.data ?? res.data;
+    },
+
+    onSuccess: (user) => {
+      queryClient.setQueryData(["auth-user"], user);
     },
   });
 

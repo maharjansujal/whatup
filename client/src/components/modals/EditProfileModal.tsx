@@ -18,7 +18,7 @@ export function EditProfileModal({ onClose }: { onClose: () => void }) {
     passwordError,
   } = useUpdateProfile();
 
-  const [avatarUrl, setAvatarUrl] = useState(authUser?.avatar_url ?? "");
+  const [avatar, setAvatar] = useState<File | null>(null);
   const [avatarSaved, setAvatarSaved] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -27,9 +27,13 @@ export function EditProfileModal({ onClose }: { onClose: () => void }) {
   const [passwordSaved, setPasswordSaved] = useState(false);
 
   const handleSaveAvatar = async () => {
-    if (!avatarUrl.trim() || avatarUrl === authUser?.avatar_url) return;
-    await updateAvatar({ avatar_url: avatarUrl.trim() });
+    if (!avatar) return;
+
+    await updateAvatar({ avatar });
+
+    setAvatar(null);
     setAvatarSaved(true);
+
     setTimeout(() => setAvatarSaved(false), 2000);
   };
 
@@ -38,9 +42,12 @@ export function EditProfileModal({ onClose }: { onClose: () => void }) {
 
   const handleSavePassword = async () => {
     if (!currentPassword || !newPassword || passwordsMismatch) return;
+    if (currentPassword === newPassword) {
+      return;
+    }
     await updatePassword({
-      current_password: currentPassword,
-      new_password: newPassword,
+      currentPassword,
+      newPassword,
     });
     setCurrentPassword("");
     setNewPassword("");
@@ -51,22 +58,22 @@ export function EditProfileModal({ onClose }: { onClose: () => void }) {
 
   return (
     <Modal title="Edit profile" onClose={onClose}>
-      <div className="w-[320px] space-y-6">
+      <div className="space-y-6">
         {/* Avatar section */}
         <div>
-          <p className="mb-2 font-['IBM_Plex_Mono'] text-[10.5px] uppercase tracking-wide text-[#9A9CA8]">
+          <p className="mb-2 text-[10.5px] uppercase tracking-wide text-[#9A9CA8]">
             Avatar
           </p>
           <div className="flex items-center gap-3">
             <Avatar
-              src={avatarUrl || undefined}
+              src={avatar ? URL.createObjectURL(avatar) : authUser?.avatar_url}
               name={authUser?.display_name ?? ""}
               size="sm"
             />
             <Input
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              placeholder="https://example.com/avatar.png"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setAvatar(e.target.files?.[0] ?? null)}
               className="flex-1"
             />
           </div>
@@ -77,11 +84,7 @@ export function EditProfileModal({ onClose }: { onClose: () => void }) {
           )}
           <Button
             onClick={handleSaveAvatar}
-            disabled={
-              isUpdatingAvatar ||
-              !avatarUrl.trim() ||
-              avatarUrl === authUser?.avatar_url
-            }
+            disabled={isUpdatingAvatar || !avatar}
             className="mt-2 w-full"
           >
             {isUpdatingAvatar ? (

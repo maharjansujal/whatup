@@ -80,17 +80,44 @@ const searchUser = async ({
   return result.rows;
 };
 
-const updateAvatar = async (
-  userId: string,
-  avatarUrl: string,
-): Promise<User> => {
+const updateAvatar = async ({
+  userId,
+  avatar_url,
+  avatar_public_id,
+}: {
+  userId: string;
+  avatar_url: string | null;
+  avatar_public_id: string | null;
+}) => {
   const result = await db.query(
-    `UPDATE users 
-     SET avatar_url = $2, updated_at = now() 
-     WHERE id = $1 
-     RETURNING ${USER_PUBLIC_COLUMNS.join(", ")}`,
-    [userId, avatarUrl],
+    `UPDATE users
+     SET avatar_url = $2,
+         avatar_public_id = $3,
+         updated_at = NOW()
+     WHERE id = $1
+     RETURNING ${USER_PUBLIC_COLUMNS}`,
+    [userId, avatar_url, avatar_public_id],
   );
+
+  return result.rows[0];
+};
+
+const updatePassword = async ({
+  userId,
+  password,
+}: {
+  userId: string;
+  password: string;
+}) => {
+  const result = await db.query(
+    `UPDATE users
+     SET password_hash = $2,
+         updated_at = NOW()
+     WHERE id = $1
+     RETURNING ${USER_PUBLIC_COLUMNS}`,
+    [userId, password],
+  );
+
   return result.rows[0];
 };
 
@@ -133,6 +160,7 @@ export const userRepository = {
   searchUser,
   updateBio,
   updateAvatar,
+  updatePassword,
   softDelete,
   exists,
 };
