@@ -11,6 +11,7 @@ import { SOCKET_EVENTS } from "../socket/socket_events";
 import { useAuth } from "./AuthContext";
 import type { User } from "../types/user";
 import { getPresence } from "../lib/getPresence";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface SocketContextType {
   socket: Socket;
@@ -30,6 +31,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const [onlineUsers, setOnlineUsers] = useState(new Set<string>());
 
   const { authUser } = useAuth();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!authUser) return;
@@ -77,12 +79,50 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       setOnlineUsers(new Set(users));
     };
 
+    const handleStatusUpdate = (status: {
+      user_id: string;
+      status: "away" | "dnd";
+      status_till: string | null;
+    }) => {
+      queryClient.setQueryData(["users"], (old: User[] | undefined) => {
+        if (!old) return old;
+
+        return old.map((user) =>
+          user.id === status.user_id
+            ? {
+                ...user,
+                custom_status: status.status,
+                status_till: status.status_till,
+              }
+            : user,
+        );
+      });
+    };
+
+    const handleStatusClear = (payload: { userId: string }) => {
+      queryClient.setQueryData(["users"], (old: User[] | undefined) => {
+        if (!old) return old;
+
+        return old.map((user) =>
+          user.id === payload.userId
+            ? {
+                ...user,
+                custom_status: null,
+                status_till: null,
+              }
+            : user,
+        );
+      });
+    };
+
     socket.on(SOCKET_EVENTS.CONNECTION, handleConnect);
     socket.on(SOCKET_EVENTS.DISCONNECT, handleDisconnect);
     socket.on(SOCKET_EVENTS.ERROR, handleConnectError);
     socket.on(SOCKET_EVENTS.ONLINE_USERS, handleOnlineUsers);
     socket.on(SOCKET_EVENTS.USER_ONLINE, handleUserOnline);
     socket.on(SOCKET_EVENTS.USER_OFFLINE, handleUserOffline);
+    socket.on(SOCKET_EVENTS.STATUS_UPDATE, handleStatusUpdate);
+    socket.on(SOCKET_EVENTS.STATUS_CLEAR, handleStatusClear);
 
     return () => {
       socket.off(SOCKET_EVENTS.CONNECTION, handleConnect);
@@ -91,6 +131,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       socket.off(SOCKET_EVENTS.ONLINE_USERS, handleOnlineUsers);
       socket.off(SOCKET_EVENTS.USER_ONLINE, handleUserOnline);
       socket.off(SOCKET_EVENTS.USER_OFFLINE, handleUserOffline);
+      socket.off(SOCKET_EVENTS.STATUS_UPDATE, handleStatusUpdate);
+      socket.off(SOCKET_EVENTS.STATUS_CLEAR, handleStatusClear);
     };
   }, [socket]);
 

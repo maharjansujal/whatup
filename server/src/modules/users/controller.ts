@@ -1,5 +1,7 @@
 import { createAppError } from "../../shared/errors/appError";
 import { asyncHandler } from "../../shared/utils/asyncHandler";
+import { getIO } from "../../socket";
+import { SOCKET_EVENTS } from "../../socket/socket_events";
 import { userService } from "./service";
 
 const getAllUsers = asyncHandler(async (_req, res) => {
@@ -70,12 +72,16 @@ const updateStatus = asyncHandler(async (req, res) => {
     statusTill: req.body.statusTill,
   });
 
+  getIO().emit(SOCKET_EVENTS.STATUS_UPDATE, status);
+
   res.status(200).json(status);
 });
 
 const deleteStatus = asyncHandler(async (req, res) => {
   await userService.clearStatus(req.user.id);
-
+  getIO().emit(SOCKET_EVENTS.STATUS_CLEAR, {
+    userId: req.user.id,
+  });
   res.status(204).send();
 });
 

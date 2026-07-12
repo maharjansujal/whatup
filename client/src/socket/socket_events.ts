@@ -18,4 +18,6 @@ export const SOCKET_EVENTS = {
 
   USER_ONLINE: "user:online",
   USER_OFFLINE: "user:offline",
+  STATUS_CLEAR: "status:clear",
+  STATUS_UPDATE: "status:update",
 };
