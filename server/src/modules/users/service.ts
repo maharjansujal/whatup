@@ -99,6 +99,30 @@ async function updatePassword({
   });
 }
 
+async function setStatus({
+  userId,
+  status,
+  statusTill,
+}: {
+  userId: string;
+  status: "away" | "dnd";
+  statusTill: Date | null;
+}) {
+  return userRepository.upsertStatus({
+    userId,
+    status,
+    statusTill,
+  });
+}
+
+async function clearStatus(userId: string) {
+  await userRepository.deleteStatus(userId);
+}
+
+async function cleanupExpiredStatuses() {
+  return userRepository.deleteExpiredStatuses();
+}
+
 export const userService = {
   getAllUsers,
   getUserById,
@@ -106,4 +130,7 @@ export const userService = {
   searchUser,
   updateAvatar,
   updatePassword,
+  setStatus,
+  clearStatus,
+  cleanupExpiredStatuses,
 };

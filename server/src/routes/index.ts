@@ -13,7 +13,7 @@ import { requireAuth } from "../middleware/auth.middleware";
 const router = Router();
 
 router.use("/auth", authRoutes);
-router.use("/users", userRoutes);
+router.use("/users", requireAuth, userRoutes);
 router.use("/conversations", conversationRoutes);
 router.use("/conversations", requireAuth, memberRoutes);
 router.use("/conversations", requireAuth, messagesRoutes);

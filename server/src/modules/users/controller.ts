@@ -63,6 +63,22 @@ const searchUser = asyncHandler(async (req, res) => {
   return res.status(200).json(result);
 });
 
+const updateStatus = asyncHandler(async (req, res) => {
+  const status = await userService.setStatus({
+    userId: req.user.id,
+    status: req.body.status,
+    statusTill: req.body.statusTill,
+  });
+
+  res.status(200).json(status);
+});
+
+const deleteStatus = asyncHandler(async (req, res) => {
+  await userService.clearStatus(req.user.id);
+
+  res.status(204).send();
+});
+
 export const userController = {
   getAllUsers,
   getUserById,
@@ -71,4 +87,6 @@ export const userController = {
   searchUser,
   updateAvatar,
   updatePassword,
+  updateStatus,
+  deleteStatus,
 };

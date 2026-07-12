@@ -32,3 +32,8 @@ export const UpdatePasswordSchema = z.object({
 });
 
 export type UpdatePasswordDto = z.infer<typeof UpdatePasswordSchema>;
+
+export const UserStatusSchema = z.object({
+  status: z.enum(["away", "dnd"]),
+  statusTill: z.string().datetime().nullable(),
+});

@@ -3,30 +3,32 @@ import { userController } from "./controller";
 import { requireAuth } from "../../middleware/auth.middleware";
 import { validate } from "../../middleware/validate.middleware";
 import { upload } from "../../shared/cloudinary/multer";
-import { UpdatePasswordSchema } from "./types";
+import { UpdatePasswordSchema, UserStatusSchema } from "./types";
 
 const router = Router();
 
-router.get("/", requireAuth, userController.getAllUsers);
+router.get("/", userController.getAllUsers);
 
-router.get("/me", requireAuth, userController.getMe);
+router.get("/me", userController.getMe);
 
-router.get("/:id", requireAuth, userController.getUserById);
+router.get("/:id", userController.getUserById);
 
-router.patch("/me", requireAuth, userController.updateMe);
+router.patch("/me", userController.updateMe);
 
 router.patch(
   "/me/avatar",
   upload.single("avatar"),
-  requireAuth,
   userController.updateAvatar,
 );
 
 router.patch(
   "/me/password",
   validate(UpdatePasswordSchema),
-  requireAuth,
   userController.updatePassword,
 );
+
+router.put("/status", validate(UserStatusSchema), userController.updateStatus);
+
+router.delete("/status", userController.deleteStatus);
 
 export default router;

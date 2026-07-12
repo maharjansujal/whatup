@@ -6,9 +6,31 @@ import { db, DbExecutor } from "../../shared/db";
 import { updateTable } from "../../shared/utils/updateTable";
 import { UpdateUserDto, User } from "./types";
 
-export const getAllUsers = async (): Promise<User[]> => {
-  const result = await db.query(`SELECT * FROM users`);
+const USER_SELECT = `
+  SELECT
+    u.*,
+    us.status AS custom_status,
+    us.status_till
+  FROM users u
+  LEFT JOIN user_statuses us
+    ON us.user_id = u.id
+`;
+
+const getAllUsers = async (): Promise<User[]> => {
+  const result = await db.query(USER_SELECT);
   return result.rows;
+};
+
+const findById = async (id: string): Promise<User> => {
+  const result = await db.query(
+    `
+    ${USER_SELECT}
+    WHERE u.id = $1
+    `,
+    [id],
+  );
+
+  return result.rows[0];
 };
 
 const findByEmail = async (email: string) => {
@@ -26,11 +48,6 @@ const findByUsername = async (username: string) => {
     [username],
   );
 
-  return result.rows[0];
-};
-
-export const findById = async (id: string): Promise<User> => {
-  const result = await db.query(`SELECT * FROM users WHERE id = $1`, [id]);
   return result.rows[0];
 };
 
@@ -151,6 +168,75 @@ const exists = async (userId: string): Promise<boolean> => {
   return (result.rowCount ?? 0) > 0;
 };
 
+const upsertStatus = async ({
+  userId,
+  status,
+  statusTill,
+}: {
+  userId: string;
+  status: "away" | "dnd";
+  statusTill: Date | null;
+}) => {
+  const result = await db.query(
+    `
+    INSERT INTO user_statuses (
+      user_id,
+      status,
+      status_till
+    )
+    VALUES ($1, $2, $3)
+
+    ON CONFLICT (user_id)
+    DO UPDATE SET
+      status = EXCLUDED.status,
+      status_till = EXCLUDED.status_till
+
+    RETURNING *;
+    `,
+    [userId, status, statusTill],
+  );
+
+  return result.rows[0];
+};
+
+const deleteStatus = async (userId: string) => {
+  await db.query(
+    `
+    DELETE
+    FROM user_statuses
+    WHERE user_id = $1;
+    `,
+    [userId],
+  );
+};
+
+const deleteExpiredStatuses = async () => {
+  const result = await db.query(
+    `
+    DELETE
+    FROM user_statuses
+    WHERE status_till IS NOT NULL
+      AND status_till <= NOW()
+    RETURNING user_id;
+    `,
+  );
+
+  return result.rows;
+};
+
+const getStatus = async (userId: string) => {
+  const result = await db.query(
+    `
+    SELECT *
+    FROM user_statuses
+    WHERE user_id = $1;
+    `,
+    [userId],
+  );
+
+  return result.rows[0] ?? null;
+};
+
 export const userRepository = {
   getAllUsers,
   findByEmail,
@@ -163,4 +249,8 @@ export const userRepository = {
   updatePassword,
   softDelete,
   exists,
+  getStatus,
+  upsertStatus,
+  deleteExpiredStatuses,
+  deleteStatus,
 };
