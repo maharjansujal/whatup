@@ -5,10 +5,10 @@ import { Receipt } from "../receipts/types";
 
 export interface CreateMessageInput {
   conversation_id: string;
-  sender_id: string;
+  sender_id: string | null;
   type: MessageType;
   content: string;
-  reply_to_message_id: string | null;
+  reply_to_message_id?: string | null;
   files?: Express.Multer.File[];
   updated_at?: Date;
   deleted_at?: Date;

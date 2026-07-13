@@ -22,17 +22,19 @@ const createMember = asyncHandler(async (req, res) => {
 
 const deleteMember = asyncHandler(async (req, res) => {
   const { id, userId } = req.params;
-  const requestingUserId = req.user.id;
 
-  const requestingUser = await memberService.getMemberById({
-    conversationId: id.toString(),
-    userId: requestingUserId,
-  });
-
-  if (requestingUser.role === "member") {
-    throw createAppError("You are not allowed to kick out a member", 403);
-  }
   const result = await memberService.deleteMember({
+    conversationId: id.toString(),
+    userId: userId.toString(),
+  });
+  return res.status(200).json(result);
+});
+
+const leaveGroup = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  const result = await memberService.leaveGroup({
     conversationId: id.toString(),
     userId: userId.toString(),
   });
@@ -193,6 +195,7 @@ const countMuted = asyncHandler(async (req, res) => {
 export const memberController = {
   createMember,
   deleteMember,
+  leaveGroup,
 
   getAllMembers,
   getMemberById,

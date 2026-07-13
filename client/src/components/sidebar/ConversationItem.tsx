@@ -1,7 +1,6 @@
 import { useAuth } from "../../context/AuthContext";
 import { usePresence } from "../../context/SocketContext";
 import { useGetUsers } from "../../hooks/get/useGetUsers";
-import type { Presence } from "../../lib/getPresence";
 import type { Conversation, LastMessage } from "../../types/conversation";
 import { Avatar } from "../common/Avatar";
 import { GroupAvatarStack } from "./GroupAvatarStack";
@@ -59,10 +58,7 @@ export function ConversationItem({
 
   // const { onlineUsers } = useSocket();
   // const isOnline = onlineUsers.has(otherUserId ?? "");
-  let presence: Presence = "offline";
-  if (otherUser) {
-    presence = usePresence(otherUser);
-  }
+  const presence = usePresence(otherUser);
 
   return (
     <button

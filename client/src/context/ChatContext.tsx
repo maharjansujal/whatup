@@ -162,7 +162,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [fetchedMessages]);
 
   useEffect(() => {
-    console.log(canShowNotification(authUser ?? undefined));
+    console.log(
+      canShowNotification({
+        user: authUser ?? undefined,
+        conversation: activeConversation,
+      }),
+    );
   }, [authUser?.custom_status]);
 
   useEffect(() => {
@@ -212,15 +217,22 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         });
       }
 
+      const messageConversation = conversations.find(
+        (c) => c.id === message.conversation_id,
+      );
+
       if (
         message.sender_id !== authUser?.id &&
-        canShowNotification(authUser ?? undefined)
+        canShowNotification({
+          user: authUser ?? undefined,
+          conversation: messageConversation,
+        })
       ) {
         showNotification({
-          title: `${message.sender.display_name} sent you a message`,
+          title: `${message.sender.display_name} sent a message`,
           body:
             message.content ??
-            `${message.sender.display_name} sent you an attachment`,
+            `${message.sender.display_name} sent an attachment`,
         });
       }
 
@@ -254,7 +266,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       socket.off(SOCKET_EVENTS.MESSAGE_DELIVERED, handleMessageDelivered);
       socket.off(SOCKET_EVENTS.MESSAGE_SEEN, handleMessageSeen);
     };
-  }, [socket, activeConversationId, authUser?.id, authUser?.custom_status, authUser?.status_till, queryClient]);
+  }, [
+    socket,
+    activeConversationId,
+    authUser?.id,
+    authUser?.custom_status,
+    authUser?.status_till,
+    queryClient,
+    conversations,
+  ]);
 
   const postMessage = usePostMessage();
 

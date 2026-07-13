@@ -7,6 +7,7 @@ const router = Router();
 router.use(requireAuth);
 
 router.post("/:id/members", memberController.createMember);
+router.delete("/:id/members/leave", memberController.leaveGroup);
 router.delete("/:id/members/:userId", memberController.deleteMember);
 
 router.get("/:id/members", memberController.getAllMembers);

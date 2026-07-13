@@ -1,5 +1,6 @@
 import { db } from "../../shared/db";
 import { createAppError } from "../../shared/errors/appError";
+import { messagesRepository } from "../messages/repository";
 import { userRepository } from "../users/repository";
 import { conversationRepository } from "./repository";
 import { ConversationUpdateInput } from "./types";
@@ -11,7 +12,7 @@ const createDirectConversation = async ({
   currentUserId: string;
   otherUserId: string;
 }) => {
-  const otherUser = await userRepository.findById(otherUserId);
+  const otherUser = await userRepository.findById({ id: otherUserId });
 
   if (!otherUser) {
     throw createAppError("User not found", 404);
@@ -146,6 +147,25 @@ const createGroupConversation = async ({
         txClient,
       );
     }
+
+    const creator = await userRepository.findById({
+      id: currentUserId,
+      executor: txClient,
+    });
+
+    if (!creator) {
+      throw createAppError("Creator not found", 404);
+    }
+
+    await messagesRepository.create({
+      data: {
+        conversation_id: conversation.id,
+        sender_id: null,
+        type: "system",
+        content: `${creator.display_name} created a group`,
+      },
+      executor: txClient,
+    });
 
     await txClient.query("COMMIT");
     const memberIds = [currentUserId, ...otherUserIds];

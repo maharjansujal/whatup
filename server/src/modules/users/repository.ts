@@ -21,8 +21,14 @@ const getAllUsers = async (): Promise<User[]> => {
   return result.rows;
 };
 
-const findById = async (id: string): Promise<User> => {
-  const result = await db.query(
+const findById = async ({
+  id,
+  executor = db,
+}: {
+  id: string;
+  executor?: DbExecutor;
+}): Promise<User> => {
+  const result = await executor.query(
     `
     ${USER_SELECT}
     WHERE u.id = $1

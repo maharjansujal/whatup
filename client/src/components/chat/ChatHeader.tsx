@@ -7,7 +7,6 @@ import { GroupAvatarStack } from "../sidebar/GroupAvatarStack";
 import { useModal } from "../../context/ModalContext";
 import { usePresence, useSocket } from "../../context/SocketContext";
 import { lazy } from "react";
-import type { Presence } from "../../lib/getPresence";
 
 const MembersModal = lazy(() =>
   import("../modals/MembersModal").then((module) => ({
@@ -56,10 +55,7 @@ export function ChatHeader({
 
   const isOnline = otherUserId ? onlineUsers.has(otherUserId) : false;
 
-  let presence: Presence = "offline";
-  if (otherUser) {
-    presence = usePresence(otherUser);
-  }
+  const presence = usePresence(otherUser);
 
   const title = conversation
     ? conversation.type === "group"

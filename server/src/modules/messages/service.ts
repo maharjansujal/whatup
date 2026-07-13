@@ -69,11 +69,14 @@ const createMessage = async (data: CreateMessageInput): Promise<Message> => {
     await receiptsRepository.createReceiptsForConversation({
       messageId: message.id,
       conversationId: data.conversation_id,
-      senderId: data.sender_id,
+      senderId: data.sender_id!,
       executor: client,
     });
 
-    const createdMessage = await messagesRepository.findById(message.id, client);
+    const createdMessage = await messagesRepository.findById(
+      message.id,
+      client,
+    );
 
     if (!createdMessage) {
       throw createAppError("Failed to retrieve created message", 500);

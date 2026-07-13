@@ -1,5 +1,7 @@
 import { db } from "../../shared/db";
 import { createAppError } from "../../shared/errors/appError";
+import { messagesRepository } from "../messages/repository";
+import { userRepository } from "../users/repository";
 import { memberRepository } from "./repository";
 import { ChatMember, CreateMemberInput } from "./types";
 
@@ -229,6 +231,25 @@ const leaveGroup = async ({
       },
       executor,
     );
+
+    const traitor = await userRepository.findById({
+      id: userId,
+      executor: executor,
+    });
+
+    if (!traitor) {
+      throw createAppError("User not found", 404);
+    }
+
+    await messagesRepository.create({
+      data: {
+        content: `${traitor.display_name} left the group`,
+        sender_id: null,
+        conversation_id: conversationId,
+        type: "system",
+      },
+      executor,
+    });
 
     await executor.query("COMMIT");
     return deleted;

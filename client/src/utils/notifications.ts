@@ -1,3 +1,4 @@
+import type { Conversation } from "../types/conversation";
 import type { User } from "../types/user";
 
 export function requestNotificationPermission() {
@@ -41,10 +42,17 @@ export function showNotification({
   };
 }
 
-export function canShowNotification(user?: User) {
+export function canShowNotification({
+  user,
+  conversation,
+}: {
+  user?: User;
+  conversation?: Conversation;
+}) {
   return (
     document.hidden &&
     Notification.permission === "granted" &&
-    !user?.custom_status
+    !user?.custom_status &&
+    !(conversation?.muted_until && new Date(conversation.muted_until) > new Date())
   );
 }

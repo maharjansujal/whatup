@@ -4,7 +4,6 @@ import {
   ChevronRight,
   LogOut,
   Pencil,
-  Trash2,
   Users,
 } from "lucide-react";
 import { Modal } from "../common/Modal";
@@ -77,7 +76,7 @@ export function ConversationInfoModal({
     conversationId,
     authUser.id,
   );
-  const leaveGroup = useDeleteMember(conversationId, authUser.id);
+  const { leaveGroup } = useDeleteMember(conversationId, authUser.id);
 
   if (!conversation) return null;
 
@@ -169,19 +168,12 @@ export function ConversationInfoModal({
         </div>
 
         <div className="mt-3 flex flex-col gap-0.5 border-t border-[#EEEEEB] pt-2">
-          {isGroup ? (
+          {isGroup && (
             <ActionRow
               icon={<LogOut size={16} />}
               label="Leave group"
               danger
-              onClick={() => leaveGroup.mutate()}
-            />
-          ) : (
-            <ActionRow
-              icon={<Trash2 size={16} />}
-              label="Delete conversation"
-              onClick={() => leaveGroup.mutate()}
-              danger
+              onClick={() => leaveGroup()}
             />
           )}
         </div>

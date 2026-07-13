@@ -11,7 +11,7 @@ const getAllUsers = () => {
 };
 
 const getUserById = (id: string) => {
-  const result = userRepository.findById(id);
+  const result = userRepository.findById({ id });
   return result;
 };
 
@@ -38,7 +38,7 @@ async function updateAvatar({
   userId: string;
   file: Express.Multer.File;
 }) {
-  const user = await userRepository.findById(userId);
+  const user = await userRepository.findById({ id: userId });
 
   if (!user) {
     throw createAppError("User not found", 404);
@@ -76,7 +76,7 @@ async function updatePassword({
   currentPassword: string;
   newPassword: string;
 }) {
-  const user = await userRepository.findById(userId);
+  const user = await userRepository.findById({ id: userId });
 
   if (!user) {
     throw createAppError("User not found", 404);
